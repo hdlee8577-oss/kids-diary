@@ -62,13 +62,19 @@ export default function PhotosPage() {
   const gridClass = useMemo(() => {
     if (layoutMode === "timeline") return "mt-4 grid gap-4";
     // cards
+    const baseCols =
+      thumbnailSize === "sm"
+        ? "grid-cols-3"
+        : thumbnailSize === "lg"
+          ? "grid-cols-1"
+          : "grid-cols-2";
     const smCols =
       thumbnailSize === "sm"
         ? "sm:grid-cols-4"
         : thumbnailSize === "lg"
           ? "sm:grid-cols-2"
           : "sm:grid-cols-3";
-    return `mt-4 grid grid-cols-2 gap-4 ${smCols}`;
+    return `mt-4 grid ${baseCols} gap-4 ${smCols}`;
   }, [layoutMode, thumbnailSize]);
 
   useEffect(() => {
