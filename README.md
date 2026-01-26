@@ -34,6 +34,7 @@ Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
   - `SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY` (서버에서만 사용)
 - **테이블 생성 SQL**: `docs/supabase-site-settings.sql`
+- **컨텐츠(사진/일기) SQL**: `docs/supabase-content.sql`
 
 API:
 - `GET /api/site-settings?siteId=default`
