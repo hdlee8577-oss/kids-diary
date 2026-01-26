@@ -11,6 +11,8 @@ create table if not exists public.photos (
   image_path text not null,
   image_url text not null,
   taken_at date null,
+  thumb_pos_x real not null default 50,
+  thumb_pos_y real not null default 50,
   created_at timestamptz not null default now()
 );
 

@@ -16,6 +16,8 @@ type PhotoItem = {
   title: string;
   image_url: string;
   taken_at: string | null;
+  thumb_pos_x?: number;
+  thumb_pos_y?: number;
   created_at: string;
 };
 
@@ -468,6 +470,9 @@ export default function PhotosPage() {
                         alt={it.title || "photo"}
                         fill
                         className="object-cover"
+                        style={{
+                          objectPosition: `${it.thumb_pos_x ?? 50}% ${it.thumb_pos_y ?? 50}%`,
+                        }}
                         sizes="(max-width: 640px) 50vw, 33vw"
                       />
                       <div className="absolute left-3 top-3 rounded-full bg-white/80 px-2 py-1 text-xs font-semibold text-zinc-900">
@@ -483,6 +488,9 @@ export default function PhotosPage() {
                         alt={it.title || "photo"}
                         fill
                         className="object-cover"
+                        style={{
+                          objectPosition: `${it.thumb_pos_x ?? 50}% ${it.thumb_pos_y ?? 50}%`,
+                        }}
                         sizes="(max-width: 640px) 50vw, 33vw"
                       />
                     </div>

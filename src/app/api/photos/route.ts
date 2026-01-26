@@ -11,6 +11,8 @@ type PhotoRow = {
   title: string;
   image_url: string;
   taken_at: string | null;
+  thumb_pos_x: number | null;
+  thumb_pos_y: number | null;
   created_at: string;
 };
 
@@ -27,7 +29,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await supabase
     .from(siteConfig.data.photos.table)
-    .select("id, site_id, title, image_url, taken_at, created_at")
+    .select("id, site_id, title, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at")
     .eq("site_id", siteId)
     .order("created_at", { ascending: false })
     .limit(100)
@@ -43,6 +45,8 @@ export async function GET(req: Request) {
       title: r.title ?? "",
       image_url: r.image_url ?? "",
       taken_at: r.taken_at,
+      thumb_pos_x: r.thumb_pos_x ?? 50,
+      thumb_pos_y: r.thumb_pos_y ?? 50,
       created_at: r.created_at,
     })) ?? [];
 

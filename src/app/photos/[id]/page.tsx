@@ -3,12 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { siteConfig } from "@/Site.config";
+import { ThumbnailPositionEditor } from "@/components/photos/ThumbnailPositionEditor";
 
 type PhotoItem = {
   id: string;
   title: string;
   image_url: string;
   taken_at: string | null;
+  thumb_pos_x: number | null;
+  thumb_pos_y: number | null;
   created_at: string;
 };
 
@@ -16,7 +19,7 @@ async function fetchPhoto(id: string): Promise<PhotoItem | null> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from(siteConfig.data.photos.table)
-    .select("id, title, image_url, taken_at, created_at")
+    .select("id, title, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at")
     .eq("id", id)
     .maybeSingle<PhotoItem>();
 
@@ -65,6 +68,13 @@ export default async function PhotoDetailPage({
           </p>
         </div>
       </div>
+
+      <ThumbnailPositionEditor
+        photoId={item.id}
+        imageUrl={item.image_url}
+        initialX={item.thumb_pos_x}
+        initialY={item.thumb_pos_y}
+      />
     </main>
   );
 }
