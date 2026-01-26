@@ -9,6 +9,8 @@ import { Input } from "@/components/shared/Input";
 import { Select } from "@/components/shared/Select";
 import { Sidebar } from "@/components/shared/Sidebar";
 import { Textarea } from "@/components/shared/Textarea";
+import { getAdminToken, setAdminToken } from "@/lib/admin/clientToken";
+import { useState } from "react";
 
 const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
   { value: "geist", label: "Geist" },
@@ -29,8 +31,31 @@ export function SettingsSidebar() {
   const setProfile = useSiteSettingsStore((s) => s.setProfile);
   const replaceTheme = useSiteSettingsStore((s) => s.replaceTheme);
 
+  const [adminToken, setAdminTokenState] = useState(() => getAdminToken());
+
   return (
     <Sidebar isOpen={isSettingsOpen} title="설정" onClose={closeSettings}>
+      <div className="grid gap-3 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
+        <p className="text-sm font-semibold text-[var(--color-text)]">
+          Admin (선택)
+        </p>
+        <Field label="Admin Token" hint="설정/사진/일기 '추가'를 보호해요.">
+          <Input
+            type="password"
+            value={adminToken}
+            onChange={(e) => {
+              const v = e.currentTarget.value;
+              setAdminTokenState(v);
+              setAdminToken(v);
+            }}
+            placeholder="Vercel 환경변수 ADMIN_TOKEN과 동일하게"
+          />
+        </Field>
+        <p className="text-xs text-black/50">
+          * 이 값은 브라우저 로컬 저장소에만 저장돼요.
+        </p>
+      </div>
+
       <div className="grid gap-4 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
         <p className="text-sm font-semibold text-[var(--color-text)]">Profile</p>
 

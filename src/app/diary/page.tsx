@@ -7,6 +7,7 @@ import { Button } from "@/components/shared/Button";
 import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
 import { Textarea } from "@/components/shared/Textarea";
+import { getAdminToken } from "@/lib/admin/clientToken";
 
 type DiaryItem = {
   id: string;
@@ -65,9 +66,13 @@ export default function DiaryPage() {
     setIsSubmitting(true);
 
     try {
+      const adminToken = getAdminToken();
       const res = await fetch("/api/diary", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...(adminToken ? { "x-admin-token": adminToken } : {}),
+        },
         body: JSON.stringify({
           siteId,
           title,

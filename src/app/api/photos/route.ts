@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { siteConfig } from "@/Site.config";
+import { requireAdminToken } from "@/lib/admin/requireAdminToken";
 
 type PhotoRow = {
   id: string;
@@ -40,6 +41,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const auth = requireAdminToken(req);
+  if (auth) return auth;
+
   let supabase: ReturnType<typeof getSupabaseAdmin>;
   try {
     supabase = getSupabaseAdmin();

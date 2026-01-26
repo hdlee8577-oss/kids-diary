@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { siteConfig, type SiteSettings } from "@/Site.config";
+import { requireAdminToken } from "@/lib/admin/requireAdminToken";
 
 type Row = {
   site_id: string;
@@ -32,6 +33,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const auth = requireAdminToken(req);
+  if (auth) return auth;
+
   const body = (await req.json()) as {
     siteId?: string;
     settings: SiteSettings;

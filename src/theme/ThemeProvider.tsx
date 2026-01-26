@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { siteConfig, type SiteSettings } from "@/Site.config";
 import { applyThemeToDom } from "@/theme/applyThemeToDom";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
+import { getAdminToken } from "@/lib/admin/clientToken";
 
 type Props = {
   initialSettings?: SiteSettings | null;
@@ -21,9 +22,13 @@ async function fetchSettings(): Promise<SiteSettings | null> {
 }
 
 async function saveSettings(settings: SiteSettings) {
+  const adminToken = getAdminToken();
   await fetch(`/api/site-settings`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      ...(adminToken ? { "x-admin-token": adminToken } : {}),
+    },
     body: JSON.stringify({ siteId: siteConfig.siteId, settings }),
   });
 }
