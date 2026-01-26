@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
@@ -34,8 +35,11 @@ export default function PhotosPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
-  const [takenAt, setTakenAt] = useState<string>("");
-  const [file, setFile] = useState<File | null>(null);
+  const [takenAt, setTakenAt] = useState<string>(""); // optional override
+  const [files, setFiles] = useState<File[]>([]);
+
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Record<string, true>>({});
 
   const modeLabel = useMemo(
     () => (layoutMode === "timeline" ? "타임라인형" : "카드형"),
@@ -58,8 +62,8 @@ export default function PhotosPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) {
-      setError("사진 파일을 선택해줘.");
+    if (files.length === 0) {
+      setError("사진 파일을 1개 이상 선택해줘.");
       return;
     }
     setError(null);
@@ -70,7 +74,7 @@ export default function PhotosPage() {
       fd.set("siteId", siteId);
       fd.set("title", title);
       if (takenAt) fd.set("takenAt", takenAt);
-      fd.set("file", file);
+      for (const f of files) fd.append("files", f);
 
       const adminToken = getAdminToken();
       const res = await fetch("/api/photos", {
@@ -85,7 +89,7 @@ export default function PhotosPage() {
 
       setTitle("");
       setTakenAt("");
-      setFile(null);
+      setFiles([]);
       const list = await fetchPhotos(siteId);
       setItems(list);
     } catch (err) {
@@ -95,14 +99,88 @@ export default function PhotosPage() {
     }
   }
 
+  const selectedCount = useMemo(
+    () => Object.keys(selectedIds).length,
+    [selectedIds],
+  );
+
+  async function deleteSelected() {
+    const ids = Object.keys(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(`선택한 사진 ${ids.length}개를 삭제할까요?`)) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const adminToken = getAdminToken();
+      const res = await fetch("/api/photos", {
+        method: "DELETE",
+        headers: {
+          "content-type": "application/json",
+          ...(adminToken ? { "x-admin-token": adminToken } : {}),
+        },
+        body: JSON.stringify({ siteId, ids }),
+      });
+      if (!res.ok) {
+        const j = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(j?.error || "삭제에 실패했어.");
+      }
+      setSelectedIds({});
+      setIsSelectMode(false);
+      const list = await fetchPhotos(siteId);
+      setItems(list);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "삭제에 실패했어.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      if (prev[id]) {
+        const copy = { ...prev };
+        delete copy[id];
+        return copy;
+      }
+      return { ...prev, [id]: true };
+    });
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
-        사진첩
-      </h1>
-      <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
-        현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
-      </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
+            사진첩
+          </h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
+            현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setIsSelectMode((v) => !v);
+              setSelectedIds({});
+            }}
+            disabled={isSubmitting || isLoading}
+          >
+            {isSelectMode ? "선택 해제" : "선택"}
+          </Button>
+          {isSelectMode ? (
+            <Button
+              type="button"
+              onClick={deleteSelected}
+              disabled={isSubmitting || selectedCount === 0}
+            >
+              선택 삭제 ({selectedCount})
+            </Button>
+          ) : null}
+        </div>
+      </div>
 
       <section className="mt-8 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm backdrop-blur">
         <h2 className="text-base font-semibold text-[var(--color-text)]">
@@ -113,21 +191,25 @@ export default function PhotosPage() {
             <Input
               value={title}
               onChange={(e) => setTitle(e.currentTarget.value)}
-              placeholder="예: 첫 눈 오는 날"
+              placeholder="비워두면 위치(가능한 경우)로 자동 생성"
             />
           </Field>
-          <Field label="촬영일 (선택)">
+          <Field label="촬영일 (선택: 비워두면 사진정보(EXIF)에서 자동)">
             <Input
               type="date"
               value={takenAt}
               onChange={(e) => setTakenAt(e.currentTarget.value)}
             />
           </Field>
-          <Field label="사진 파일">
+          <Field label="사진 파일(여러 개 선택 가능)">
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => setFile(e.currentTarget.files?.[0] ?? null)}
+              multiple
+              onChange={(e) => {
+                const list = Array.from(e.currentTarget.files ?? []);
+                setFiles(list);
+              }}
             />
           </Field>
           {error ? (
@@ -135,7 +217,7 @@ export default function PhotosPage() {
           ) : null}
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "업로드 중..." : "추가하기"}
+              {isSubmitting ? "업로드 중..." : `추가하기 (${files.length})`}
             </Button>
             <p className="text-xs text-black/50">
               * Supabase 설정이 안 되어 있으면 저장이 동작하지 않을 수 있어요.
@@ -165,15 +247,38 @@ export default function PhotosPage() {
                 key={it.id}
                 className="overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm"
               >
-                <div className="relative aspect-[4/3] bg-black/5">
-                  <Image
-                    src={it.image_url}
-                    alt={it.title || "photo"}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, 33vw"
-                  />
-                </div>
+                {isSelectMode ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleSelected(it.id)}
+                    className="relative block w-full text-left"
+                  >
+                    <div className="relative aspect-[4/3] bg-black/5">
+                      <Image
+                        src={it.image_url}
+                        alt={it.title || "photo"}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                      <div className="absolute left-3 top-3 rounded-full bg-white/80 px-2 py-1 text-xs font-semibold text-zinc-900">
+                        {selectedIds[it.id] ? "선택됨" : "선택"}
+                      </div>
+                    </div>
+                  </button>
+                ) : (
+                  <Link href={`/photos/${it.id}`} className="block">
+                    <div className="relative aspect-[4/3] bg-black/5">
+                      <Image
+                        src={it.image_url}
+                        alt={it.title || "photo"}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                      />
+                    </div>
+                  </Link>
+                )}
                 <div className="p-4">
                   <p className="text-sm font-semibold text-[var(--color-text)]">
                     {it.title || "제목 없음"}
