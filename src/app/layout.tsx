@@ -4,7 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
-import { siteConfig } from "@/Site.config";
+import { defaultSiteSettings } from "@/Site.config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +36,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansKr.variable} min-h-dvh antialiased`}
       >
-        <ThemeProvider initialTheme={siteConfig.defaults.theme}>
+        <ThemeProvider initialSettings={defaultSiteSettings}>
           <div className="min-h-dvh">
             <SiteHeader />
             <SettingsSidebar />

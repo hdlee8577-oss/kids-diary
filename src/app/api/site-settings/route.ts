@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { siteConfig, type ThemeSettings } from "@/Site.config";
+import { siteConfig, type SiteSettings } from "@/Site.config";
 
 type Row = {
   site_id: string;
-  theme: ThemeSettings;
+  settings: SiteSettings;
   updated_at: string;
 };
 
@@ -16,11 +16,11 @@ export async function GET(req: Request) {
   try {
     supabase = getSupabaseAdmin();
   } catch {
-    return NextResponse.json({ theme: null, persistence: "disabled" });
+    return NextResponse.json({ settings: null, persistence: "disabled" });
   }
   const { data, error } = await supabase
     .from("site_settings")
-    .select("site_id, theme, updated_at")
+    .select("site_id, settings, updated_at")
     .eq("site_id", siteId)
     .maybeSingle<Row>();
 
@@ -28,13 +28,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ theme: data?.theme ?? null });
+  return NextResponse.json({ settings: data?.settings ?? null });
 }
 
 export async function POST(req: Request) {
   const body = (await req.json()) as {
     siteId?: string;
-    theme: ThemeSettings;
+    settings: SiteSettings;
   };
 
   const siteId = body.siteId || siteConfig.siteId;
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
   const { error } = await supabase.from("site_settings").upsert(
     {
       site_id: siteId,
-      theme: body.theme,
+      settings: body.settings,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "site_id" },

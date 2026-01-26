@@ -1,17 +1,25 @@
 import { create } from "zustand";
-import { siteConfig, type ThemeSettings } from "@/Site.config";
+import {
+  defaultSiteSettings,
+  type SiteProfile,
+  type ThemeSettings,
+} from "@/Site.config";
 
 export type ThemeSettingsPatch = Omit<Partial<ThemeSettings>, "colors" | "layout"> & {
   colors?: Partial<ThemeSettings["colors"]>;
   layout?: Partial<ThemeSettings["layout"]>;
 };
 
+export type SiteProfilePatch = Partial<SiteProfile>;
+
 export type SiteSettingsState = {
+  profile: SiteProfile;
   theme: ThemeSettings;
   isHydrated: boolean;
   setTheme: (partial: ThemeSettingsPatch) => void;
+  setProfile: (partial: SiteProfilePatch) => void;
   replaceTheme: (theme: ThemeSettings) => void;
-  hydrateFromRemote: (theme: ThemeSettings | null) => void;
+  hydrateFromRemote: (settings: { profile?: SiteProfile; theme?: ThemeSettings } | null) => void;
 };
 
 function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
@@ -30,16 +38,22 @@ function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
 }
 
 export const useSiteSettingsStore = create<SiteSettingsState>((set) => ({
-  theme: siteConfig.defaults.theme,
+  profile: defaultSiteSettings.profile,
+  theme: defaultSiteSettings.theme,
   isHydrated: false,
   setTheme: (partial) =>
     set((s) => ({
       theme: mergeTheme(s.theme, partial),
     })),
+  setProfile: (partial) =>
+    set((s) => ({
+      profile: { ...s.profile, ...partial },
+    })),
   replaceTheme: (theme) => set({ theme }),
-  hydrateFromRemote: (theme) =>
+  hydrateFromRemote: (settings) =>
     set({
-      theme: theme ?? siteConfig.defaults.theme,
+      profile: settings?.profile ?? defaultSiteSettings.profile,
+      theme: settings?.theme ?? defaultSiteSettings.theme,
       isHydrated: true,
     }),
 }));

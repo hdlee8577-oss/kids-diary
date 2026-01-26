@@ -1,34 +1,35 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { siteConfig, type ThemeSettings } from "@/Site.config";
+import { siteConfig, type SiteSettings } from "@/Site.config";
 import { applyThemeToDom } from "@/theme/applyThemeToDom";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 
 type Props = {
-  initialTheme?: ThemeSettings | null;
+  initialSettings?: SiteSettings | null;
   children: React.ReactNode;
 };
 
-async function fetchTheme(): Promise<ThemeSettings | null> {
+async function fetchSettings(): Promise<SiteSettings | null> {
   const res = await fetch(
     `/api/site-settings?siteId=${encodeURIComponent(siteConfig.siteId)}`,
     { method: "GET" },
   );
   if (!res.ok) return null;
-  const data = (await res.json()) as { theme?: ThemeSettings | null };
-  return data.theme ?? null;
+  const data = (await res.json()) as { settings?: SiteSettings | null };
+  return data.settings ?? null;
 }
 
-async function saveTheme(theme: ThemeSettings) {
+async function saveSettings(settings: SiteSettings) {
   await fetch(`/api/site-settings`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ siteId: siteConfig.siteId, theme }),
+    body: JSON.stringify({ siteId: siteConfig.siteId, settings }),
   });
 }
 
-export function ThemeProvider({ initialTheme, children }: Props) {
+export function ThemeProvider({ initialSettings, children }: Props) {
+  const profile = useSiteSettingsStore((s) => s.profile);
   const theme = useSiteSettingsStore((s) => s.theme);
   const isHydrated = useSiteSettingsStore((s) => s.isHydrated);
   const hydrateFromRemote = useSiteSettingsStore((s) => s.hydrateFromRemote);
@@ -50,19 +51,19 @@ export function ThemeProvider({ initialTheme, children }: Props) {
     (async () => {
       if (isHydrated) return;
 
-      if (initialTheme) {
-        hydrateFromRemote(initialTheme);
+      if (initialSettings) {
+        hydrateFromRemote(initialSettings);
         return;
       }
 
-      const remote = await fetchTheme();
+      const remote = await fetchSettings();
       if (!alive) return;
       hydrateFromRemote(remote);
     })();
     return () => {
       alive = false;
     };
-  }, [hydrateFromRemote, initialTheme, isHydrated]);
+  }, [hydrateFromRemote, initialSettings, isHydrated]);
 
   // 2) apply theme to DOM immediately (realtime preview)
   useEffect(() => {
@@ -75,15 +76,15 @@ export function ThemeProvider({ initialTheme, children }: Props) {
   useEffect(() => {
     if (!isHydrated) return;
 
-    const serialized = JSON.stringify(theme);
+    const serialized = JSON.stringify({ profile, theme });
     if (serialized === lastSaved.current) return;
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
-      await saveTheme(theme);
+      await saveSettings({ profile, theme });
       lastSaved.current = serialized;
     }, 600);
-  }, [isHydrated, theme]);
+  }, [isHydrated, profile, theme]);
 
   return (
     <ThemeUIContext.Provider value={ui}>{children}</ThemeUIContext.Provider>

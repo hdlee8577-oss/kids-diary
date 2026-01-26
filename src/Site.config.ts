@@ -22,6 +22,11 @@ export type SiteProfile = {
   birthDate?: string; // ISO date string
 };
 
+export type SiteSettings = {
+  profile: SiteProfile;
+  theme: ThemeSettings;
+};
+
 export type SiteConfig = {
   siteId: string;
   profile: SiteProfile;
@@ -54,5 +59,10 @@ export const siteConfig: SiteConfig = {
       },
     },
   },
+};
+
+export const defaultSiteSettings: SiteSettings = {
+  profile: siteConfig.profile,
+  theme: siteConfig.defaults.theme,
 };
 

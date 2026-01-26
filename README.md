@@ -1,6 +1,6 @@
 # kids-diary
 
-우리 딸 성장 기록(홈/사진첩/일기장) 개인용 웹사이트.
+누구나 자신의 아이에 맞춰 커스터마이징할 수 있는 **성장 기록 프레임워크**.
 
 ## Getting Started
 
@@ -24,6 +24,20 @@ Pages:
 - `/` 홈
 - `/photos` 사진첩
 - `/diary` 일기장
+
+## Settings (Theme/Profile) + Supabase Persistence
+
+이 프로젝트는 `Settings Sidebar`에서 바꾼 값(아이 이름/소개/생년월일/테마)을 **실시간 프리뷰**하고,
+Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
+
+- **환경변수**: `.env.example` 참고
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY` (서버에서만 사용)
+- **테이블 생성 SQL**: `docs/supabase-site-settings.sql`
+
+API:
+- `GET /api/site-settings?siteId=default`
+- `POST /api/site-settings` `{ siteId, settings }`
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

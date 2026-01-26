@@ -8,6 +8,7 @@ import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
 import { Select } from "@/components/shared/Select";
 import { Sidebar } from "@/components/shared/Sidebar";
+import { Textarea } from "@/components/shared/Textarea";
 
 const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
   { value: "geist", label: "Geist" },
@@ -22,20 +23,45 @@ const LAYOUT_OPTIONS: Array<{ value: LayoutMode; label: string }> = [
 
 export function SettingsSidebar() {
   const { isSettingsOpen, closeSettings } = useThemeUI();
+  const profile = useSiteSettingsStore((s) => s.profile);
   const theme = useSiteSettingsStore((s) => s.theme);
   const setTheme = useSiteSettingsStore((s) => s.setTheme);
+  const setProfile = useSiteSettingsStore((s) => s.setProfile);
   const replaceTheme = useSiteSettingsStore((s) => s.replaceTheme);
 
   return (
     <Sidebar isOpen={isSettingsOpen} title="설정" onClose={closeSettings}>
-      <Field label="아이 이름" hint="메인 화면에 표시돼요.">
-        <Input
-          value={siteConfig.profile.childName}
-          disabled
-          readOnly
-          aria-disabled
-        />
-      </Field>
+      <div className="grid gap-4 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
+        <p className="text-sm font-semibold text-[var(--color-text)]">Profile</p>
+
+        <Field label="아이 이름" hint="메인 화면에 표시돼요.">
+          <Input
+            value={profile.childName}
+            onChange={(e) => setProfile({ childName: e.currentTarget.value })}
+            placeholder={siteConfig.profile.childName}
+          />
+        </Field>
+
+        <Field label="소개글" hint="짧고 따뜻하게 :)">
+          <Textarea
+            value={profile.intro}
+            onChange={(e) => setProfile({ intro: e.currentTarget.value })}
+            placeholder={siteConfig.profile.intro}
+          />
+        </Field>
+
+        <Field label="생년월일 (선택)">
+          <Input
+            type="date"
+            value={profile.birthDate ?? ""}
+            onChange={(e) =>
+              setProfile({
+                birthDate: e.currentTarget.value || undefined,
+              })
+            }
+          />
+        </Field>
+      </div>
 
       <div className="grid gap-4 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
         <p className="text-sm font-semibold text-[var(--color-text)]">
@@ -107,20 +133,21 @@ export function SettingsSidebar() {
         </Field>
 
         <Field label="Layout">
-          <Select
-            value={theme.layout.mode}
-            onChange={(e) =>
-              setTheme({
-                layout: { mode: e.currentTarget.value as LayoutMode },
-              })
-            }
-          >
-            {LAYOUT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </Select>
+          <div className="grid grid-cols-2 gap-2">
+            {LAYOUT_OPTIONS.map((o) => {
+              const isActive = theme.layout.mode === o.value;
+              return (
+                <Button
+                  key={o.value}
+                  type="button"
+                  variant={isActive ? "primary" : "secondary"}
+                  onClick={() => setTheme({ layout: { mode: o.value as LayoutMode } })}
+                >
+                  {o.label}
+                </Button>
+              );
+            })}
+          </div>
         </Field>
 
         <Button
