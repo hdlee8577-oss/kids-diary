@@ -136,8 +136,8 @@ export default function DiaryPage() {
             <p className="text-sm font-medium text-red-600">{error}</p>
           ) : null}
           <div className="flex items-center gap-3">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "저장 중..." : "저장하기"}
+            <Button type="submit" isLoading={isSubmitting}>
+              저장하기
             </Button>
             <p className="text-xs text-black/50">
               * Supabase 설정이 안 되어 있으면 저장이 동작하지 않을 수 있어요.

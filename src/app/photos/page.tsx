@@ -221,6 +221,7 @@ export default function PhotosPage() {
           <Button
             type="button"
             variant="secondary"
+            size="sm"
             onClick={() => {
               setIsSelectMode((v) => !v);
               setSelectedIds({});
@@ -232,6 +233,7 @@ export default function PhotosPage() {
           {isSelectMode ? (
             <Button
               type="button"
+              size="sm"
               onClick={deleteSelected}
               disabled={isSubmitting || selectedCount === 0}
             >
@@ -406,11 +408,9 @@ export default function PhotosPage() {
             <p className="text-sm font-medium text-red-600">{error}</p>
           ) : null}
           <div className="flex items-center gap-3">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? uploadProgress
-                  ? `업로드 중... (${uploadProgress.done}/${uploadProgress.total})`
-                  : "업로드 중..."
+            <Button type="submit" isLoading={isSubmitting}>
+              {isSubmitting && uploadProgress
+                ? `업로드 중... (${uploadProgress.done}/${uploadProgress.total})`
                 : `추가하기 (${drafts.length})`}
             </Button>
             <p className="text-xs text-black/50">
