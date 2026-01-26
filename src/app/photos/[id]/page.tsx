@@ -17,14 +17,30 @@ type PhotoItem = {
 
 async function fetchPhoto(id: string): Promise<PhotoItem | null> {
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
+  const primary = await supabase
     .from(siteConfig.data.photos.table)
     .select("id, title, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at")
     .eq("id", id)
     .maybeSingle<PhotoItem>();
 
-  if (error) return null;
-  return data ?? null;
+  if (
+    primary.error?.message &&
+    (primary.error.message.includes("thumb_pos_x") ||
+      primary.error.message.includes("thumb_pos_y"))
+  ) {
+    const fallback = await supabase
+      .from(siteConfig.data.photos.table)
+      .select("id, title, image_url, taken_at, created_at")
+      .eq("id", id)
+      .maybeSingle<Omit<PhotoItem, "thumb_pos_x" | "thumb_pos_y">>();
+
+    if (fallback.error) return null;
+    if (!fallback.data) return null;
+    return { ...fallback.data, thumb_pos_x: 50, thumb_pos_y: 50 } as PhotoItem;
+  }
+
+  if (primary.error) return null;
+  return primary.data ?? null;
 }
 
 export default async function PhotoDetailPage({

@@ -27,17 +27,46 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: [], persistence: "disabled" });
   }
 
-  const { data, error } = await supabase
+  const primary = await supabase
     .from(siteConfig.data.photos.table)
-    .select("id, site_id, title, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at")
+    .select(
+      "id, site_id, title, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at",
+    )
     .eq("site_id", siteId)
     .order("created_at", { ascending: false })
     .limit(100)
     .returns<PhotoRow[]>();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  let data = primary.data ?? null;
+  let error = primary.error ?? null;
+
+  // Backward compatible: if columns not added yet, retry without them.
+  if (
+    error?.message &&
+    (error.message.includes("thumb_pos_x") || error.message.includes("thumb_pos_y"))
+  ) {
+    const fallback = await supabase
+      .from(siteConfig.data.photos.table)
+      .select("id, site_id, title, image_url, taken_at, created_at")
+      .eq("site_id", siteId)
+      .order("created_at", { ascending: false })
+      .limit(100)
+      .returns<
+        Array<{
+          id: string;
+          site_id: string;
+          title: string;
+          image_url: string;
+          taken_at: string | null;
+          created_at: string;
+        }>
+      >();
+
+    data = (fallback.data as unknown as PhotoRow[]) ?? null;
+    error = fallback.error ?? null;
   }
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const items =
     data?.map((r) => ({
