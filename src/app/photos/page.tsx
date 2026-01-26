@@ -19,6 +19,14 @@ type PhotoItem = {
   created_at: string;
 };
 
+type UploadDraft = {
+  id: string;
+  file: File;
+  title: string;
+  takenAt: string;
+  isLoadingTitle: boolean;
+};
+
 async function fetchPhotos(siteId: string): Promise<PhotoItem[]> {
   const res = await fetch(`/api/photos?siteId=${encodeURIComponent(siteId)}`);
   if (!res.ok) return [];
@@ -35,12 +43,12 @@ export default function PhotosPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [takenAt, setTakenAt] = useState<string>(""); // optional override
-  const [files, setFiles] = useState<File[]>([]);
-  const [metaByIndex, setMetaByIndex] = useState<
-    Array<{ title: string; takenAt: string; isLoadingTitle?: boolean }>
-  >([]);
+  const [title, setTitle] = useState(""); // default for all files (optional)
+  const [takenAt, setTakenAt] = useState<string>(""); // default override for all files (optional)
+  const [drafts, setDrafts] = useState<UploadDraft[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(
+    null,
+  );
 
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Record<string, true>>({});
@@ -66,42 +74,83 @@ export default function PhotosPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (files.length === 0) {
+    if (drafts.length === 0) {
       setError("사진 파일을 1개 이상 선택해줘.");
       return;
     }
     setError(null);
     setIsSubmitting(true);
+    setUploadProgress({ done: 0, total: drafts.length });
 
     try {
-      const fd = new FormData();
-      fd.set("siteId", siteId);
-      fd.set("title", title);
-      if (takenAt) fd.set("takenAt", takenAt);
-      for (const f of files) fd.append("files", f);
-      fd.set("meta", JSON.stringify(metaByIndex.map((m) => ({ title: m.title, takenAt: m.takenAt }))));
-
       const adminToken = getAdminToken();
-      const res = await fetch("/api/photos", {
-        method: "POST",
-        headers: adminToken ? { "x-admin-token": adminToken } : undefined,
-        body: fd,
-      });
-      if (!res.ok) {
-        const j = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(j?.error || "업로드에 실패했어.");
+      const failed: Array<{ name: string; error: string }> = [];
+      const succeeded: string[] = [];
+
+      for (let i = 0; i < drafts.length; i++) {
+        const d = drafts[i];
+        const fd = new FormData();
+        fd.set("siteId", siteId);
+        if (title) fd.set("title", title);
+        if (takenAt) fd.set("takenAt", takenAt);
+        fd.set("file", d.file);
+        fd.set(
+          "meta",
+          JSON.stringify([
+            {
+              title: d.title,
+              takenAt: d.takenAt,
+            },
+          ]),
+        );
+
+        const res = await fetch("/api/photos", {
+          method: "POST",
+          headers: adminToken ? { "x-admin-token": adminToken } : undefined,
+          body: fd,
+        });
+
+        const j = (await res.json().catch(() => null)) as
+          | { ok?: boolean; ids?: string[]; errors?: Array<{ name: string; error: string }>; error?: string }
+          | null;
+
+        if (!res.ok || j?.ok === false) {
+          const msg =
+            j?.error ||
+            j?.errors?.[0]?.error ||
+            "업로드에 실패했어.";
+          failed.push({ name: d.file.name, error: msg });
+        } else {
+          const id = j?.ids?.[0];
+          if (id) succeeded.push(id);
+        }
+
+        setUploadProgress({ done: i + 1, total: drafts.length });
       }
 
-      setTitle("");
-      setTakenAt("");
-      setFiles([]);
-      setMetaByIndex([]);
+      if (failed.length > 0) {
+        setError(
+          `일부 업로드 실패 (${failed.length}/${drafts.length})\n` +
+            failed.map((f) => `- ${f.name}: ${f.error}`).join("\n"),
+        );
+        // keep failed files in draft list
+        setDrafts((prev) =>
+          prev.filter((d) => failed.some((f) => f.name === d.file.name)),
+        );
+      } else {
+        setError(null);
+        setDrafts([]);
+        setTitle("");
+        setTakenAt("");
+      }
+
       const list = await fetchPhotos(siteId);
       setItems(list);
     } catch (err) {
       setError(err instanceof Error ? err.message : "업로드에 실패했어.");
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   }
 
@@ -151,6 +200,10 @@ export default function PhotosPage() {
       }
       return { ...prev, [id]: true };
     });
+  }
+
+  function removeDraft(id: string) {
+    setDrafts((prev) => prev.filter((d) => d.id !== id));
   }
 
   return (
@@ -214,15 +267,23 @@ export default function PhotosPage() {
               multiple
               onChange={(e) => {
                 const list = Array.from(e.currentTarget.files ?? []);
-                setFiles(list);
-                setMetaByIndex(
-                  list.map(() => ({ title: "", takenAt: "" })),
-                );
+                const newDrafts: UploadDraft[] = list.map((file) => ({
+                  id: crypto.randomUUID(),
+                  file,
+                  title: "",
+                  takenAt: "",
+                  isLoadingTitle: false,
+                }));
+                setDrafts(newDrafts);
 
                 // Fill preview meta from EXIF (date + GPS->title)
-                list.forEach(async (file, idx) => {
+                newDrafts.forEach(async (d) => {
                   try {
-                    const parsed = (await exifr.parse(file, { exif: true, tiff: true, gps: true })) as unknown;
+                    const parsed = (await exifr.parse(d.file, {
+                      exif: true,
+                      tiff: true,
+                      gps: true,
+                    })) as unknown;
                     const p = parsed as {
                       DateTimeOriginal?: Date;
                       CreateDate?: Date;
@@ -242,16 +303,17 @@ export default function PhotosPage() {
                     const lat = typeof p?.latitude === "number" ? p.latitude : null;
                     const lon = typeof p?.longitude === "number" ? p.longitude : null;
 
-                    setMetaByIndex((prev) => {
-                      const copy = [...prev];
-                      if (!copy[idx]) return prev;
-                      copy[idx] = {
-                        ...copy[idx],
-                        takenAt: copy[idx].takenAt || taken,
-                        isLoadingTitle: lat && lon ? true : copy[idx].isLoadingTitle,
-                      };
-                      return copy;
-                    });
+                    setDrafts((prev) =>
+                      prev.map((x) =>
+                        x.id !== d.id
+                          ? x
+                          : {
+                              ...x,
+                              takenAt: x.takenAt || taken,
+                              isLoadingTitle: Boolean(lat && lon),
+                            },
+                      ),
+                    );
 
                     if (lat && lon) {
                       const res = await fetch(
@@ -261,70 +323,77 @@ export default function PhotosPage() {
                         const j = (await res.json()) as { title?: string | null };
                         const guessed = (j.title || "").trim();
                         if (guessed) {
-                          setMetaByIndex((prev) => {
-                            const copy = [...prev];
-                            if (!copy[idx]) return prev;
-                            copy[idx] = {
-                              ...copy[idx],
-                              title: copy[idx].title || guessed,
-                              isLoadingTitle: false,
-                            };
-                            return copy;
-                          });
+                          setDrafts((prev) =>
+                            prev.map((x) =>
+                              x.id !== d.id
+                                ? x
+                                : {
+                                    ...x,
+                                    title: x.title || guessed,
+                                    isLoadingTitle: false,
+                                  },
+                            ),
+                          );
                         }
                       }
                     }
                   } catch {
                     // ignore
                   } finally {
-                    setMetaByIndex((prev) => {
-                      const copy = [...prev];
-                      if (!copy[idx]) return prev;
-                      copy[idx] = { ...copy[idx], isLoadingTitle: false };
-                      return copy;
-                    });
+                    setDrafts((prev) =>
+                      prev.map((x) =>
+                        x.id !== d.id ? x : { ...x, isLoadingTitle: false },
+                      ),
+                    );
                   }
                 });
               }}
             />
           </Field>
-          {files.length > 0 ? (
+          {drafts.length > 0 ? (
             <div className="grid gap-3 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
               <p className="text-sm font-semibold text-[var(--color-text)]">
                 업로드 미리보기(파일별)
               </p>
               <div className="grid gap-3">
-                {files.map((f, idx) => (
+                {drafts.map((d) => (
                   <div
-                    key={`${f.name}-${idx}`}
+                    key={d.id}
                     className="grid gap-2 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/60 p-3"
                   >
-                    <p className="text-xs text-black/60">{f.name}</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-xs text-black/60">{d.file.name}</p>
+                      <button
+                        type="button"
+                        className="rounded-[999px] bg-black/5 px-2 py-1 text-xs font-semibold text-black/70 hover:bg-black/10"
+                        onClick={() => removeDraft(d.id)}
+                      >
+                        제거
+                      </button>
+                    </div>
                     <div className="grid gap-2 sm:grid-cols-2">
                       <Input
-                        value={metaByIndex[idx]?.title ?? ""}
+                        value={d.title}
                         onChange={(e) =>
-                          setMetaByIndex((prev) => {
-                            const copy = [...prev];
-                            if (!copy[idx]) copy[idx] = { title: "", takenAt: "" };
-                            copy[idx] = { ...copy[idx], title: e.currentTarget.value };
-                            return copy;
-                          })
+                          setDrafts((prev) =>
+                            prev.map((x) =>
+                              x.id !== d.id ? x : { ...x, title: e.currentTarget.value },
+                            ),
+                          )
                         }
                         placeholder={
-                          metaByIndex[idx]?.isLoadingTitle ? "위치로 제목 추정 중..." : "제목(선택)"
+                          d.isLoadingTitle ? "위치로 제목 추정 중..." : "제목(선택)"
                         }
                       />
                       <Input
                         type="date"
-                        value={metaByIndex[idx]?.takenAt ?? ""}
+                        value={d.takenAt}
                         onChange={(e) =>
-                          setMetaByIndex((prev) => {
-                            const copy = [...prev];
-                            if (!copy[idx]) copy[idx] = { title: "", takenAt: "" };
-                            copy[idx] = { ...copy[idx], takenAt: e.currentTarget.value };
-                            return copy;
-                          })
+                          setDrafts((prev) =>
+                            prev.map((x) =>
+                              x.id !== d.id ? x : { ...x, takenAt: e.currentTarget.value },
+                            ),
+                          )
                         }
                       />
                     </div>
@@ -338,7 +407,11 @@ export default function PhotosPage() {
           ) : null}
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "업로드 중..." : `추가하기 (${files.length})`}
+              {isSubmitting
+                ? uploadProgress
+                  ? `업로드 중... (${uploadProgress.done}/${uploadProgress.total})`
+                  : "업로드 중..."
+                : `추가하기 (${drafts.length})`}
             </Button>
             <p className="text-xs text-black/50">
               * Supabase 설정이 안 되어 있으면 저장이 동작하지 않을 수 있어요.
