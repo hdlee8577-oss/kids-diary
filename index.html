@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Kids Diary - Gallery</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <h1>Kids Diary</h1>
+        <p>Photo gallery</p>
+      </div>
+      <nav class="nav">
+        <a href="./index.html" class="active">Gallery</a>
+        <a href="./diary.html">Diary</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Upload a photo</h2>
+        </div>
+        <div id="config-banner" class="banner warning hidden">
+          <strong>Supabase is not configured.</strong>
+          <span>Update config.js with your project URL and anon key.</span>
+        </div>
+        <form id="upload-form" class="stack">
+          <label class="field">
+            Title
+            <input
+              id="photo-title"
+              type="text"
+              name="title"
+              placeholder="Optional title"
+            />
+          </label>
+          <label class="field">
+            Photo file
+            <input
+              id="photo-file"
+              type="file"
+              accept="image/*"
+              required
+            />
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="button">Upload</button>
+            <button type="reset" class="button-secondary">Reset</button>
+          </div>
+        </form>
+        <p id="upload-status" class="status-message"></p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Gallery</h2>
+          <button
+            id="refresh-gallery"
+            class="button-secondary"
+            type="button"
+          >
+            Refresh
+          </button>
+        </div>
+        <p id="gallery-status" class="status-message"></p>
+        <div id="gallery-grid" class="gallery-grid"></div>
+        <div id="gallery-empty" class="empty-state hidden">
+          No photos yet.
+        </div>
+      </section>
+    </main>
+
+    <div
+      id="photo-modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div class="modal-content">
+        <button class="modal-close" type="button" aria-label="Close">
+          Close
+        </button>
+        <img id="modal-image" alt="" />
+        <div class="modal-meta">
+          <h3 id="modal-title">Photo</h3>
+          <p id="modal-date" class="muted"></p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./gallery.js"></script>
+  </body>
+</html>
