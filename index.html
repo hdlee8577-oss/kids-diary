@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kids Diary</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Kids Diary</p>
+        <h1>Gallery and Diary</h1>
+      </div>
+      <nav class="tabs">
+        <button class="tab-button active" data-target="gallery-section">
+          Gallery
+        </button>
+        <button class="tab-button" data-target="diary-section">Diary</button>
+      </nav>
+    </header>
+
+    <main class="main">
+      <section id="gallery-section" class="tab-section active">
+        <div class="section-header">
+          <div>
+            <h2>Photo Gallery</h2>
+            <p class="muted">
+              Upload photos and click to view them larger.
+            </p>
+          </div>
+          <form id="photo-form" class="form">
+            <label class="form-field">
+              <span>Photo file</span>
+              <input id="photo-file" type="file" accept="image/*" required />
+            </label>
+            <label class="form-field">
+              <span>Caption</span>
+              <input
+                id="photo-caption"
+                type="text"
+                maxlength="120"
+                placeholder="Optional caption"
+              />
+            </label>
+            <button type="submit" class="primary">Upload</button>
+          </form>
+        </div>
+        <p id="photo-status" class="status" role="status"></p>
+        <div id="photo-grid" class="photo-grid" aria-live="polite"></div>
+      </section>
+
+      <section id="diary-section" class="tab-section">
+        <div class="section-header">
+          <div>
+            <h2>Diary Timeline</h2>
+            <p class="muted">
+              Save short diary entries by date.
+            </p>
+          </div>
+          <form id="diary-form" class="form">
+            <label class="form-field">
+              <span>Date</span>
+              <input id="diary-date" type="date" required />
+            </label>
+            <label class="form-field">
+              <span>Entry</span>
+              <textarea
+                id="diary-content"
+                rows="3"
+                maxlength="500"
+                placeholder="Today we..."
+                required
+              ></textarea>
+            </label>
+            <button type="submit" class="primary">Save</button>
+          </form>
+        </div>
+        <p id="diary-status" class="status" role="status"></p>
+        <ul id="diary-list" class="timeline" aria-live="polite"></ul>
+      </section>
+    </main>
+
+    <div id="photo-modal" class="modal hidden" aria-hidden="true">
+      <div class="modal-content" role="dialog" aria-modal="true">
+        <button id="modal-close" class="modal-close" aria-label="Close">
+          &times;
+        </button>
+        <img id="modal-image" alt="Selected photo" />
+        <p id="modal-caption" class="muted"></p>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
