@@ -12,8 +12,6 @@ type PhotoRow = {
   created_at: string;
 };
 
-const BUCKET = "photos";
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const siteId = searchParams.get("siteId") || siteConfig.siteId;
@@ -26,7 +24,7 @@ export async function GET(req: Request) {
   }
 
   const { data, error } = await supabase
-    .from("photos")
+    .from(siteConfig.data.photos.table)
     .select("id, site_id, title, image_url, taken_at, created_at")
     .eq("site_id", siteId)
     .order("created_at", { ascending: false })
@@ -74,7 +72,9 @@ export async function POST(req: Request) {
   const objectPath = `${siteId}/${crypto.randomUUID()}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
-  const upload = await supabase.storage.from(BUCKET).upload(objectPath, bytes, {
+  const upload = await supabase.storage
+    .from(siteConfig.data.photos.bucket)
+    .upload(objectPath, bytes, {
     contentType: file.type || "application/octet-stream",
     upsert: false,
   });
@@ -83,11 +83,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: upload.error.message }, { status: 500 });
   }
 
-  const publicUrl = supabase.storage.from(BUCKET).getPublicUrl(objectPath)
+  const publicUrl = supabase.storage
+    .from(siteConfig.data.photos.bucket)
+    .getPublicUrl(objectPath)
     .data.publicUrl;
 
   const { data, error } = await supabase
-    .from("photos")
+    .from(siteConfig.data.photos.table)
     .insert({
       site_id: siteId,
       title,

@@ -30,6 +30,15 @@ export type SiteSettings = {
 export type SiteConfig = {
   siteId: string;
   profile: SiteProfile;
+  data: {
+    photos: {
+      table: string;
+      bucket: string;
+    };
+    diary: {
+      table: string;
+    };
+  };
   defaults: {
     theme: ThemeSettings;
   };
@@ -43,6 +52,16 @@ export const siteConfig: SiteConfig = {
     intro:
       "사진과 일기를 차곡차곡 모아두는 공간이에요. 오늘의 한 장면이 내일의 소중한 기억이 되도록, 따뜻하게 기록해요.",
     birthDate: undefined,
+  },
+  // 기존 “갤러리/일기 데이터 프로젝트”에 맞게 여기만 바꾸면 연결됩니다.
+  data: {
+    photos: {
+      table: "photos",
+      bucket: "photos",
+    },
+    diary: {
+      table: "diary_entries",
+    },
   },
   defaults: {
     theme: {

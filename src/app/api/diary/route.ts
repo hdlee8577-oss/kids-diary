@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   }
 
   const { data, error } = await supabase
-    .from("diary_entries")
+    .from(siteConfig.data.diary.table)
     .select("id, site_id, title, content, entry_date, created_at")
     .eq("site_id", siteId)
     .order("entry_date", { ascending: false })
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   }
 
   const { data, error } = await supabase
-    .from("diary_entries")
+    .from(siteConfig.data.diary.table)
     .insert({
       site_id: siteId,
       title,

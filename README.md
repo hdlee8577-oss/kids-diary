@@ -37,6 +37,12 @@ Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
 - **테이블 생성 SQL**: `docs/supabase-site-settings.sql`
 - **컨텐츠(사진/일기) SQL**: `docs/supabase-content.sql`
 
+## 기존 갤러리/일기 데이터 프로젝트 연결
+
+이미 사용 중인 Supabase 프로젝트(갤러리/일기 데이터)가 있다면:
+- Vercel 환경변수에 그 프로젝트의 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`를 넣고
+- `src/Site.config.ts`의 `siteConfig.data`에서 **테이블명/버킷명**을 기존 프로젝트에 맞게 바꾸면 됩니다.
+
 API:
 - `GET /api/site-settings?siteId=default`
 - `POST /api/site-settings` `{ siteId, settings }`
