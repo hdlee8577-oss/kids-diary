@@ -67,6 +67,17 @@ export async function POST(req: Request) {
   const siteId = (form.get("siteId")?.toString() || siteConfig.siteId).trim();
   const baseTitle = (form.get("title")?.toString() || "").trim();
   const overrideTakenAt = (form.get("takenAt")?.toString() || "").trim() || null;
+  const metaRaw = (form.get("meta")?.toString() || "").trim();
+  const meta: Array<{ title?: string; takenAt?: string }> = (() => {
+    if (!metaRaw) return [];
+    try {
+      const parsed = JSON.parse(metaRaw) as unknown;
+      if (!Array.isArray(parsed)) return [];
+      return parsed as Array<{ title?: string; takenAt?: string }>;
+    } catch {
+      return [];
+    }
+  })();
   const files = form.getAll("files");
   const fileSingle = form.get("file");
   const uploadFiles: File[] = [
@@ -81,7 +92,8 @@ export async function POST(req: Request) {
   const createdIds: string[] = [];
   const errors: Array<{ name: string; error: string }> = [];
 
-  for (const file of uploadFiles) {
+  for (let idx = 0; idx < uploadFiles.length; idx++) {
+    const file = uploadFiles[idx];
     const ext = (() => {
       const name = file.name || "";
       const i = name.lastIndexOf(".");
@@ -92,10 +104,12 @@ export async function POST(req: Request) {
     const objectPath = `${siteId}/${crypto.randomUUID()}.${ext}`;
     const bytes = new Uint8Array(await file.arrayBuffer());
 
-    const exif = overrideTakenAt ? {} : await extractExifFromBytes(bytes);
-    const takenAt = overrideTakenAt ?? exif.takenAt ?? null;
+    const perFile = meta[idx] || {};
+    const perFileTakenAt = (perFile.takenAt || "").trim() || null;
+    const exif = overrideTakenAt || perFileTakenAt ? {} : await extractExifFromBytes(bytes);
+    const takenAt = overrideTakenAt ?? perFileTakenAt ?? exif.takenAt ?? null;
 
-    let title = baseTitle;
+    let title = (perFile.title || "").trim() || baseTitle;
     if (!title) {
       if (exif.gps) {
         const guessed = await reverseGeocodeTitle(exif.gps.lat, exif.gps.lon);

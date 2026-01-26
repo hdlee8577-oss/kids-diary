@@ -9,6 +9,7 @@ import { Button } from "@/components/shared/Button";
 import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
 import { getAdminToken } from "@/lib/admin/clientToken";
+import exifr from "exifr";
 
 type PhotoItem = {
   id: string;
@@ -37,6 +38,9 @@ export default function PhotosPage() {
   const [title, setTitle] = useState("");
   const [takenAt, setTakenAt] = useState<string>(""); // optional override
   const [files, setFiles] = useState<File[]>([]);
+  const [metaByIndex, setMetaByIndex] = useState<
+    Array<{ title: string; takenAt: string; isLoadingTitle?: boolean }>
+  >([]);
 
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Record<string, true>>({});
@@ -75,6 +79,7 @@ export default function PhotosPage() {
       fd.set("title", title);
       if (takenAt) fd.set("takenAt", takenAt);
       for (const f of files) fd.append("files", f);
+      fd.set("meta", JSON.stringify(metaByIndex.map((m) => ({ title: m.title, takenAt: m.takenAt }))));
 
       const adminToken = getAdminToken();
       const res = await fetch("/api/photos", {
@@ -90,6 +95,7 @@ export default function PhotosPage() {
       setTitle("");
       setTakenAt("");
       setFiles([]);
+      setMetaByIndex([]);
       const list = await fetchPhotos(siteId);
       setItems(list);
     } catch (err) {
@@ -209,9 +215,124 @@ export default function PhotosPage() {
               onChange={(e) => {
                 const list = Array.from(e.currentTarget.files ?? []);
                 setFiles(list);
+                setMetaByIndex(
+                  list.map(() => ({ title: "", takenAt: "" })),
+                );
+
+                // Fill preview meta from EXIF (date + GPS->title)
+                list.forEach(async (file, idx) => {
+                  try {
+                    const parsed = (await exifr.parse(file, { exif: true, tiff: true, gps: true })) as unknown;
+                    const p = parsed as {
+                      DateTimeOriginal?: Date;
+                      CreateDate?: Date;
+                      ModifyDate?: Date;
+                      latitude?: number;
+                      longitude?: number;
+                    };
+                    const date =
+                      (p?.DateTimeOriginal instanceof Date && !Number.isNaN(p.DateTimeOriginal.getTime())
+                        ? p.DateTimeOriginal
+                        : p?.CreateDate instanceof Date && !Number.isNaN(p.CreateDate.getTime())
+                          ? p.CreateDate
+                          : p?.ModifyDate instanceof Date && !Number.isNaN(p.ModifyDate.getTime())
+                            ? p.ModifyDate
+                            : null);
+                    const taken = date ? date.toISOString().slice(0, 10) : "";
+                    const lat = typeof p?.latitude === "number" ? p.latitude : null;
+                    const lon = typeof p?.longitude === "number" ? p.longitude : null;
+
+                    setMetaByIndex((prev) => {
+                      const copy = [...prev];
+                      if (!copy[idx]) return prev;
+                      copy[idx] = {
+                        ...copy[idx],
+                        takenAt: copy[idx].takenAt || taken,
+                        isLoadingTitle: lat && lon ? true : copy[idx].isLoadingTitle,
+                      };
+                      return copy;
+                    });
+
+                    if (lat && lon) {
+                      const res = await fetch(
+                        `/api/geocode?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`,
+                      );
+                      if (res.ok) {
+                        const j = (await res.json()) as { title?: string | null };
+                        const guessed = (j.title || "").trim();
+                        if (guessed) {
+                          setMetaByIndex((prev) => {
+                            const copy = [...prev];
+                            if (!copy[idx]) return prev;
+                            copy[idx] = {
+                              ...copy[idx],
+                              title: copy[idx].title || guessed,
+                              isLoadingTitle: false,
+                            };
+                            return copy;
+                          });
+                        }
+                      }
+                    }
+                  } catch {
+                    // ignore
+                  } finally {
+                    setMetaByIndex((prev) => {
+                      const copy = [...prev];
+                      if (!copy[idx]) return prev;
+                      copy[idx] = { ...copy[idx], isLoadingTitle: false };
+                      return copy;
+                    });
+                  }
+                });
               }}
             />
           </Field>
+          {files.length > 0 ? (
+            <div className="grid gap-3 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
+              <p className="text-sm font-semibold text-[var(--color-text)]">
+                업로드 미리보기(파일별)
+              </p>
+              <div className="grid gap-3">
+                {files.map((f, idx) => (
+                  <div
+                    key={`${f.name}-${idx}`}
+                    className="grid gap-2 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/60 p-3"
+                  >
+                    <p className="text-xs text-black/60">{f.name}</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Input
+                        value={metaByIndex[idx]?.title ?? ""}
+                        onChange={(e) =>
+                          setMetaByIndex((prev) => {
+                            const copy = [...prev];
+                            if (!copy[idx]) copy[idx] = { title: "", takenAt: "" };
+                            copy[idx] = { ...copy[idx], title: e.currentTarget.value };
+                            return copy;
+                          })
+                        }
+                        placeholder={
+                          metaByIndex[idx]?.isLoadingTitle ? "위치로 제목 추정 중..." : "제목(선택)"
+                        }
+                      />
+                      <Input
+                        type="date"
+                        value={metaByIndex[idx]?.takenAt ?? ""}
+                        onChange={(e) =>
+                          setMetaByIndex((prev) => {
+                            const copy = [...prev];
+                            if (!copy[idx]) copy[idx] = { title: "", takenAt: "" };
+                            copy[idx] = { ...copy[idx], takenAt: e.currentTarget.value };
+                            return copy;
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {error ? (
             <p className="text-sm font-medium text-red-600">{error}</p>
           ) : null}
