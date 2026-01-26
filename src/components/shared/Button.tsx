@@ -46,9 +46,9 @@ export function Button({
   ...props
 }: Props) {
   const base =
-    "inline-flex select-none items-center justify-center gap-2 rounded-[var(--radius)] font-semibold shadow-sm transition active:translate-y-[0.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60";
+    "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] font-semibold shadow-sm transition active:translate-y-[0.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60";
   const sizes =
-    size === "sm" ? "h-9 px-3 text-sm" : "h-11 px-5 text-sm";
+    size === "sm" ? "h-10 px-4 text-sm" : "h-12 px-6 text-[15px]";
   const styles =
     variant === "primary"
       ? "bg-gradient-to-b from-[var(--color-primary)]/95 to-[var(--color-primary)] text-white hover:brightness-[1.03]"
