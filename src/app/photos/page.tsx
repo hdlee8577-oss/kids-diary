@@ -7,6 +7,7 @@ import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
 import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
+import { getAdminToken } from "@/lib/admin/clientToken";
 
 type PhotoItem = {
   id: string;
@@ -71,7 +72,12 @@ export default function PhotosPage() {
       if (takenAt) fd.set("takenAt", takenAt);
       fd.set("file", file);
 
-      const res = await fetch("/api/photos", { method: "POST", body: fd });
+      const adminToken = getAdminToken();
+      const res = await fetch("/api/photos", {
+        method: "POST",
+        headers: adminToken ? { "x-admin-token": adminToken } : undefined,
+        body: fd,
+      });
       if (!res.ok) {
         const j = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(j?.error || "업로드에 실패했어.");

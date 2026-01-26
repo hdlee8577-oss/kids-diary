@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { siteConfig } from "@/Site.config";
+import { requireAdminToken } from "@/lib/admin/requireAdminToken";
 
 type PhotoRow = {
   id: string;
@@ -11,7 +12,12 @@ type PhotoRow = {
   created_at: string;
 };
 
-const BUCKET = "photos";
+type LegacyPhotoRow = {
+  id: string;
+  public_url: string | null;
+  original_name: string | null;
+  created_at: string;
+};
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -24,22 +30,58 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: [], persistence: "disabled" });
   }
 
-  const { data, error } = await supabase
-    .from("photos")
-    .select("id, site_id, title, image_url, taken_at, created_at")
-    .eq("site_id", siteId)
-    .order("created_at", { ascending: false })
-    .limit(100)
-    .returns<PhotoRow[]>();
+  if (siteConfig.data.schema === "legacy") {
+    const { data, error } = await supabase
+      .from(siteConfig.data.photos.table)
+      .select("id, public_url, original_name, created_at")
+      .order("created_at", { ascending: false })
+      .limit(200)
+      .returns<LegacyPhotoRow[]>();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const items =
+      data?.map((r) => ({
+        id: r.id,
+        title: r.original_name ?? "",
+        image_url: r.public_url ?? "",
+        taken_at: null,
+        created_at: r.created_at,
+      })) ?? [];
+
+    return NextResponse.json({ items });
+  } else {
+    const { data, error } = await supabase
+      .from(siteConfig.data.photos.table)
+      .select("id, site_id, title, image_url, taken_at, created_at")
+      .eq("site_id", siteId)
+      .order("created_at", { ascending: false })
+      .limit(100)
+      .returns<PhotoRow[]>();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    const items =
+      data?.map((r) => ({
+        id: r.id,
+        title: r.title ?? "",
+        image_url: r.image_url ?? "",
+        taken_at: r.taken_at,
+        created_at: r.created_at,
+      })) ?? [];
+
+    return NextResponse.json({ items });
   }
-
-  return NextResponse.json({ items: data ?? [] });
 }
 
 export async function POST(req: Request) {
+  const auth = requireAdminToken(req);
+  if (auth) return auth;
+
   let supabase: ReturnType<typeof getSupabaseAdmin>;
   try {
     supabase = getSupabaseAdmin();
@@ -70,7 +112,9 @@ export async function POST(req: Request) {
   const objectPath = `${siteId}/${crypto.randomUUID()}.${ext}`;
   const bytes = new Uint8Array(await file.arrayBuffer());
 
-  const upload = await supabase.storage.from(BUCKET).upload(objectPath, bytes, {
+  const upload = await supabase.storage
+    .from(siteConfig.data.photos.bucket)
+    .upload(objectPath, bytes, {
     contentType: file.type || "application/octet-stream",
     upsert: false,
   });
@@ -79,25 +123,45 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: upload.error.message }, { status: 500 });
   }
 
-  const publicUrl = supabase.storage.from(BUCKET).getPublicUrl(objectPath)
+  const publicUrl = supabase.storage
+    .from(siteConfig.data.photos.bucket)
+    .getPublicUrl(objectPath)
     .data.publicUrl;
 
-  const { data, error } = await supabase
-    .from("photos")
-    .insert({
-      site_id: siteId,
-      title,
-      image_path: objectPath,
-      image_url: publicUrl,
-      taken_at: takenAt,
-    })
-    .select("id")
-    .single();
+  if (siteConfig.data.schema === "legacy") {
+    const { data, error } = await supabase
+      .from(siteConfig.data.photos.table)
+      .insert({
+        file_path: objectPath,
+        public_url: publicUrl,
+        original_name: file.name,
+      })
+      .select("id")
+      .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, id: data.id });
+  } else {
+    const { data, error } = await supabase
+      .from(siteConfig.data.photos.table)
+      .insert({
+        site_id: siteId,
+        title,
+        image_path: objectPath,
+        image_url: publicUrl,
+        taken_at: takenAt,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, id: data.id });
   }
-
-  return NextResponse.json({ ok: true, id: data.id });
 }
 
