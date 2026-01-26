@@ -58,13 +58,13 @@ export const siteConfig: SiteConfig = {
   data: {
     // "framework": (site_id/title/image_url...) 컬럼을 쓰는 새 스키마
     // "legacy": 기존 프로젝트 스키마 (photos: public_url/original_name/file_path, diary: entries)
-    schema: "framework",
+    schema: "legacy",
     photos: {
       table: "photos",
       bucket: "photos",
     },
     diary: {
-      table: "diary_entries",
+      table: "entries",
     },
   },
   defaults: {
