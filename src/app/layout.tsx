@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
-import { SiteHeader } from "@/components/SiteHeader";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { ThemeProvider } from "@/theme/ThemeProvider";
+import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
+import { siteConfig } from "@/Site.config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,9 +16,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const notoSansKr = Noto_Sans_KR({
+  variable: "--font-noto-sans-kr",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "성장 기록",
-  description: "우리 가족만의 성장 기록과 사진첩",
+  description: "커스터마이징 가능한 성장 기록 프레임워크",
 };
 
 export default function RootLayout({
@@ -26,12 +34,15 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-dvh bg-gradient-to-b from-amber-50 via-white to-rose-50 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansKr.variable} min-h-dvh antialiased`}
       >
-        <div className="min-h-dvh">
-          <SiteHeader />
-          {children}
-        </div>
+        <ThemeProvider initialTheme={siteConfig.defaults.theme}>
+          <div className="min-h-dvh">
+            <SiteHeader />
+            <SettingsSidebar />
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

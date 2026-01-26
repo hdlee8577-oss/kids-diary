@@ -1,11 +1,11 @@
 export default function DiaryPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">
+      <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
         일기장
       </h1>
-      <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-700">
-        여기에 일기 작성/목록 UI를 추가하면 돼요.
+      <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
+        Settings에서 폰트/색상/곡률을 바꾸면 여기에도 바로 적용돼요.
       </p>
     </main>
   );
