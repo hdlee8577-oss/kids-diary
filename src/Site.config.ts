@@ -1,4 +1,5 @@
 export type LayoutMode = "timeline" | "cards";
+export type ThumbnailSize = "sm" | "md" | "lg";
 
 export type FontChoice = "geist" | "notoSansKr" | "system";
 
@@ -13,6 +14,9 @@ export type ThemeSettings = {
   font: FontChoice;
   layout: {
     mode: LayoutMode;
+  };
+  gallery: {
+    thumbnailSize: ThumbnailSize;
   };
 };
 
@@ -75,6 +79,9 @@ export const siteConfig: SiteConfig = {
       font: "geist",
       layout: {
         mode: "cards",
+      },
+      gallery: {
+        thumbnailSize: "md",
       },
     },
   },

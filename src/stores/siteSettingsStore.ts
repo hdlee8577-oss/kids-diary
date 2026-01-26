@@ -8,6 +8,7 @@ import {
 export type ThemeSettingsPatch = Omit<Partial<ThemeSettings>, "colors" | "layout"> & {
   colors?: Partial<ThemeSettings["colors"]>;
   layout?: Partial<ThemeSettings["layout"]>;
+  gallery?: Partial<ThemeSettings["gallery"]>;
 };
 
 export type SiteProfilePatch = Partial<SiteProfile>;
@@ -33,6 +34,10 @@ function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
     layout: {
       ...current.layout,
       ...(partial.layout ?? {}),
+    },
+    gallery: {
+      ...current.gallery,
+      ...(partial.gallery ?? {}),
     },
   };
 }

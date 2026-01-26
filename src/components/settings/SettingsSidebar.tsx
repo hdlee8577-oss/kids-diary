@@ -1,6 +1,6 @@
 "use client";
 
-import { siteConfig, type FontChoice, type LayoutMode } from "@/Site.config";
+import { siteConfig, type FontChoice, type LayoutMode, type ThumbnailSize } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { useThemeUI } from "@/theme/ThemeProvider";
 import { Button } from "@/components/shared/Button";
@@ -21,6 +21,12 @@ const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
 const LAYOUT_OPTIONS: Array<{ value: LayoutMode; label: string }> = [
   { value: "cards", label: "카드형" },
   { value: "timeline", label: "타임라인형" },
+];
+
+const THUMBNAIL_OPTIONS: Array<{ value: ThumbnailSize; label: string }> = [
+  { value: "lg", label: "크게" },
+  { value: "md", label: "보통" },
+  { value: "sm", label: "작게" },
 ];
 
 export function SettingsSidebar() {
@@ -167,6 +173,25 @@ export function SettingsSidebar() {
                   type="button"
                   variant={isActive ? "primary" : "secondary"}
                   onClick={() => setTheme({ layout: { mode: o.value as LayoutMode } })}
+                >
+                  {o.label}
+                </Button>
+              );
+            })}
+          </div>
+        </Field>
+
+        <Field label="사진 썸네일 크기" hint="사진첩에서 한 화면에 보이는 개수예요.">
+          <div className="grid grid-cols-3 gap-2">
+            {THUMBNAIL_OPTIONS.map((o) => {
+              const isActive = theme.gallery.thumbnailSize === o.value;
+              return (
+                <Button
+                  key={o.value}
+                  type="button"
+                  size="sm"
+                  variant={isActive ? "primary" : "secondary"}
+                  onClick={() => setTheme({ gallery: { thumbnailSize: o.value } })}
                 >
                   {o.label}
                 </Button>

@@ -36,6 +36,7 @@ async function fetchPhotos(siteId: string): Promise<PhotoItem[]> {
 
 export default function PhotosPage() {
   const layoutMode = useSiteSettingsStore((s) => s.theme.layout.mode);
+  const thumbnailSize = useSiteSettingsStore((s) => s.theme.gallery.thumbnailSize);
   const siteId = siteConfig.siteId;
 
   const [items, setItems] = useState<PhotoItem[]>([]);
@@ -57,6 +58,18 @@ export default function PhotosPage() {
     () => (layoutMode === "timeline" ? "타임라인형" : "카드형"),
     [layoutMode],
   );
+
+  const gridClass = useMemo(() => {
+    if (layoutMode === "timeline") return "mt-4 grid gap-4";
+    // cards
+    const smCols =
+      thumbnailSize === "sm"
+        ? "sm:grid-cols-4"
+        : thumbnailSize === "lg"
+          ? "sm:grid-cols-2"
+          : "sm:grid-cols-3";
+    return `mt-4 grid grid-cols-2 gap-4 ${smCols}`;
+  }, [layoutMode, thumbnailSize]);
 
   useEffect(() => {
     let alive = true;
@@ -430,11 +443,7 @@ export default function PhotosPage() {
           <p className="mt-3 text-sm text-black/60">아직 사진이 없어요.</p>
         ) : (
           <div
-            className={
-              layoutMode === "timeline"
-                ? "mt-4 grid gap-4"
-                : "mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3"
-            }
+            className={gridClass}
           >
             {items.map((it) => (
               <article
