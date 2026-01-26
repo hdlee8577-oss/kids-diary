@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Diary - Kids Diary</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div><strong>Kids Diary</strong></div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="gallery.html">Gallery</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div id="config-warning" class="warning" style="display: none;"></div>
+
+      <section class="card">
+        <h2>Daily Diary</h2>
+        <p class="helper">
+          Write a short note for each date. Entries appear in a timeline.
+        </p>
+
+        <form id="entry-form" class="form-grid">
+          <div class="form-row">
+            <label for="entry-date">Date</label>
+            <input id="entry-date" type="date" />
+          </div>
+          <div class="form-row">
+            <label for="entry-content">Entry</label>
+            <textarea
+              id="entry-content"
+              placeholder="Write a short memory..."
+            ></textarea>
+          </div>
+          <div>
+            <button class="button" type="submit">Save Entry</button>
+          </div>
+        </form>
+        <div id="entry-status" class="status"></div>
+      </section>
+
+      <section id="timeline" class="timeline"></section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

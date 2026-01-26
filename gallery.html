@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gallery - Kids Diary</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="nav">
+        <div><strong>Kids Diary</strong></div>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="diary.html">Diary</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div id="config-warning" class="warning" style="display: none;"></div>
+
+      <section class="card">
+        <h2>Photo Gallery</h2>
+        <p class="helper">
+          Upload images and click any thumbnail to view it larger.
+        </p>
+
+        <form id="photo-upload-form" class="form-grid">
+          <div class="form-row">
+            <label for="photo-input">Select photos</label>
+            <input id="photo-input" type="file" accept="image/*" multiple />
+          </div>
+          <div>
+            <button class="button" type="submit">Upload</button>
+          </div>
+        </form>
+        <div id="upload-status" class="status"></div>
+      </section>
+
+      <section class="gallery-grid" id="gallery-grid"></section>
+    </main>
+
+    <div id="photo-modal" class="modal">
+      <div class="modal-content">
+        <button id="modal-close" class="modal-close" type="button">x</button>
+        <img id="modal-image" alt="Selected photo" />
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
