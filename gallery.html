@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gallery | Kids Diary</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrapper">
+        <div class="brand">Kids Diary</div>
+        <nav class="site-nav">
+          <a href="index.html">Home</a>
+          <a class="active" href="gallery.html">Gallery</a>
+          <a href="diary.html">Diary</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-header">
+        <div>
+          <h1>Photo Gallery</h1>
+          <p>Upload photos and click to view a larger preview.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Add a photo</h2>
+          <p>Images are stored in Supabase Storage.</p>
+        </div>
+        <form id="upload-form" class="form-grid">
+          <label>
+            Title
+            <input type="text" name="title" maxlength="80" placeholder="Example: First snow day" required>
+          </label>
+          <label>
+            Photo file
+            <input type="file" name="file" accept="image/*" required>
+          </label>
+          <button type="submit">Upload</button>
+        </form>
+        <p class="form-hint">Tip: Images up to 5MB are recommended.</p>
+        <div id="upload-status" class="status"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Latest photos</h2>
+          <p>Click a photo to view it larger.</p>
+        </div>
+        <div id="gallery-grid" class="gallery-grid"></div>
+        <div id="empty-state" class="empty-state hidden">No photos yet.</div>
+      </section>
+    </main>
+
+    <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+      <div class="lightbox-content" role="dialog" aria-modal="true">
+        <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close">x</button>
+        <img id="lightbox-image" alt="">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="gallery.js" defer></script>
+  </body>
+</html>

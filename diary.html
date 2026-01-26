@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Diary | Kids Diary</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="nav-wrapper">
+        <div class="brand">Kids Diary</div>
+        <nav class="site-nav">
+          <a href="index.html">Home</a>
+          <a href="gallery.html">Gallery</a>
+          <a class="active" href="diary.html">Diary</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="page-header">
+        <div>
+          <h1>Diary Timeline</h1>
+          <p>Write short notes by date and view them in order.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>New entry</h2>
+          <p>Save a short note for a specific date.</p>
+        </div>
+        <form id="entry-form" class="form-grid">
+          <label>
+            Date
+            <input type="date" name="entryDate" required>
+          </label>
+          <label class="form-textarea">
+            Note
+            <textarea name="content" rows="3" maxlength="240" placeholder="What happened today?" required></textarea>
+          </label>
+          <button type="submit">Save Entry</button>
+        </form>
+        <p class="form-hint">Tip: Keep entries short (under 240 characters).</p>
+        <div id="entry-status" class="status"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Timeline</h2>
+          <p>Entries are grouped by date.</p>
+        </div>
+        <div id="timeline" class="timeline"></div>
+        <div id="timeline-empty" class="empty-state hidden">No diary entries yet.</div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="supabase-client.js" defer></script>
+    <script src="diary.js" defer></script>
+  </body>
+</html>
