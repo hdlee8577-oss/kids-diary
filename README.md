@@ -41,7 +41,18 @@ Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
 
 이미 사용 중인 Supabase 프로젝트(갤러리/일기 데이터)가 있다면:
 - Vercel 환경변수에 그 프로젝트의 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`를 넣고
-- `src/Site.config.ts`의 `siteConfig.data`에서 **테이블명/버킷명**을 기존 프로젝트에 맞게 바꾸면 됩니다.
+- `src/Site.config.ts`의 `siteConfig.data`에서 **스키마 모드/테이블명/버킷명**을 기존 프로젝트에 맞게 바꾸면 됩니다.
+
+기존(legacy) 프로젝트 스키마(네가 준 코드 기준):
+- **photos 테이블**: `id, public_url, original_name, file_path, created_at`
+- **entries 테이블**: `id, entry_date, content, created_at`
+- **Storage bucket**: 기본 `photos` (코드에서 `SUPABASE_STORAGE_BUCKET || "photos"`)
+
+이 경우 `src/Site.config.ts`에서:
+- `siteConfig.data.schema = "legacy"`
+- `siteConfig.data.diary.table = "entries"`
+- `siteConfig.data.photos.table = "photos"`
+- `siteConfig.data.photos.bucket = "photos"` (또는 기존 버킷명)
 
 API:
 - `GET /api/site-settings?siteId=default`
