@@ -12,13 +12,6 @@ type DiaryRow = {
   created_at: string;
 };
 
-type LegacyDiaryRow = {
-  id: string;
-  entry_date: string;
-  content: string;
-  created_at: string;
-};
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const siteId = searchParams.get("siteId") || siteConfig.siteId;
@@ -30,54 +23,29 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: [], persistence: "disabled" });
   }
 
-  if (siteConfig.data.schema === "legacy") {
-    const { data, error } = await supabase
-      .from(siteConfig.data.diary.table)
-      .select("id, entry_date, content, created_at")
-      .order("entry_date", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(500)
-      .returns<LegacyDiaryRow[]>();
+  const { data, error } = await supabase
+    .from(siteConfig.data.diary.table)
+    .select("id, site_id, title, content, entry_date, created_at")
+    .eq("site_id", siteId)
+    .order("entry_date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(200)
+    .returns<DiaryRow[]>();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const items =
-      data?.map((r) => ({
-        id: r.id,
-        title: "",
-        content: r.content ?? "",
-        entry_date: r.entry_date,
-        created_at: r.created_at,
-      })) ?? [];
-
-    return NextResponse.json({ items });
-  } else {
-    const { data, error } = await supabase
-      .from(siteConfig.data.diary.table)
-      .select("id, site_id, title, content, entry_date, created_at")
-      .eq("site_id", siteId)
-      .order("entry_date", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .returns<DiaryRow[]>();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    const items =
-      data?.map((r) => ({
-        id: r.id,
-        title: r.title ?? "",
-        content: r.content ?? "",
-        entry_date: r.entry_date,
-        created_at: r.created_at,
-      })) ?? [];
-
-    return NextResponse.json({ items });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  const items =
+    data?.map((r) => ({
+      id: r.id,
+      title: r.title ?? "",
+      content: r.content ?? "",
+      entry_date: r.entry_date,
+      created_at: r.created_at,
+    })) ?? [];
+
+  return NextResponse.json({ items });
 }
 
 export async function POST(req: Request) {
@@ -110,38 +78,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing content" }, { status: 400 });
   }
 
-  if (siteConfig.data.schema === "legacy") {
-    const { data, error } = await supabase
-      .from(siteConfig.data.diary.table)
-      .insert({
-        entry_date: entryDate ?? new Date().toISOString().slice(0, 10),
-        content,
-      })
-      .select("id")
-      .single();
+  const { data, error } = await supabase
+    .from(siteConfig.data.diary.table)
+    .insert({
+      site_id: siteId,
+      title,
+      content,
+      entry_date: entryDate,
+    })
+    .select("id")
+    .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ ok: true, id: data.id });
-  } else {
-    const { data, error } = await supabase
-      .from(siteConfig.data.diary.table)
-      .insert({
-        site_id: siteId,
-        title,
-        content,
-        entry_date: entryDate,
-      })
-      .select("id")
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ ok: true, id: data.id });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  return NextResponse.json({ ok: true, id: data.id });
 }
 
