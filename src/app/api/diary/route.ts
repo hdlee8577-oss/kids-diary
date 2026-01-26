@@ -72,7 +72,8 @@ export async function POST(req: Request) {
   const siteId = (body.siteId || siteConfig.siteId).trim();
   const title = (body.title || "").trim();
   const content = (body.content || "").trim();
-  const entryDate = (body.entryDate || "").trim() || null;
+  const entryDateRaw = (body.entryDate || "").trim();
+  const entryDate = entryDateRaw || new Date().toISOString().slice(0, 10);
 
   if (!content) {
     return NextResponse.json({ error: "Missing content" }, { status: 400 });
