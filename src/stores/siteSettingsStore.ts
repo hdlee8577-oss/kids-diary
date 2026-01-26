@@ -1,15 +1,20 @@
 import { create } from "zustand";
 import { siteConfig, type ThemeSettings } from "@/Site.config";
 
+export type ThemeSettingsPatch = Omit<Partial<ThemeSettings>, "colors" | "layout"> & {
+  colors?: Partial<ThemeSettings["colors"]>;
+  layout?: Partial<ThemeSettings["layout"]>;
+};
+
 export type SiteSettingsState = {
   theme: ThemeSettings;
   isHydrated: boolean;
-  setTheme: (partial: Partial<ThemeSettings>) => void;
+  setTheme: (partial: ThemeSettingsPatch) => void;
   replaceTheme: (theme: ThemeSettings) => void;
   hydrateFromRemote: (theme: ThemeSettings | null) => void;
 };
 
-function mergeTheme(current: ThemeSettings, partial: Partial<ThemeSettings>) {
+function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
   return {
     ...current,
     ...partial,
