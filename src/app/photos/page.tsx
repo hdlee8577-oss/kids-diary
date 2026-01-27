@@ -71,32 +71,55 @@ export default function PhotosPage() {
 
     try {
       const adminToken = getAdminToken();
+      let successCount = 0;
+      let failCount = 0;
       
       // 여러 파일을 순차적으로 업로드
-      for (const file of files) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const fd = new FormData();
         fd.set("siteId", siteId);
-        fd.set("title", title || "");
+        // 여러 파일일 때는 파일명을 제목으로 사용 (제목이 없으면)
+        const fileTitle = files.length > 1 && !title 
+          ? file.name.replace(/\.[^/.]+$/, "") 
+          : title || "";
+        fd.set("title", fileTitle);
         if (takenAt) fd.set("takenAt", takenAt);
         fd.set("file", file);
 
-        const res = await fetch("/api/photos", {
-          method: "POST",
-          headers: adminToken ? { "x-admin-token": adminToken } : undefined,
-          body: fd,
-        });
-        
-        if (!res.ok) {
-          const j = (await res.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(j?.error || "업로드에 실패했어.");
+        try {
+          const res = await fetch("/api/photos", {
+            method: "POST",
+            headers: adminToken ? { "x-admin-token": adminToken } : undefined,
+            body: fd,
+          });
+          
+          if (!res.ok) {
+            const j = (await res.json().catch(() => null)) as { error?: string } | null;
+            throw new Error(j?.error || "업로드에 실패했어.");
+          }
+          successCount++;
+        } catch (err) {
+          failCount++;
+          console.error(`파일 ${file.name} 업로드 실패:`, err);
+          // 마지막 파일이 아니면 계속 진행
+          if (i === files.length - 1) {
+            throw err;
+          }
         }
       }
 
-      setTitle("");
-      setTakenAt("");
-      setFiles([]);
-      const list = await fetchPhotos(siteId);
-      setItems(list);
+      if (successCount > 0) {
+        setTitle("");
+        setTakenAt("");
+        setFiles([]);
+        const list = await fetchPhotos(siteId);
+        setItems(list);
+        
+        if (failCount > 0) {
+          setError(`${successCount}개 업로드 성공, ${failCount}개 실패`);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "업로드에 실패했어.");
     } finally {
@@ -141,11 +164,23 @@ export default function PhotosPage() {
                 const selectedFiles = Array.from(e.currentTarget.files || []);
                 setFiles(selectedFiles);
               }}
+              className="cursor-pointer"
             />
             {files.length > 0 && (
-              <p className="mt-2 text-xs text-black/60">
-                {files.length}개의 파일이 선택되었습니다.
-              </p>
+              <div className="mt-2">
+                <p className="text-xs text-black/60">
+                  {files.length}개의 파일이 선택되었습니다.
+                </p>
+                <div className="mt-1 max-h-32 overflow-y-auto">
+                  <ul className="space-y-1 text-xs text-black/50">
+                    {files.map((file, index) => (
+                      <li key={index} className="truncate">
+                        {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             )}
           </Field>
           {error ? (

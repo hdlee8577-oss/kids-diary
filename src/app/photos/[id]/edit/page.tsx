@@ -104,8 +104,8 @@ export default function EditThumbnailPage() {
     setIsSaving(true);
     try {
       await updateThumbnailPosition(photo.id, currentPos.x, currentPos.y);
-      // 저장 후 상세 페이지로 이동
-      router.push(`/photos/${photo.id}`);
+      // 저장 후 사진첩으로 이동
+      router.push(`/photos`);
     } catch (err) {
       console.error("Failed to save thumbnail position:", err);
       setIsSaving(false);
