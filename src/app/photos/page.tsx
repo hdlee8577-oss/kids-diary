@@ -238,30 +238,6 @@ export default function PhotosPage() {
             현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setIsSelectMode((v) => !v);
-              setSelectedIds({});
-            }}
-            disabled={isSubmitting || isLoading}
-          >
-            {isSelectMode ? "선택 해제" : "선택"}
-          </Button>
-          {isSelectMode ? (
-            <Button
-              type="button"
-              size="sm"
-              onClick={deleteSelected}
-              disabled={isSubmitting || selectedCount === 0}
-            >
-              선택 삭제 ({selectedCount})
-            </Button>
-          ) : null}
-        </div>
       </div>
 
       <section className="mt-8 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm backdrop-blur">
@@ -442,9 +418,35 @@ export default function PhotosPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-base font-semibold text-[var(--color-text)]">
-          사진 목록
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-[var(--color-text)]">
+            사진 목록
+          </h2>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setIsSelectMode((v) => !v);
+                setSelectedIds({});
+              }}
+              disabled={isSubmitting || isLoading}
+            >
+              {isSelectMode ? "선택 해제" : "선택"}
+            </Button>
+            {isSelectMode ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={deleteSelected}
+                disabled={isSubmitting || selectedCount === 0}
+              >
+                선택 삭제 ({selectedCount})
+              </Button>
+            ) : null}
+          </div>
+        </div>
         {isLoading ? (
           <p className="mt-3 text-sm text-black/60">불러오는 중…</p>
         ) : items.length === 0 ? (
