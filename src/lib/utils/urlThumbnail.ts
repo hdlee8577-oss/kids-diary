@@ -8,9 +8,16 @@ export type ArtworkType = "image" | "video" | "writing" | "link";
  * YouTube URL에서 video ID 추출
  */
 function extractYouTubeVideoId(url: string): string | null {
+  // 다양한 YouTube URL 형식 지원
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /youtube\.com\/.*[?&]v=([^&\n?#]+)/,
+    // https://www.youtube.com/watch?v=VIDEO_ID
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    // https://youtube.com/watch?v=VIDEO_ID&feature=...
+    /youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})/,
+    // https://m.youtube.com/watch?v=VIDEO_ID
+    /m\.youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    // https://youtu.be/VIDEO_ID
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
   ];
 
   for (const pattern of patterns) {
@@ -25,10 +32,12 @@ function extractYouTubeVideoId(url: string): string | null {
 
 /**
  * YouTube video ID로 썸네일 URL 생성
+ * maxresdefault가 없을 수 있으므로 hqdefault를 기본으로 사용
  */
 function getYouTubeThumbnail(videoId: string): string {
-  // maxresdefault가 없으면 hqdefault 사용
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  // hqdefault는 항상 존재하므로 기본값으로 사용
+  // 필요시 maxresdefault를 시도하고 실패하면 hqdefault로 fallback 가능
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 }
 
 /**

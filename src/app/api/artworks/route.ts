@@ -128,10 +128,16 @@ export async function POST(req: Request) {
     if (thumbnail) {
       imageUrl = thumbnail.thumbnailUrl;
       artworkType = thumbnail.type;
+      console.log("[artworks POST] URL 썸네일 추출 성공:", {
+        originalUrl: url,
+        thumbnailUrl: imageUrl,
+        type: artworkType,
+      });
     } else {
       // 썸네일을 추출할 수 없으면 기본 이미지 또는 빈 값
       imageUrl = null;
       artworkType = detectArtworkType(url);
+      console.warn("[artworks POST] URL 썸네일 추출 실패:", url);
     }
   } else if (file instanceof File) {
     // 파일 업로드
