@@ -35,9 +35,25 @@ export function useSupabaseUser(): UseSupabaseUserResult {
       // 현재 사용자 확인
       const { data: currentUserData } = await supabaseBrowserClient.auth.getUser();
       
-      // 자동 로그인이 활성화되어 있고, 비밀번호가 설정되어 있으며, 로그인되어 있지 않으면 자동 로그인 시도
-      if (autoLoginEnabled && autoLoginPassword && !currentUserData.user) {
+      // 이미 로그인되어 있으면 자동 로그인 시도하지 않음
+      if (currentUserData.user) {
+        if (!alive) return;
+        setUser(currentUserData.user);
+        setLoading(false);
+        return;
+      }
+
+      // 자동 로그인이 활성화되어 있고, 비밀번호가 설정되어 있으며, 아직 자동 로그인을 시도하지 않았으면 자동 로그인 시도
+      const AUTO_LOGIN_ATTEMPTED_KEY = "kids-diary:autoLoginAttempted";
+      const hasAttemptedAutoLogin = typeof window !== "undefined" && localStorage.getItem(AUTO_LOGIN_ATTEMPTED_KEY) === "true";
+      
+      if (autoLoginEnabled && autoLoginPassword && !hasAttemptedAutoLogin) {
         try {
+          // 자동 로그인 시도 플래그 설정
+          if (typeof window !== "undefined") {
+            localStorage.setItem(AUTO_LOGIN_ATTEMPTED_KEY, "true");
+          }
+
           const { data: signInData, error: signInError } = await supabaseBrowserClient.auth.signInWithPassword({
             email: autoLoginEmail,
             password: autoLoginPassword,
