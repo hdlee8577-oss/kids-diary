@@ -64,7 +64,7 @@ export async function POST(req: Request) {
       settings: body.settings,
       updated_at: new Date().toISOString(),
     },
-    { conflictTarget: ["site_id"] },
+    { onConflict: "site_id" },
   );
 
   if (error) {
