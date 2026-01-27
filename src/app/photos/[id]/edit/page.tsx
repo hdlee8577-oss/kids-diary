@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getAdminToken } from "@/lib/admin/clientToken";
+import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 
 type PhotoItem = {
   id: string;
@@ -184,8 +185,16 @@ export default function EditThumbnailPage() {
         </p>
       </div>
 
-      {/* 현재 섬네일과 같은 사이즈로 표시 (aspect-[4/3], 카드형 기준) */}
-      <div className="mx-auto max-w-md">
+      {/* 현재 섬네일과 같은 사이즈로 표시 */}
+      <div
+        className={`mx-auto ${
+          thumbnailSize === "small"
+            ? "max-w-xs"
+            : thumbnailSize === "large"
+              ? "max-w-lg"
+              : "max-w-md"
+        }`}
+      >
         <div
           ref={containerRef}
           className={`relative aspect-[4/3] w-full overflow-hidden rounded-[var(--radius)] bg-black/5 ${

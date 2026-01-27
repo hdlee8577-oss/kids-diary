@@ -30,6 +30,7 @@ async function fetchPhotos(siteId: string): Promise<PhotoItem[]> {
 
 export default function PhotosPage() {
   const layoutMode = useSiteSettingsStore((s) => s.theme.layout.mode);
+  const thumbnailSize = useSiteSettingsStore((s) => s.theme.layout.thumbnailSize || "medium");
   const siteId = siteConfig.siteId;
 
   const [items, setItems] = useState<PhotoItem[]>([]);
@@ -210,11 +211,15 @@ export default function PhotosPage() {
             className={
               layoutMode === "timeline"
                 ? "mt-4 grid gap-4"
-                : "mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3"
+                : thumbnailSize === "small"
+                  ? "mt-4 grid grid-cols-3 gap-4 sm:grid-cols-4"
+                  : thumbnailSize === "large"
+                    ? "mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2"
+                    : "mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3"
             }
           >
             {items.map((it) => (
-              <PhotoCard key={it.id} item={it} layoutMode={layoutMode} />
+              <PhotoCard key={it.id} item={it} layoutMode={layoutMode} thumbnailSize={thumbnailSize} />
             ))}
           </div>
         )}
@@ -226,9 +231,11 @@ export default function PhotosPage() {
 function PhotoCard({
   item,
   layoutMode,
+  thumbnailSize,
 }: {
   item: PhotoItem;
   layoutMode: "timeline" | "cards";
+  thumbnailSize: "small" | "medium" | "large";
 }) {
   const thumbPosX = item.thumb_pos_x ?? 50.0;
   const thumbPosY = item.thumb_pos_y ?? 50.0;

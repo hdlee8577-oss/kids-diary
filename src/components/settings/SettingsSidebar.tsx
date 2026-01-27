@@ -1,6 +1,6 @@
 "use client";
 
-import { siteConfig, type FontChoice, type LayoutMode, type MoodPreset } from "@/Site.config";
+import { siteConfig, type FontChoice, type LayoutMode, type MoodPreset, type ThumbnailSize } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { useThemeUI } from "@/theme/ThemeProvider";
 import { Button } from "@/components/shared/Button";
@@ -21,6 +21,12 @@ const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
 const LAYOUT_OPTIONS: Array<{ value: LayoutMode; label: string }> = [
   { value: "cards", label: "카드형" },
   { value: "timeline", label: "타임라인형" },
+];
+
+const THUMBNAIL_SIZE_OPTIONS: Array<{ value: ThumbnailSize; label: string }> = [
+  { value: "small", label: "작게" },
+  { value: "medium", label: "보통" },
+  { value: "large", label: "크게" },
 ];
 
 const getMoodPresets = (currentMood?: { accentColor1?: string; accentColor2?: string }) => [
@@ -205,6 +211,24 @@ export function SettingsSidebar() {
                   type="button"
                   variant={isActive ? "primary" : "secondary"}
                   onClick={() => setTheme({ layout: { mode: o.value as LayoutMode } })}
+                >
+                  {o.label}
+                </Button>
+              );
+            })}
+          </div>
+        </Field>
+
+        <Field label="섬네일 사이즈">
+          <div className="grid grid-cols-3 gap-2">
+            {THUMBNAIL_SIZE_OPTIONS.map((o) => {
+              const isActive = (theme.layout.thumbnailSize || "medium") === o.value;
+              return (
+                <Button
+                  key={o.value}
+                  type="button"
+                  variant={isActive ? "primary" : "secondary"}
+                  onClick={() => setTheme({ layout: { thumbnailSize: o.value as ThumbnailSize } })}
                 >
                   {o.label}
                 </Button>

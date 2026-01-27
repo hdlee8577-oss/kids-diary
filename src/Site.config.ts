@@ -1,4 +1,5 @@
 export type LayoutMode = "timeline" | "cards";
+export type ThumbnailSize = "small" | "medium" | "large";
 
 export type FontChoice = "geist" | "notoSansKr" | "system";
 
@@ -22,6 +23,7 @@ export type ThemeSettings = {
   font: FontChoice;
   layout: {
     mode: LayoutMode;
+    thumbnailSize?: ThumbnailSize;
   };
   homeMood?: HomeMood;
 };
@@ -85,6 +87,7 @@ export const siteConfig: SiteConfig = {
       font: "geist",
       layout: {
         mode: "cards",
+        thumbnailSize: "medium",
       },
       homeMood: {
         accentColor1: "#FECDD3", // rose-200
