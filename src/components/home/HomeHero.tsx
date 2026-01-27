@@ -395,26 +395,6 @@ export function HomeHero() {
             {/* 메뉴 - 아래쪽으로 열리도록 수정 */}
             {isMenuOpen && (
               <div className="absolute left-0 top-full z-[100] mt-2 min-w-[200px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                  onChange={(e) => {
-                    console.log("[Profile] 🎯 input onChange 이벤트 발생");
-                    console.log("[Profile] 선택된 파일들:", e.target.files);
-                    console.log("[Profile] 파일 개수:", e.target.files?.length ?? 0);
-                    if (e.target.files && e.target.files.length > 0) {
-                      handleFileChange(e);
-                    } else {
-                      console.log("[Profile] ⚠️ 파일이 선택되지 않음 (onChange는 발생했지만 파일 없음)");
-                    }
-                  }}
-                  onClick={(e) => {
-                    console.log("[Profile] 🎯 input 클릭됨");
-                    // 파일 선택 다이얼로그가 열리도록 함
-                  }}
-                  className="hidden"
-                />
                 <button
                   onClick={async (e) => {
                     e.preventDefault();
