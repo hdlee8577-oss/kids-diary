@@ -71,17 +71,22 @@ export function ThemeProvider({ initialSettings, children }: Props) {
   );
 
   // 1) initial hydration (server-provided or remote)
+  const lastUserIdRef = useRef<string | null>(null);
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (isHydrated) return;
+      // userId가 바뀌지 않았고 이미 하이드레이션 되어 있으면 아무것도 하지 않음
+      if (isHydrated && lastUserIdRef.current === (userId ?? null)) return;
+      lastUserIdRef.current = userId ?? null;
 
-      if (!userId && initialSettings) {
-        // 게스트(default) 사용자는 서버에서 내려온 기본 설정을 사용
-        hydrateFromRemote(initialSettings);
+      // 1) 비로그인(게스트) 상태: 항상 코드 기본값(우리아이 등)을 사용
+      //    DB나 기존 site_settings 테이블 값은 무시
+      if (!userId) {
+        hydrateFromRemote(null);
         return;
       }
 
+      // 2) 로그인 상태: 해당 userId 기준으로 Supabase에서 설정 조회
       const remote = await fetchSettings(userId);
       if (!alive) return;
       hydrateFromRemote(remote);
@@ -89,7 +94,7 @@ export function ThemeProvider({ initialSettings, children }: Props) {
     return () => {
       alive = false;
     };
-  }, [hydrateFromRemote, initialSettings, isHydrated]);
+  }, [hydrateFromRemote, isHydrated, userId]);
 
   // 2) apply theme to DOM immediately (realtime preview)
   useEffect(() => {
