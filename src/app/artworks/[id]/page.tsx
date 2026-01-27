@@ -12,6 +12,8 @@ type ArtworkItem = {
   title: string;
   description: string;
   image_url: string;
+  url: string | null;
+  type: "image" | "video" | "writing" | "link";
   category: string | null;
   grade: string | null;
   tags: string[];
@@ -111,18 +113,54 @@ export default function ArtworkDetailPage() {
         )}
       </div>
 
-      {/* 전체 이미지 표시 */}
-      <div className="relative w-full overflow-hidden rounded-[var(--radius)] bg-black/5">
-        <Image
-          src={artwork.image_url}
-          alt={artwork.title || "artwork"}
-          width={1200}
-          height={900}
-          className="h-auto w-full object-contain"
-          sizes="100vw"
-          priority
-        />
-      </div>
+      {/* 이미지 또는 URL 콘텐츠 표시 */}
+      {artwork.image_url ? (
+        <div className="relative w-full overflow-hidden rounded-[var(--radius)] bg-black/5">
+          <Image
+            src={artwork.image_url}
+            alt={artwork.title || "artwork"}
+            width={1200}
+            height={900}
+            className="h-auto w-full object-contain"
+            sizes="100vw"
+            priority
+          />
+        </div>
+      ) : artwork.url ? (
+        <div className="rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)]/50 p-8 text-center">
+          <div className="mb-4 text-6xl">
+            {artwork.type === "video" ? "🎥" : artwork.type === "writing" ? "✍️" : "🔗"}
+          </div>
+          <p className="mb-4 text-sm text-black/70">
+            {artwork.type === "video"
+              ? "비디오 링크"
+              : artwork.type === "writing"
+                ? "글쓰기 작품"
+                : "외부 링크"}
+          </p>
+          <a
+            href={artwork.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-[var(--radius)] bg-[var(--color-primary)] px-6 py-3 text-sm font-semibold text-white hover:opacity-95"
+          >
+            링크 열기
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+              />
+            </svg>
+          </a>
+        </div>
+      ) : null}
 
       {/* 엄마의 한마디 */}
       {artwork.mom_note && (

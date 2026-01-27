@@ -2,13 +2,21 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { siteConfig } from "@/Site.config";
 import { requireAdminToken } from "@/lib/admin/requireAdminToken";
+import {
+  extractThumbnailFromUrl,
+  detectArtworkType,
+  type ArtworkType,
+} from "@/lib/utils/urlThumbnail";
 
 type ArtworkRow = {
   id: string;
   site_id: string;
   title: string;
   description: string | null;
-  image_url: string;
+  image_url: string | null;
+  image_path: string | null;
+  url: string | null;
+  type: string | null;
   category: string | null;
   grade: string | null;
   tags: string[] | null;
@@ -33,7 +41,7 @@ export async function GET(req: Request) {
   const { data, error } = await supabase
     .from(siteConfig.data.artworks.table)
     .select(
-      "id, site_id, title, description, image_url, category, grade, tags, mom_note, artwork_date, created_at"
+      "id, site_id, title, description, image_url, image_path, url, type, category, grade, tags, mom_note, artwork_date, created_at"
     )
     .eq("site_id", siteId)
     .order("artwork_date", { ascending: false, nullsFirst: false })
@@ -63,6 +71,8 @@ export async function GET(req: Request) {
       title: r.title ?? "",
       description: r.description ?? "",
       image_url: r.image_url ?? "",
+      url: r.url ?? null,
+      type: (r.type as ArtworkType) ?? "image",
       category: r.category ?? null,
       grade: r.grade ?? null,
       tags: (r.tags as string[]) ?? [],
@@ -96,6 +106,7 @@ export async function POST(req: Request) {
   const grade = (form.get("grade")?.toString() || "").trim() || null;
   const momNote = (form.get("momNote")?.toString() || "").trim() || null;
   const artworkDate = (form.get("artworkDate")?.toString() || "").trim() || null;
+  const url = (form.get("url")?.toString() || "").trim() || null;
   const tagsStr = form.get("tags")?.toString() || "[]";
   let tags: string[] = [];
   try {
@@ -106,43 +117,65 @@ export async function POST(req: Request) {
 
   const file = form.get("file");
 
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "Missing file" }, { status: 400 });
+  let imagePath: string | null = null;
+  let imageUrl: string | null = null;
+  let artworkType: ArtworkType = "image";
+
+  // URL 또는 파일 중 하나는 필수
+  if (url) {
+    // URL에서 썸네일 추출
+    const thumbnail = extractThumbnailFromUrl(url);
+    if (thumbnail) {
+      imageUrl = thumbnail.thumbnailUrl;
+      artworkType = thumbnail.type;
+    } else {
+      // 썸네일을 추출할 수 없으면 기본 이미지 또는 빈 값
+      imageUrl = null;
+      artworkType = detectArtworkType(url);
+    }
+  } else if (file instanceof File) {
+    // 파일 업로드
+    const ext = (() => {
+      const name = file.name || "";
+      const i = name.lastIndexOf(".");
+      if (i === -1) return "jpg";
+      return name.slice(i + 1).toLowerCase() || "jpg";
+    })();
+
+    imagePath = `${siteId}/${crypto.randomUUID()}.${ext}`;
+    const bytes = new Uint8Array(await file.arrayBuffer());
+
+    const upload = await supabase.storage
+      .from(siteConfig.data.artworks.bucket)
+      .upload(imagePath, bytes, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
+
+    if (upload.error) {
+      return NextResponse.json({ error: upload.error.message }, { status: 500 });
+    }
+
+    imageUrl = supabase.storage
+      .from(siteConfig.data.artworks.bucket)
+      .getPublicUrl(imagePath)
+      .data.publicUrl;
+  } else {
+    return NextResponse.json(
+      { error: "이미지 파일 또는 URL 중 하나는 필수입니다." },
+      { status: 400 }
+    );
   }
-
-  const ext = (() => {
-    const name = file.name || "";
-    const i = name.lastIndexOf(".");
-    if (i === -1) return "jpg";
-    return name.slice(i + 1).toLowerCase() || "jpg";
-  })();
-
-  const objectPath = `${siteId}/${crypto.randomUUID()}.${ext}`;
-  const bytes = new Uint8Array(await file.arrayBuffer());
-
-  const upload = await supabase.storage
-    .from(siteConfig.data.artworks.bucket)
-    .upload(objectPath, bytes, {
-      contentType: file.type || "application/octet-stream",
-      upsert: false,
-    });
-
-  if (upload.error) {
-    return NextResponse.json({ error: upload.error.message }, { status: 500 });
-  }
-
-  const publicUrl = supabase.storage
-    .from(siteConfig.data.artworks.bucket)
-    .getPublicUrl(objectPath)
-    .data.publicUrl;
 
   // artwork_date 컬럼이 있을 수도 있고 없을 수도 있으므로, 조건부로 포함
   const insertData: any = {
     site_id: siteId,
     title,
     description,
-    image_path: objectPath,
-    image_url: publicUrl,
+    image_path: imagePath,
+    image_url: imageUrl,
+    url: url,
+    type: artworkType,
     category,
     grade,
     tags: tags.length > 0 ? tags : null,

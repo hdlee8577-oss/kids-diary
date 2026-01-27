@@ -18,6 +18,8 @@ type ArtworkItem = {
   title: string;
   description: string;
   image_url: string;
+  url: string | null;
+  type: "image" | "video" | "writing" | "link";
   category: string | null;
   grade: string | null;
   tags: string[];
@@ -54,6 +56,8 @@ export default function ArtworksPage() {
   const [artworkDate, setArtworkDate] = useState<string>("");
   const [momNote, setMomNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [url, setUrl] = useState<string>("");
+  const [inputType, setInputType] = useState<"file" | "url">("file");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 파일 검증 상수
@@ -142,6 +146,8 @@ export default function ArtworksPage() {
       setArtworkDate("");
       setMomNote("");
       setFile(null);
+      setUrl("");
+      setInputType("file");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -299,36 +305,85 @@ export default function ArtworksPage() {
                 rows={2}
               />
             </Field>
-            <Field label="이미지 파일" required>
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                onChange={(e) => {
-                  const selectedFile = e.currentTarget.files?.[0];
-                  if (!selectedFile) {
-                    setFile(null);
-                    return;
-                  }
-                  const validation = validateFile(selectedFile);
-                  if (!validation.valid) {
-                    alert(validation.error);
-                    if (fileInputRef.current) {
-                      fileInputRef.current.value = "";
-                    }
-                    setFile(null);
-                  } else {
-                    setFile(selectedFile);
-                  }
-                }}
-                className="cursor-pointer"
-              />
-              {file && (
-                <p className="mt-2 text-xs text-black/60">
-                  선택된 파일: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
+            <Field label="작품 타입" required>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="inputType"
+                    value="file"
+                    checked={inputType === "file"}
+                    onChange={(e) => {
+                      setInputType("file");
+                      setUrl("");
+                    }}
+                    className="text-[var(--color-primary)]"
+                  />
+                  <span className="text-sm">이미지 파일</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="inputType"
+                    value="url"
+                    checked={inputType === "url"}
+                    onChange={(e) => {
+                      setInputType("url");
+                      setFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                    }}
+                    className="text-[var(--color-primary)]"
+                  />
+                  <span className="text-sm">URL 링크 (유튜브 등)</span>
+                </label>
+              </div>
             </Field>
+            {inputType === "file" ? (
+              <Field label="이미지 파일" required>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={(e) => {
+                    const selectedFile = e.currentTarget.files?.[0];
+                    if (!selectedFile) {
+                      setFile(null);
+                      return;
+                    }
+                    const validation = validateFile(selectedFile);
+                    if (!validation.valid) {
+                      alert(validation.error);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
+                      setFile(null);
+                    } else {
+                      setFile(selectedFile);
+                    }
+                  }}
+                  className="cursor-pointer"
+                />
+                {file && (
+                  <p className="mt-2 text-xs text-black/60">
+                    선택된 파일: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
+              </Field>
+            ) : (
+              <Field label="URL 링크" required>
+                <Input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=... 또는 이미지 URL"
+                />
+                <p className="mt-1 text-xs text-black/50">
+                  유튜브, 이미지 URL 등을 입력하세요. 유튜브는 자동으로 썸네일을 가져옵니다.
+                </p>
+              </Field>
+            )}
             {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={isSubmitting}>
@@ -427,14 +482,27 @@ function ArtworkCard({
     >
       <Link href={`/artworks/${item.id}`} onClick={(e) => isSelectionMode && e.preventDefault()}>
         <div className="relative aspect-[4/3] bg-black/5 overflow-hidden rounded-t-[var(--radius)]">
-          <Image
-            src={item.image_url}
-            alt={item.title || "artwork"}
-            fill
-            className="object-cover select-none"
-            sizes="(max-width: 640px) 50vw, 33vw"
-            draggable={false}
-          />
+          {item.image_url ? (
+            <Image
+              src={item.image_url}
+              alt={item.title || "artwork"}
+              fill
+              className="object-cover select-none"
+              sizes="(max-width: 640px) 50vw, 33vw"
+              draggable={false}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-black/5 to-black/10">
+              <div className="text-center">
+                <span className="text-4xl">
+                  {item.type === "video" ? "🎥" : item.type === "writing" ? "✍️" : "🔗"}
+                </span>
+                <p className="mt-2 text-xs text-black/60">
+                  {item.type === "video" ? "비디오" : item.type === "writing" ? "글쓰기" : "링크"}
+                </p>
+              </div>
+            </div>
+          )}
           {isSelectionMode && (
             <div className="absolute top-2 right-2">
               <div
@@ -473,6 +541,11 @@ function ArtworkCard({
               <p className="mt-1 text-xs text-black/60 line-clamp-2">{item.description}</p>
             )}
             <div className="mt-2 flex flex-wrap gap-1">
+              {item.type !== "image" && (
+                <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+                  {item.type === "video" ? "🎥 비디오" : item.type === "writing" ? "✍️ 글쓰기" : "🔗 링크"}
+                </span>
+              )}
               {item.category && (
                 <span className="inline-flex items-center rounded-full bg-black/5 px-2 py-0.5 text-xs text-black/70">
                   {item.category}
