@@ -59,13 +59,18 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <DynamicNav />
           {user ? (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="hidden text-xs font-medium text-black/60 hover:text-[var(--color-text)] sm:inline-block"
-            >
-              로그아웃
-            </button>
+            <div className="hidden items-center gap-2 text-xs sm:flex">
+              <span className="max-w-[140px] truncate text-black/60">
+                {user.email ?? "로그인됨"}
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full border border-black/10 px-2 py-1 text-[11px] font-medium text-black/60 hover:border-black/20 hover:text-[var(--color-text)]"
+              >
+                로그아웃
+              </button>
+            </div>
           ) : (
             <Link
               href="/auth"
