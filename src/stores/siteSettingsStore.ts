@@ -20,6 +20,7 @@ export type SiteSettingsState = {
   setProfile: (partial: SiteProfilePatch) => void;
   replaceTheme: (theme: ThemeSettings) => void;
   hydrateFromRemote: (settings: { profile?: SiteProfile; theme?: ThemeSettings } | null) => void;
+  resetToDefault: () => void;
 };
 
 function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
@@ -57,6 +58,12 @@ export const useSiteSettingsStore = create<SiteSettingsState>((set) => ({
     set({
       profile: settings?.profile ?? defaultSiteSettings.profile,
       theme: settings?.theme ?? defaultSiteSettings.theme,
+      isHydrated: true,
+    }),
+  resetToDefault: () =>
+    set({
+      profile: defaultSiteSettings.profile,
+      theme: defaultSiteSettings.theme,
       isHydrated: true,
     }),
 }));

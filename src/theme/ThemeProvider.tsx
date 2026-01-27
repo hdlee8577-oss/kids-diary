@@ -5,23 +5,24 @@ import { siteConfig, type SiteSettings } from "@/Site.config";
 import { applyThemeToDom } from "@/theme/applyThemeToDom";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { getAdminToken } from "@/lib/admin/clientToken";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 type Props = {
   initialSettings?: SiteSettings | null;
   children: React.ReactNode;
 };
 
-async function fetchSettings(): Promise<SiteSettings | null> {
-  const res = await fetch(
-    `/api/site-settings?siteId=${encodeURIComponent(siteConfig.siteId)}`,
-    { method: "GET" },
-  );
+async function fetchSettings(userId: string | null): Promise<SiteSettings | null> {
+  const key = userId ?? siteConfig.siteId;
+  const res = await fetch(`/api/site-settings?userId=${encodeURIComponent(key)}`, {
+    method: "GET",
+  });
   if (!res.ok) return null;
   const data = (await res.json()) as { settings?: SiteSettings | null };
   return data.settings ?? null;
 }
 
-async function saveSettings(settings: SiteSettings): Promise<boolean> {
+async function saveSettings(settings: SiteSettings, userId: string | null): Promise<boolean> {
   try {
     const adminToken = getAdminToken();
     const res = await fetch(`/api/site-settings`, {
@@ -30,15 +31,18 @@ async function saveSettings(settings: SiteSettings): Promise<boolean> {
         "content-type": "application/json",
         ...(adminToken ? { "x-admin-token": adminToken } : {}),
       },
-      body: JSON.stringify({ siteId: siteConfig.siteId, settings }),
+      body: JSON.stringify({
+        userId,
+        settings,
+      }),
     });
-    
+
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       console.error("설정 저장 실패:", data.error || res.statusText);
       return false;
     }
-    
+
     return true;
   } catch (err) {
     console.error("설정 저장 중 오류:", err);
@@ -51,6 +55,8 @@ export function ThemeProvider({ initialSettings, children }: Props) {
   const theme = useSiteSettingsStore((s) => s.theme);
   const isHydrated = useSiteSettingsStore((s) => s.isHydrated);
   const hydrateFromRemote = useSiteSettingsStore((s) => s.hydrateFromRemote);
+  const { user } = useSupabaseUser();
+  const userId = user?.id ?? null;
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -70,12 +76,13 @@ export function ThemeProvider({ initialSettings, children }: Props) {
     (async () => {
       if (isHydrated) return;
 
-      if (initialSettings) {
+      if (!userId && initialSettings) {
+        // 게스트(default) 사용자는 서버에서 내려온 기본 설정을 사용
         hydrateFromRemote(initialSettings);
         return;
       }
 
-      const remote = await fetchSettings();
+      const remote = await fetchSettings(userId);
       if (!alive) return;
       hydrateFromRemote(remote);
     })();
@@ -100,7 +107,7 @@ export function ThemeProvider({ initialSettings, children }: Props) {
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
-      const success = await saveSettings({ profile, theme });
+      const success = await saveSettings({ profile, theme }, userId);
       if (success) {
         lastSaved.current = serialized;
         setSaveError(null);

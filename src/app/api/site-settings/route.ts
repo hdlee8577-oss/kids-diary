@@ -9,9 +9,13 @@ type Row = {
   updated_at: string;
 };
 
+// GET: 로그인된 사용자별로 사이트 설정 조회 (userId 없으면 default 사용)
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const siteId = searchParams.get("siteId") || siteConfig.siteId;
+  const userId =
+    searchParams.get("userId") ||
+    searchParams.get("siteId") || // 이전 버전과의 호환
+    siteConfig.siteId;
 
   let supabase: ReturnType<typeof getSupabaseAdmin>;
   try {
@@ -22,7 +26,7 @@ export async function GET(req: Request) {
   const { data, error } = await supabase
     .from("site_settings")
     .select("site_id, settings, updated_at")
-    .eq("site_id", siteId)
+    .eq("site_id", userId)
     .maybeSingle<Row>();
 
   if (error) {
@@ -32,16 +36,18 @@ export async function GET(req: Request) {
   return NextResponse.json({ settings: data?.settings ?? null });
 }
 
+// POST: 로그인된 사용자별 사이트 설정 저장/업데이트
 export async function POST(req: Request) {
   const auth = requireAdminToken(req);
   if (auth) return auth;
 
   const body = (await req.json()) as {
-    siteId?: string;
+    userId?: string;
+    siteId?: string; // 이전 버전과의 호환
     settings: SiteSettings;
   };
 
-  const siteId = body.siteId || siteConfig.siteId;
+  const userId = body.userId || body.siteId || siteConfig.siteId;
   let supabase: ReturnType<typeof getSupabaseAdmin>;
   try {
     supabase = getSupabaseAdmin();
@@ -54,11 +60,11 @@ export async function POST(req: Request) {
 
   const { error } = await supabase.from("site_settings").upsert(
     {
-      site_id: siteId,
+      site_id: userId,
       settings: body.settings,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "site_id" },
+    { conflictTarget: ["site_id"] },
   );
 
   if (error) {

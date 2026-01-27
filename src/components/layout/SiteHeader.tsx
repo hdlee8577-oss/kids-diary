@@ -7,6 +7,7 @@ import { useThemeUI } from "@/theme/ThemeProvider";
 import { DynamicNav } from "./DynamicNav";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
+import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 
 function GearIcon() {
   return (
@@ -40,10 +41,13 @@ export function SiteHeader() {
   const { toggleSettings } = useThemeUI();
   const { user } = useSupabaseUser();
   const router = useRouter();
+  const resetSettings = useSiteSettingsStore((s) => s.resetToDefault);
 
   async function handleLogout() {
     if (!supabaseBrowserClient) return;
     await supabaseBrowserClient.auth.signOut();
+    // 프로필/테마를 게스트 기본값(우리아이 등)으로 되돌리기
+    resetSettings();
     router.refresh();
   }
 
