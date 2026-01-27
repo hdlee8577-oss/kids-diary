@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { siteConfig } from "@/Site.config";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 type PhotoItem = {
   id: string;
@@ -109,7 +110,8 @@ function getMonthlyPoints(photos: PhotoItem[], diary: DiaryItem[]): MonthlyPoint
 }
 
 export default function StatsPage() {
-  const siteId = siteConfig.siteId;
+  const { user } = useSupabaseUser();
+  const siteId = user?.id ?? siteConfig.siteId;
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [diary, setDiary] = useState<DiaryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);

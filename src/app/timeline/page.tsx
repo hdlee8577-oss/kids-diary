@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { siteConfig } from "@/Site.config";
 import { Button } from "@/components/shared/Button";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 // 타입 정의
 type PhotoItem = {
@@ -281,7 +282,8 @@ export default function TimelinePage() {
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const [isLoading, setIsLoading] = useState(true);
-  const siteId = siteConfig.siteId;
+  const { user } = useSupabaseUser();
+  const siteId = user?.id ?? siteConfig.siteId;
 
   // 데이터 가져오기
   useEffect(() => {

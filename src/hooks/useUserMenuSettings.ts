@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { create } from "zustand";
-import { siteConfig } from "@/Site.config";
 import { getAdminToken } from "@/lib/admin/clientToken";
+import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 type UserMenuSettings = {
   enabledModules: string[];
@@ -50,13 +50,18 @@ export function useUserMenuSettings() {
     let alive = true;
     (async () => {
       try {
+        // 1) 현재 로그인한 사용자 ID 가져오기 (없으면 undefined)
+        let userId: string | undefined;
+        if (supabaseBrowserClient) {
+          const { data } = await supabaseBrowserClient.auth.getUser();
+          userId = data.user?.id ?? undefined;
+        }
+
         const adminToken = getAdminToken();
-        const res = await fetch(
-          `/api/user/menu-settings?siteId=${encodeURIComponent(siteConfig.siteId)}`,
-          {
-            headers: adminToken ? { "x-admin-token": adminToken } : {},
-          }
-        );
+        const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+        const res = await fetch(`/api/user/menu-settings${query}`, {
+          headers: adminToken ? { "x-admin-token": adminToken } : {},
+        });
 
         if (!res.ok) {
           throw new Error("Failed to fetch menu settings");
@@ -98,6 +103,12 @@ export function useUserMenuSettings() {
     setError(null);
 
     try {
+      let userId: string | undefined;
+      if (supabaseBrowserClient) {
+        const { data } = await supabaseBrowserClient.auth.getUser();
+        userId = data.user?.id ?? undefined;
+      }
+
       const adminToken = getAdminToken();
       const res = await fetch(`/api/user/menu-settings`, {
         method: "POST",
@@ -106,7 +117,7 @@ export function useUserMenuSettings() {
           ...(adminToken ? { "x-admin-token": adminToken } : {}),
         },
         body: JSON.stringify({
-          siteId: siteConfig.siteId,
+          userId,
           settings: newSettings,
         }),
       });

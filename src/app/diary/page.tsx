@@ -9,6 +9,7 @@ import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
 import { Textarea } from "@/components/shared/Textarea";
 import { getAdminToken } from "@/lib/admin/clientToken";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 type DiaryItem = {
   id: string;
@@ -27,7 +28,8 @@ async function fetchDiary(siteId: string): Promise<DiaryItem[]> {
 
 export default function DiaryPage() {
   const layoutMode = useSiteSettingsStore((s) => s.theme.layout.mode);
-  const siteId = siteConfig.siteId;
+  const { user } = useSupabaseUser();
+  const siteId = user?.id ?? siteConfig.siteId;
 
   const [items, setItems] = useState<DiaryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);

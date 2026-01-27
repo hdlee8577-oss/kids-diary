@@ -9,6 +9,7 @@ import { Button } from "@/components/shared/Button";
 import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
 import { getAdminToken } from "@/lib/admin/clientToken";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 type PhotoItem = {
   id: string;
@@ -31,7 +32,8 @@ async function fetchPhotos(siteId: string): Promise<PhotoItem[]> {
 export default function PhotosPage() {
   const layoutMode = useSiteSettingsStore((s) => s.theme.layout.mode);
   const thumbnailSize = useSiteSettingsStore((s) => s.theme.layout.thumbnailSize || "medium");
-  const siteId = siteConfig.siteId;
+  const { user } = useSupabaseUser();
+  const siteId = user?.id ?? siteConfig.siteId;
 
   const [items, setItems] = useState<PhotoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);

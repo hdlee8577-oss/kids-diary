@@ -22,11 +22,13 @@ type UserMenuSettingsAPI = {
 };
 
 // GET: 사용자 메뉴 설정 조회
-// 현재는 siteId 기반, 나중에 user_id로 변경 가능
+// userId 기반으로 조회 (없으면 siteConfig.siteId로 폴백)
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const siteId = searchParams.get("siteId") || siteConfig.siteId;
-  // 나중에 인증 추가 시: const userId = searchParams.get("userId");
+  const userId =
+    searchParams.get("userId") ||
+    searchParams.get("siteId") || // 이전 버전과의 호환용
+    siteConfig.siteId;
 
   let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
   try {
@@ -38,12 +40,10 @@ export async function GET(req: Request) {
     );
   }
 
-  // 현재는 siteId를 user_id로 사용 (임시)
-  // 나중에 인증 추가 시 user_id로 변경
   const { data, error } = await supabaseAdmin
     .from("user_menu_settings")
     .select("*")
-    .eq("user_id", siteId) // 임시: siteId를 user_id로 사용
+    .eq("user_id", userId)
     .maybeSingle<UserMenuSettingsDB & { id: string; created_at: string; updated_at: string }>();
 
   if (error) {
@@ -80,12 +80,12 @@ export async function POST(req: Request) {
   if (auth) return auth;
 
   const body = (await req.json()) as {
-    siteId?: string;
+    userId?: string;
+    siteId?: string; // 이전 버전과의 호환용
     settings: UserMenuSettingsAPI;
   };
 
-  const siteId = body.siteId || siteConfig.siteId;
-  // 나중에 인증 추가 시: const userId = body.userId;
+  const userId = body.userId || body.siteId || siteConfig.siteId;
 
   let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
   try {
@@ -97,14 +97,12 @@ export async function POST(req: Request) {
     );
   }
 
-  // 현재는 siteId를 user_id로 사용 (임시)
-  // 나중에 인증 추가 시 user_id로 변경
   // camelCase를 snake_case로 변환하여 DB에 저장
   const { error } = await supabaseAdmin
     .from("user_menu_settings")
     .upsert(
       {
-        user_id: siteId, // 임시: siteId를 user_id로 사용
+        user_id: userId,
         enabled_modules: body.settings.enabledModules || [],
         menu_order: body.settings.menuOrder || [],
         role_mode: body.settings.roleMode || "parent",
