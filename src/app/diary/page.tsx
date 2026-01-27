@@ -35,6 +35,7 @@ export default function DiaryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const [title, setTitle] = useState("");
   const [entryDate, setEntryDate] = useState<string>("");
@@ -93,6 +94,7 @@ export default function DiaryPage() {
       setTitle("");
       setEntryDate("");
       setContent("");
+      setIsAddFormOpen(false);
       const list = await fetchDiary(siteId);
       setItems(list);
     } catch (err) {
@@ -111,109 +113,118 @@ export default function DiaryPage() {
         현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
       </p>
 
-      <section className="mt-8 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm backdrop-blur">
+      <div className="mt-8 flex items-center justify-between">
         <h2 className="text-base font-semibold text-[var(--color-text)]">
-          일기 추가
+          일기 목록
         </h2>
-        <form className="mt-4 grid gap-4" onSubmit={onSubmit}>
-          <Field label="제목 (선택)">
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.currentTarget.value)}
-              placeholder="예: 오늘의 한 마디"
-            />
-          </Field>
-          <Field label="날짜 (선택)">
-            <Input
-              type="date"
-              value={entryDate}
-              onChange={(e) => setEntryDate(e.currentTarget.value)}
-            />
-          </Field>
-          <Field label="내용">
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.currentTarget.value)}
-              placeholder="오늘 있었던 일을 짧게라도 남겨봐요."
-            />
-          </Field>
-          {error ? (
-            <p className="text-sm font-medium text-red-600">{error}</p>
-          ) : null}
-          <div className="flex items-center gap-3">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "저장 중..." : "저장하기"}
-            </Button>
-            <p className="text-xs text-black/50">
-              * Supabase 설정이 안 되어 있으면 저장이 동작하지 않을 수 있어요.
-            </p>
-          </div>
-        </form>
-      </section>
-
-      <section className="mt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-[var(--color-text)]">
-            일기 목록
-          </h2>
-          {items.length > 0 && (
-            <div className="flex items-center gap-2">
-              {isSelectionMode ? (
-                <>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setIsSelectionMode(false);
-                      setSelectedIds(new Set());
-                    }}
-                  >
-                    취소
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={async () => {
-                      if (selectedIds.size === 0) return;
-                      if (!confirm(`${selectedIds.size}개의 일기를 삭제하시겠어요?`)) {
-                        return;
+        <div className="flex items-center gap-2">
+          {isSelectionMode ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedIds(new Set());
+                  setIsSelectionMode(false);
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  if (selectedIds.size === 0) return;
+                  if (!confirm(`${selectedIds.size}개의 일기를 삭제하시겠어요?`)) {
+                    return;
+                  }
+                  const adminToken = getAdminToken();
+                  try {
+                    for (const id of selectedIds) {
+                      const res = await fetch(`/api/diary/${id}`, {
+                        method: "DELETE",
+                        headers: adminToken
+                          ? { "x-admin-token": adminToken }
+                          : {},
+                      });
+                      if (!res.ok) {
+                        throw new Error("삭제 실패");
                       }
-                      const adminToken = getAdminToken();
-                      try {
-                        for (const id of selectedIds) {
-                          const res = await fetch(`/api/diary/${id}`, {
-                            method: "DELETE",
-                            headers: adminToken
-                              ? { "x-admin-token": adminToken }
-                              : {},
-                          });
-                          if (!res.ok) {
-                            throw new Error("삭제 실패");
-                          }
-                        }
-                        setSelectedIds(new Set());
-                        setIsSelectionMode(false);
-                        const list = await fetchDiary(siteId);
-                        setItems(list);
-                      } catch (err) {
-                        console.error("삭제 실패:", err);
-                        alert("일부 일기 삭제에 실패했어요.");
-                      }
-                    }}
-                    disabled={selectedIds.size === 0}
-                  >
-                    선택 삭제 ({selectedIds.size})
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  variant="secondary"
-                  onClick={() => setIsSelectionMode(true)}
-                >
+                    }
+                    setSelectedIds(new Set());
+                    setIsSelectionMode(false);
+                    const list = await fetchDiary(siteId);
+                    setItems(list);
+                  } catch (err) {
+                    console.error("삭제 실패:", err);
+                    alert("일부 일기 삭제에 실패했어요.");
+                  }
+                }}
+                disabled={selectedIds.size === 0}
+              >
+                선택 삭제 ({selectedIds.size})
+              </Button>
+            </>
+          ) : (
+            <>
+              {items.length > 0 && (
+                <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
                   선택
                 </Button>
               )}
-            </div>
+              <Button
+                type="button"
+                onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+                variant={isAddFormOpen ? "secondary" : "primary"}
+              >
+                {isAddFormOpen ? "닫기" : "일기 추가"}
+              </Button>
+            </>
           )}
         </div>
+      </div>
+
+      {isAddFormOpen && (
+        <section className="mt-4 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm backdrop-blur">
+          <h3 className="text-base font-semibold text-[var(--color-text)]">
+            일기 추가
+          </h3>
+          <form className="mt-4 grid gap-4" onSubmit={onSubmit}>
+            <Field label="제목 (선택)">
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.currentTarget.value)}
+                placeholder="예: 오늘의 한 마디"
+              />
+            </Field>
+            <Field label="날짜 (선택)">
+              <Input
+                type="date"
+                value={entryDate}
+                onChange={(e) => setEntryDate(e.currentTarget.value)}
+              />
+            </Field>
+            <Field label="내용">
+              <Textarea
+                value={content}
+                onChange={(e) => setContent(e.currentTarget.value)}
+                placeholder="오늘 있었던 일을 짧게라도 남겨봐요."
+              />
+            </Field>
+            {error ? (
+              <p className="text-sm font-medium text-red-600">{error}</p>
+            ) : null}
+            <div className="flex items-center gap-3">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "저장 중..." : "저장하기"}
+              </Button>
+              <p className="text-xs text-black/50">
+                * Supabase 설정이 안 되어 있으면 저장이 동작하지 않을 수 있어요.
+              </p>
+            </div>
+          </form>
+        </section>
+      )}
+
+      <section className="mt-10">
         {isLoading ? (
           <p className="mt-3 text-sm text-black/60">불러오는 중…</p>
         ) : items.length === 0 ? (
