@@ -27,6 +27,7 @@ export function DiaryDetailClient({ item }: Props) {
   const [title, setTitle] = useState(item.title || "");
   const [entryDate, setEntryDate] = useState(item.entry_date);
   const [content, setContent] = useState(item.content);
+  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +54,7 @@ export function DiaryDetailClient({ item }: Props) {
         const j = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(j?.error || "수정에 실패했어.");
       }
+      setIsEditing(false);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "수정에 실패했어.");
@@ -99,28 +101,62 @@ export function DiaryDetailClient({ item }: Props) {
         생성: {new Date(item.created_at).toLocaleString()}
       </p>
 
-      <div className="mt-6 grid gap-4">
-        <Field label="제목">
-          <Input value={title} onChange={(e) => setTitle(e.currentTarget.value)} />
-        </Field>
-        <Field label="날짜">
-          <Input
-            type="date"
-            value={entryDate}
-            onChange={(e) => setEntryDate(e.currentTarget.value)}
-          />
-        </Field>
-        <Field label="내용">
-          <Textarea value={content} onChange={(e) => setContent(e.currentTarget.value)} />
-        </Field>
-      </div>
+      {isEditing ? (
+        <div className="mt-6 grid gap-4">
+          <Field label="제목">
+            <Input value={title} onChange={(e) => setTitle(e.currentTarget.value)} />
+          </Field>
+          <Field label="날짜">
+            <Input
+              type="date"
+              value={entryDate}
+              onChange={(e) => setEntryDate(e.currentTarget.value)}
+            />
+          </Field>
+          <Field label="내용">
+            <Textarea value={content} onChange={(e) => setContent(e.currentTarget.value)} />
+          </Field>
+        </div>
+      ) : (
+        <div className="mt-6 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
+          <p className="text-sm font-semibold text-[var(--color-text)]">
+            {item.title || "제목 없음"}
+          </p>
+          <p className="mt-1 text-xs text-black/50">{item.entry_date}</p>
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-black/70">
+            {item.content}
+          </p>
+        </div>
+      )}
 
       {error ? <p className="mt-4 text-sm font-medium text-red-600">{error}</p> : null}
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        <Button type="button" onClick={save} isLoading={isSaving}>
-          수정 저장
-        </Button>
+        {isEditing ? (
+          <>
+            <Button type="button" onClick={save} isLoading={isSaving}>
+              수정 저장
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setTitle(item.title || "");
+                setEntryDate(item.entry_date);
+                setContent(item.content);
+                setIsEditing(false);
+                setError(null);
+              }}
+              disabled={isSaving || isDeleting}
+            >
+              취소
+            </Button>
+          </>
+        ) : (
+          <Button type="button" onClick={() => setIsEditing(true)}>
+            수정
+          </Button>
+        )}
         <Button type="button" variant="secondary" onClick={remove} isLoading={isDeleting}>
           삭제
         </Button>
