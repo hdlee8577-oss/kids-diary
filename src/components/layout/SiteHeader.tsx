@@ -52,6 +52,8 @@ export function SiteHeader() {
     // 프로필/테마를 게스트 기본값(우리아이 등)으로 되돌리기
     resetSettings();
     // 자동 로그인 플래그는 유지 (한 번 시도했으면 더 이상 자동 로그인하지 않음)
+    // 홈페이지로 리다이렉트
+    router.push("/");
     router.refresh();
   }
 
