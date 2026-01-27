@@ -75,6 +75,10 @@ export const siteConfig: SiteConfig = {
     diary: {
       table: "diary_entries",
     },
+    artworks: {
+      table: "artworks",
+      bucket: "artworks",
+    },
   },
   defaults: {
     theme: {
