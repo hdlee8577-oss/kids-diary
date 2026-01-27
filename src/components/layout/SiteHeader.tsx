@@ -67,14 +67,15 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="group inline-flex items-center gap-2 rounded-full border border-black/10 bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface)]/80 px-4 py-1.5 text-sm font-semibold tracking-tight text-[var(--color-text)] shadow-sm transition-all hover:border-black/20 hover:shadow-md"
+          className="group inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-bold tracking-tight shadow-sm transition-all hover:shadow-md"
           style={{
-            background: `linear-gradient(135deg, ${mood.accentColor1}15, ${mood.accentColor2}15)`,
-            borderColor: `${mood.accentColor1}40`,
+            background: `linear-gradient(135deg, ${mood.accentColor1}20, ${mood.accentColor2}20)`,
+            borderColor: `${mood.accentColor1}50`,
+            color: `var(--color-primary)`,
           }}
         >
           <span className="text-base leading-none">{mood.character || "🌸"}</span>
-          <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] bg-clip-text font-bold text-transparent group-hover:from-[var(--color-primary)] group-hover:to-[var(--color-primary)]/80">
+          <span className="font-bold" style={{ color: `var(--color-primary)` }}>
             {childName}의 성장기록
           </span>
         </Link>
