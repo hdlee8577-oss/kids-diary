@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { create } from "zustand";
 import { siteConfig } from "@/Site.config";
 import { getAdminToken } from "@/lib/admin/clientToken";
 
@@ -12,17 +13,40 @@ type UserMenuSettings = {
   preset: string;
 };
 
-export function useUserMenuSettings() {
-  const [settings, setSettings] = useState<UserMenuSettings>({
+type UserMenuSettingsState = {
+  settings: UserMenuSettings;
+  loading: boolean;
+  error: string | null;
+  setSettings: (settings: UserMenuSettings) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+};
+
+const useUserMenuSettingsStore = create<UserMenuSettingsState>((set) => ({
+  settings: {
     enabledModules: ["photos", "diary"], // 기본값
     menuOrder: [],
     roleMode: "parent",
     preset: "custom",
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  },
+  loading: true,
+  error: null,
+  setSettings: (settings) => set({ settings }),
+  setLoading: (loading) => set({ loading }),
+  setError: (error) => set({ error }),
+}));
 
+let hasFetchedOnce = false;
+
+export function useUserMenuSettings() {
+  const { settings, loading, error, setSettings, setLoading, setError } =
+    useUserMenuSettingsStore();
+
+  // 최초 1회만 서버에서 설정을 불러와서 전역 스토어에 넣는다.
   useEffect(() => {
+    if (hasFetchedOnce) return;
+    hasFetchedOnce = true;
+
     let alive = true;
     (async () => {
       try {
@@ -42,7 +66,6 @@ export function useUserMenuSettings() {
         if (!alive) return;
 
         if (data.settings) {
-          // API 응답이 올바른 형식인지 확인
           setSettings({
             enabledModules: data.settings.enabledModules || [],
             menuOrder: data.settings.menuOrder || [],
@@ -64,10 +87,13 @@ export function useUserMenuSettings() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [setError, setLoading, setSettings]);
 
   async function updateSettings(updates: Partial<UserMenuSettings>) {
+    const previous = settings;
     const newSettings = { ...settings, ...updates };
+
+    // 전역 스토어를 먼저 업데이트 → 헤더 메뉴 등 즉시 반영
     setSettings(newSettings);
     setError(null);
 
@@ -90,9 +116,9 @@ export function useUserMenuSettings() {
         throw new Error(data.error || "Failed to save menu settings");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
       // 실패 시 이전 설정으로 복원
-      setSettings(settings);
+      setSettings(previous);
+      setError(err instanceof Error ? err.message : "Unknown error");
       throw err;
     }
   }
@@ -104,3 +130,4 @@ export function useUserMenuSettings() {
     updateSettings,
   };
 }
+
