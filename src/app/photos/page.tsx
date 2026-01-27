@@ -37,6 +37,7 @@ export default function PhotosPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const [title, setTitle] = useState("");
   const [takenAt, setTakenAt] = useState<string>("");
@@ -114,6 +115,7 @@ export default function PhotosPage() {
         setTitle("");
         setTakenAt("");
         setFiles([]);
+        setIsAddFormOpen(false);
         const list = await fetchPhotos(siteId);
         setItems(list);
         
@@ -137,11 +139,25 @@ export default function PhotosPage() {
         현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
       </p>
 
-      <section className="mt-8 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm backdrop-blur">
+      <div className="mt-8 flex items-center justify-between">
         <h2 className="text-base font-semibold text-[var(--color-text)]">
-          사진 추가
+          사진 목록
         </h2>
-        <form className="mt-4 grid gap-4" onSubmit={onSubmit}>
+        <Button
+          type="button"
+          onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+          variant={isAddFormOpen ? "secondary" : "primary"}
+        >
+          {isAddFormOpen ? "닫기" : "사진 추가"}
+        </Button>
+      </div>
+
+      {isAddFormOpen && (
+        <section className="mt-4 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm backdrop-blur">
+          <h3 className="text-base font-semibold text-[var(--color-text)]">
+            사진 추가
+          </h3>
+          <form className="mt-4 grid gap-4" onSubmit={onSubmit}>
           <Field label="제목">
             <Input
               value={title}
@@ -196,12 +212,10 @@ export default function PhotosPage() {
             </p>
           </div>
         </form>
-      </section>
+        </section>
+      )}
 
       <section className="mt-10">
-        <h2 className="text-base font-semibold text-[var(--color-text)]">
-          사진 목록
-        </h2>
         {isLoading ? (
           <p className="mt-3 text-sm text-black/60">불러오는 중…</p>
         ) : items.length === 0 ? (
