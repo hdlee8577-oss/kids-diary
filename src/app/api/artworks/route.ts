@@ -13,6 +13,7 @@ type ArtworkRow = {
   grade: string | null;
   tags: string[] | null;
   mom_note: string | null;
+  artwork_date: string | null;
   created_at: string;
 };
 
@@ -30,9 +31,10 @@ export async function GET(req: Request) {
   const { data, error } = await supabase
     .from(siteConfig.data.artworks.table)
     .select(
-      "id, site_id, title, description, image_url, category, grade, tags, mom_note, created_at"
+      "id, site_id, title, description, image_url, category, grade, tags, mom_note, artwork_date, created_at"
     )
     .eq("site_id", siteId)
+    .order("artwork_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(100)
     .returns<ArtworkRow[]>();
@@ -51,6 +53,7 @@ export async function GET(req: Request) {
       grade: r.grade ?? null,
       tags: (r.tags as string[]) ?? [],
       mom_note: r.mom_note ?? null,
+      artwork_date: r.artwork_date ?? null,
       created_at: r.created_at,
     })) ?? [];
 
@@ -78,6 +81,7 @@ export async function POST(req: Request) {
   const category = (form.get("category")?.toString() || "").trim() || null;
   const grade = (form.get("grade")?.toString() || "").trim() || null;
   const momNote = (form.get("momNote")?.toString() || "").trim() || null;
+  const artworkDate = (form.get("artworkDate")?.toString() || "").trim() || null;
   const tagsStr = form.get("tags")?.toString() || "[]";
   let tags: string[] = [];
   try {
@@ -130,6 +134,7 @@ export async function POST(req: Request) {
       grade,
       tags: tags.length > 0 ? tags : null,
       mom_note: momNote,
+      artwork_date: artworkDate,
     })
     .select("id")
     .single();

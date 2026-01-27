@@ -22,6 +22,7 @@ type ArtworkItem = {
   grade: string | null;
   tags: string[];
   mom_note: string | null;
+  artwork_date: string | null;
   created_at: string;
 };
 
@@ -50,6 +51,7 @@ export default function ArtworksPage() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<string>("");
   const [grade, setGrade] = useState<string>("");
+  const [artworkDate, setArtworkDate] = useState<string>("");
   const [momNote, setMomNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -106,6 +108,7 @@ export default function ArtworksPage() {
       formData.append("description", description);
       formData.append("category", category);
       formData.append("grade", grade);
+      formData.append("artworkDate", artworkDate);
       formData.append("momNote", momNote);
       formData.append("tags", JSON.stringify([]));
       formData.append("file", file);
@@ -128,6 +131,7 @@ export default function ArtworksPage() {
       setDescription("");
       setCategory("");
       setGrade("");
+      setArtworkDate("");
       setMomNote("");
       setFile(null);
       if (fileInputRef.current) {
@@ -239,6 +243,13 @@ export default function ArtworksPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="작품에 대한 설명을 입력해주세요"
                 rows={3}
+              />
+            </Field>
+            <Field label="작품 날짜">
+              <Input
+                type="date"
+                value={artworkDate}
+                onChange={(e) => setArtworkDate(e.target.value)}
               />
             </Field>
             <div className="grid grid-cols-2 gap-4">

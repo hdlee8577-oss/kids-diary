@@ -16,6 +16,7 @@ type ArtworkItem = {
   grade: string | null;
   tags: string[];
   mom_note: string | null;
+  artwork_date: string | null;
   created_at: string;
 };
 
@@ -88,6 +89,11 @@ export default function ArtworkDetailPage() {
         <h1 className="text-2xl font-semibold text-[var(--color-text)]">
           {artwork.title || "제목 없음"}
         </h1>
+        {artwork.artwork_date && (
+          <p className="mt-2 text-sm text-black/60">
+            작품 날짜: {new Date(artwork.artwork_date).toLocaleDateString("ko-KR")}
+          </p>
+        )}
         <div className="mt-2 flex flex-wrap gap-2">
           {artwork.category && (
             <span className="inline-flex items-center rounded-full bg-black/5 px-3 py-1 text-sm text-black/70">
