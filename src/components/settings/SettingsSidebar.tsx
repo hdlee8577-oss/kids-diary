@@ -263,11 +263,13 @@ export function SettingsSidebar() {
                   type="button"
                   onClick={() => {
                     if (preset.value === "custom") {
+                      const currentMood = theme.homeMood || siteConfig.defaults.theme.homeMood!;
                       setTheme({
                         homeMood: {
-                          ...theme.homeMood,
-                          preset: "custom",
+                          accentColor1: currentMood.accentColor1,
+                          accentColor2: currentMood.accentColor2,
                           character: preset.character,
+                          preset: "custom",
                         },
                       });
                     } else {
