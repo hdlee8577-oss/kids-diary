@@ -734,8 +734,8 @@ export function useUserMenuSettings() {
 **현재 완성:** ✅ 사진첩, ✅ 일기장
 
 **구현 필요:**
-- [ ] 타임라인 모듈 (`/timeline`)
-- [ ] 통계 모듈 (`/stats`)
+- [x] 타임라인 모듈 (`/timeline`)
+- [x] 통계 모듈 (`/stats`)
 - [ ] 작품 모음 모듈 (`/artworks`)
 - [ ] 상장/인증서 모듈 (`/awards`)
 - [ ] 성장 기록 모듈 (`/growth`)

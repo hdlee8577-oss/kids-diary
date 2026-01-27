@@ -13,11 +13,11 @@ export function DynamicNav() {
   if (error) {
     return (
       <nav aria-label="주요 메뉴">
-        <ul className="flex items-center gap-1">
+        <ul className="flex flex-nowrap items-center gap-1">
           <li>
             <Link
               href="/photos"
-              className="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
+              className="inline-flex items-center whitespace-nowrap rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
             >
               📸 사진첩
             </Link>
@@ -25,7 +25,7 @@ export function DynamicNav() {
           <li>
             <Link
               href="/diary"
-              className="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
+              className="inline-flex items-center whitespace-nowrap rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
             >
               📝 일기장
             </Link>
@@ -38,7 +38,7 @@ export function DynamicNav() {
   if (loading) {
     return (
       <nav aria-label="주요 메뉴">
-        <ul className="flex items-center gap-1">
+        <ul className="flex flex-nowrap items-center gap-1">
           <li>
             <div className="rounded-[var(--radius)] px-3 py-2 text-sm text-black/50">
               로딩 중...
@@ -66,14 +66,14 @@ export function DynamicNav() {
 
   return (
     <nav aria-label="주요 메뉴">
-      <ul className="flex items-center gap-1">
+      <ul className="flex flex-nowrap items-center gap-1">
         {sortedModules.map((module) => {
           const isActive = pathname.startsWith(module.path);
           return (
             <li key={module.id}>
               <Link
                 href={module.path}
-                className={`rounded-[var(--radius)] px-3 py-2 text-sm font-medium transition ${
+                className={`inline-flex items-center whitespace-nowrap rounded-[var(--radius)] px-3 py-2 text-sm font-medium transition ${
                   isActive
                     ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
                     : "text-black/70 hover:bg-black/5 hover:text-[var(--color-text)]"
