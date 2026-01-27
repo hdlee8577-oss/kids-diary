@@ -2,8 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { siteConfig } from "@/Site.config";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
+import { getAdminToken } from "@/lib/admin/clientToken";
+import { Button } from "@/components/shared/Button";
 
 type PhotoItem = {
   id: string;
@@ -15,8 +20,8 @@ type PhotoItem = {
   created_at: string;
 };
 
-async function fetchPhoto(id: string): Promise<PhotoItem | null> {
-  const res = await fetch(`/api/photos?siteId=default`);
+async function fetchPhoto(id: string, siteId: string): Promise<PhotoItem | null> {
+  const res = await fetch(`/api/photos?siteId=${encodeURIComponent(siteId)}`);
   if (!res.ok) return null;
   const data = (await res.json()) as { items: PhotoItem[] };
   return data.items.find((item) => item.id === id) ?? null;
@@ -25,15 +30,19 @@ async function fetchPhoto(id: string): Promise<PhotoItem | null> {
 export default function PhotoDetailPage() {
   const params = useParams();
   const photoId = params.id as string;
+  const router = useRouter();
+  const { user } = useSupabaseUser();
+  const siteId = user?.id ?? siteConfig.siteId;
 
   const [photo, setPhoto] = useState<PhotoItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       setIsLoading(true);
-      const data = await fetchPhoto(photoId);
+      const data = await fetchPhoto(photoId, siteId);
       if (!alive) return;
       if (data) {
         setPhoto(data);
@@ -43,7 +52,31 @@ export default function PhotoDetailPage() {
     return () => {
       alive = false;
     };
-  }, [photoId]);
+  }, [photoId, siteId]);
+
+  async function handleDelete() {
+    if (!confirm("이 사진을 삭제하시겠어요?")) return;
+
+    setIsDeleting(true);
+    try {
+      const adminToken = getAdminToken();
+      const res = await fetch(`/api/photos?ids=${encodeURIComponent(photoId)}`, {
+        method: "DELETE",
+        headers: {
+          ...(adminToken ? { "x-admin-token": adminToken } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("삭제 실패");
+      }
+
+      router.push("/photos");
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+      setIsDeleting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -66,13 +99,20 @@ export default function PhotoDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <Link
           href="/photos"
           className="text-sm text-[var(--color-text)]/70 hover:text-[var(--color-text)]"
         >
           ← 사진첩으로
         </Link>
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? "삭제 중..." : "삭제"}
+        </Button>
       </div>
 
       <div className="mb-6">

@@ -120,6 +120,62 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true, id: data.id });
 }
 
+export async function DELETE(req: Request) {
+  const auth = requireAdminToken(req);
+  if (auth) return auth;
+
+  let supabase: ReturnType<typeof getSupabaseAdmin>;
+  try {
+    supabase = getSupabaseAdmin();
+  } catch {
+    return NextResponse.json(
+      { error: "Supabase env not configured", persistence: "disabled" },
+      { status: 501 },
+    );
+  }
+
+  const { searchParams } = new URL(req.url);
+  const idsStr = searchParams.get("ids");
+  if (!idsStr) {
+    return NextResponse.json({ error: "Missing ids" }, { status: 400 });
+  }
+
+  const ids = idsStr.split(",").filter(Boolean);
+  if (ids.length === 0) {
+    return NextResponse.json({ error: "Empty ids" }, { status: 400 });
+  }
+
+  // 먼저 이미지 경로 조회
+  const { data: photos, error: fetchError } = await supabase
+    .from(siteConfig.data.photos.table)
+    .select("image_path")
+    .in("id", ids);
+
+  if (fetchError) {
+    return NextResponse.json({ error: fetchError.message }, { status: 500 });
+  }
+
+  // Storage에서 이미지 삭제
+  if (photos && photos.length > 0) {
+    const paths = photos.map((p) => p.image_path).filter(Boolean);
+    if (paths.length > 0) {
+      await supabase.storage.from(siteConfig.data.photos.bucket).remove(paths);
+    }
+  }
+
+  // DB에서 레코드 삭제
+  const { error } = await supabase
+    .from(siteConfig.data.photos.table)
+    .delete()
+    .in("id", ids);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
 export async function PATCH(req: Request) {
   const auth = requireAdminToken(req);
   if (auth) return auth;

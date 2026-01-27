@@ -40,6 +40,8 @@ export default function PhotosPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const [title, setTitle] = useState("");
   const [takenAt, setTakenAt] = useState<string>("");
@@ -170,13 +172,65 @@ export default function PhotosPage() {
         <h2 className="text-base font-semibold text-[var(--color-text)]">
           사진 목록
         </h2>
-        <Button
-          type="button"
-          onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-          variant={isAddFormOpen ? "secondary" : "primary"}
-        >
-          {isAddFormOpen ? "닫기" : "사진 추가"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {isSelectionMode ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedIds(new Set());
+                  setIsSelectionMode(false);
+                }}
+              >
+                취소
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  if (selectedIds.size === 0) return;
+                  if (!confirm(`선택한 ${selectedIds.size}개의 사진을 삭제하시겠어요?`)) {
+                    return;
+                  }
+                  try {
+                    const adminToken = getAdminToken();
+                    const ids = Array.from(selectedIds).join(",");
+                    const res = await fetch(`/api/photos?ids=${encodeURIComponent(ids)}`, {
+                      method: "DELETE",
+                      headers: {
+                        ...(adminToken ? { "x-admin-token": adminToken } : {}),
+                      },
+                    });
+                    if (!res.ok) {
+                      throw new Error("삭제 실패");
+                    }
+                    setSelectedIds(new Set());
+                    setIsSelectionMode(false);
+                    const list = await fetchPhotos(siteId);
+                    setItems(list);
+                  } catch (err) {
+                    alert("삭제 중 오류가 발생했습니다.");
+                  }
+                }}
+                disabled={selectedIds.size === 0}
+              >
+                선택 삭제 ({selectedIds.size})
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
+                선택
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+                variant={isAddFormOpen ? "secondary" : "primary"}
+              >
+                {isAddFormOpen ? "닫기" : "사진 추가"}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {isAddFormOpen && (
@@ -286,7 +340,42 @@ export default function PhotosPage() {
             }
           >
             {items.map((it) => (
-              <PhotoCard key={it.id} item={it} layoutMode={layoutMode} thumbnailSize={thumbnailSize} />
+              <PhotoCard
+                key={it.id}
+                item={it}
+                layoutMode={layoutMode}
+                thumbnailSize={thumbnailSize}
+                isSelectionMode={isSelectionMode}
+                isSelected={selectedIds.has(it.id)}
+                onToggleSelect={() => {
+                  const newSet = new Set(selectedIds);
+                  if (newSet.has(it.id)) {
+                    newSet.delete(it.id);
+                  } else {
+                    newSet.add(it.id);
+                  }
+                  setSelectedIds(newSet);
+                }}
+                onDelete={async () => {
+                  if (!confirm("이 사진을 삭제하시겠어요?")) return;
+                  try {
+                    const adminToken = getAdminToken();
+                    const res = await fetch(`/api/photos?ids=${encodeURIComponent(it.id)}`, {
+                      method: "DELETE",
+                      headers: {
+                        ...(adminToken ? { "x-admin-token": adminToken } : {}),
+                      },
+                    });
+                    if (!res.ok) {
+                      throw new Error("삭제 실패");
+                    }
+                    const list = await fetchPhotos(siteId);
+                    setItems(list);
+                  } catch (err) {
+                    alert("삭제 중 오류가 발생했습니다.");
+                  }
+                }}
+              />
             ))}
           </div>
         )}
@@ -299,10 +388,18 @@ function PhotoCard({
   item,
   layoutMode,
   thumbnailSize,
+  isSelectionMode,
+  isSelected,
+  onToggleSelect,
+  onDelete,
 }: {
   item: PhotoItem;
   layoutMode: "timeline" | "cards";
   thumbnailSize: "small" | "medium" | "large";
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+  onDelete: () => void;
 }) {
   const thumbPosX = item.thumb_pos_x ?? 50.0;
   const thumbPosY = item.thumb_pos_y ?? 50.0;
@@ -325,8 +422,13 @@ function PhotoCard({
   }, [isMenuOpen]);
 
   return (
-    <article className="relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md overflow-visible">
-      <Link href={`/photos/${item.id}`}>
+    <article
+      className={`relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md overflow-visible ${
+        isSelectionMode ? "cursor-pointer" : ""
+      } ${isSelected ? "ring-2 ring-[var(--color-primary)]" : ""}`}
+      onClick={isSelectionMode ? onToggleSelect : undefined}
+    >
+      <Link href={`/photos/${item.id}`} onClick={(e) => isSelectionMode && e.preventDefault()}>
         <div className="relative aspect-[4/3] bg-black/5 overflow-hidden rounded-t-[var(--radius)]">
           <Image
             src={item.image_url}
@@ -339,6 +441,27 @@ function PhotoCard({
             sizes="(max-width: 640px) 50vw, 33vw"
             draggable={false}
           />
+          {isSelectionMode && (
+            <div className="absolute top-2 right-2">
+              <div
+                className={`h-6 w-6 rounded-full border-2 ${
+                  isSelected
+                    ? "bg-[var(--color-primary)] border-[var(--color-primary)]"
+                    : "bg-white border-black/20"
+                } flex items-center justify-center`}
+              >
+                {isSelected && (
+                  <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </Link>
       <div className="relative p-4">
@@ -380,10 +503,21 @@ function PhotoCard({
                 <Link
                   href={`/photos/${item.id}/edit`}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)] last:rounded-b-[var(--radius)]"
+                  className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)]"
                 >
                   섬네일 수정
                 </Link>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    onDelete();
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 last:rounded-b-[var(--radius)]"
+                >
+                  삭제
+                </button>
               </div>
             )}
           </div>
