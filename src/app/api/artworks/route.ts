@@ -30,59 +30,48 @@ export async function GET(req: Request) {
 
   console.log("[API Artworks GET] siteId:", siteId, "table:", siteConfig.data.artworks.table);
 
-  try {
-    const { data, error } = await supabase
-      .from(siteConfig.data.artworks.table)
-      .select(
-        "id, site_id, title, description, image_url, category, grade, tags, mom_note, artwork_date, created_at"
-      )
-      .eq("site_id", siteId)
-      .order("artwork_date", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false })
-      .limit(100)
-      .returns<ArtworkRow[]>();
+  const { data, error } = await supabase
+    .from(siteConfig.data.artworks.table)
+    .select(
+      "id, site_id, title, description, image_url, category, grade, tags, mom_note, artwork_date, created_at"
+    )
+    .eq("site_id", siteId)
+    .order("artwork_date", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(100)
+    .returns<ArtworkRow[]>();
 
-    if (error) {
-      console.error("[API Artworks GET] Supabase Error:", error);
-      console.error("[API Artworks GET] Error details:", JSON.stringify(error, null, 2));
-      return NextResponse.json(
-        { 
-          error: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log("[API Artworks GET] Found", data?.length || 0, "items for siteId:", siteId);
-
-    const items =
-      data?.map((r) => ({
-        id: r.id,
-        title: r.title ?? "",
-        description: r.description ?? "",
-        image_url: r.image_url ?? "",
-        category: r.category ?? null,
-        grade: r.grade ?? null,
-        tags: (r.tags as string[]) ?? [],
-        mom_note: r.mom_note ?? null,
-        artwork_date: r.artwork_date ?? null,
-        created_at: r.created_at,
-      })) ?? [];
-
-    return NextResponse.json({ items });
-  } catch (err) {
-    console.error("[API Artworks GET] Unexpected error:", err);
+  if (error) {
+    console.error("[API Artworks GET] Supabase Error:", error);
+    console.error("[API Artworks GET] Error details:", JSON.stringify(error, null, 2));
     return NextResponse.json(
       { 
-        error: err instanceof Error ? err.message : "Unknown error",
-        type: "unexpected_error"
+        error: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
       },
       { status: 500 }
     );
   }
+
+  console.log("[API Artworks GET] Found", data?.length || 0, "items for siteId:", siteId);
+
+  const items =
+    data?.map((r) => ({
+      id: r.id,
+      title: r.title ?? "",
+      description: r.description ?? "",
+      image_url: r.image_url ?? "",
+      category: r.category ?? null,
+      grade: r.grade ?? null,
+      tags: (r.tags as string[]) ?? [],
+      mom_note: r.mom_note ?? null,
+      artwork_date: r.artwork_date ?? null,
+      created_at: r.created_at,
+    })) ?? [];
+
+  return NextResponse.json({ items });
 }
 
 export async function POST(req: Request) {
