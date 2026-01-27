@@ -18,6 +18,8 @@ type ArtworkItem = {
   title: string;
   description: string;
   image_url: string;
+  url: string | null;
+  type: "image" | "video" | "writing" | "link";
   category: string | null;
   grade: string | null;
   tags: string[];
@@ -43,6 +45,7 @@ async function updateArtwork(
     artworkDate?: string;
     momNote?: string;
     tags?: string[];
+    url?: string;
   },
 ): Promise<boolean> {
   const adminToken = getAdminToken();
@@ -75,6 +78,7 @@ export default function EditArtworkPage() {
   const [grade, setGrade] = useState<string>("");
   const [artworkDate, setArtworkDate] = useState<string>("");
   const [momNote, setMomNote] = useState("");
+  const [url, setUrl] = useState<string>("");
 
   useEffect(() => {
     let alive = true;
@@ -90,6 +94,7 @@ export default function EditArtworkPage() {
         setGrade(data.grade || "");
         setArtworkDate(data.artwork_date || "");
         setMomNote(data.mom_note || "");
+        setUrl(data.url || "");
       }
       setIsLoading(false);
     })();
@@ -111,6 +116,7 @@ export default function EditArtworkPage() {
         grade: grade || undefined,
         artworkDate: artworkDate || undefined,
         momNote: momNote || undefined,
+        url: url || undefined,
       });
 
       if (!success) {
@@ -215,6 +221,17 @@ export default function EditArtworkPage() {
             </Select>
           </Field>
         </div>
+        <Field label="URL 링크">
+          <Input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=... 또는 이미지 URL"
+          />
+          <p className="mt-1 text-xs text-black/50">
+            유튜브, 이미지 URL 등을 입력하세요. URL이 변경되면 썸네일이 자동으로 업데이트됩니다.
+          </p>
+        </Field>
         <Field label="엄마의 한마디">
           <Textarea
             value={momNote}

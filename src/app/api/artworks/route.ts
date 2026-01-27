@@ -280,6 +280,7 @@ export async function PATCH(req: Request) {
     artworkDate,
     momNote,
     tags,
+    url,
   } = body as {
     id?: string;
     title?: string;
@@ -289,6 +290,7 @@ export async function PATCH(req: Request) {
     artworkDate?: string;
     momNote?: string;
     tags?: string[];
+    url?: string;
   };
 
   if (!id) {
@@ -303,6 +305,20 @@ export async function PATCH(req: Request) {
   if (artworkDate !== undefined) updateData.artwork_date = artworkDate || null;
   if (momNote !== undefined) updateData.mom_note = momNote || null;
   if (tags !== undefined) updateData.tags = tags && tags.length > 0 ? tags : null;
+  
+  // URL이 변경되면 썸네일도 다시 추출
+  if (url !== undefined) {
+    updateData.url = url || null;
+    if (url) {
+      const thumbnail = extractThumbnailFromUrl(url);
+      if (thumbnail) {
+        updateData.image_url = thumbnail.thumbnailUrl;
+        updateData.type = thumbnail.type;
+      } else {
+        updateData.type = detectArtworkType(url);
+      }
+    }
+  }
 
   const { data, error } = await supabase
     .from(siteConfig.data.artworks.table)
