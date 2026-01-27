@@ -27,20 +27,20 @@ export function useSupabaseUser(): UseSupabaseUserResult {
     let alive = true;
 
     (async () => {
-      // 개발 환경에서 자동 로그인 (테스트용)
-      const isDev = process.env.NODE_ENV === "development";
-      const testEmail = "hdlee8577@gmail.com";
-      const testPassword = process.env.NEXT_PUBLIC_TEST_PASSWORD || "test1234";
+      // 자동 로그인 설정 확인 (환경 변수로 제어)
+      const autoLoginEnabled = process.env.NEXT_PUBLIC_AUTO_LOGIN_ENABLED === "true";
+      const autoLoginEmail = process.env.NEXT_PUBLIC_AUTO_LOGIN_EMAIL || "hdlee8577@gmail.com";
+      const autoLoginPassword = process.env.NEXT_PUBLIC_AUTO_LOGIN_PASSWORD || "";
 
       // 현재 사용자 확인
       const { data: currentUserData } = await supabaseBrowserClient.auth.getUser();
       
-      // 개발 환경이고 로그인되어 있지 않으면 자동 로그인 시도
-      if (isDev && !currentUserData.user) {
+      // 자동 로그인이 활성화되어 있고, 비밀번호가 설정되어 있으며, 로그인되어 있지 않으면 자동 로그인 시도
+      if (autoLoginEnabled && autoLoginPassword && !currentUserData.user) {
         try {
           const { data: signInData, error: signInError } = await supabaseBrowserClient.auth.signInWithPassword({
-            email: testEmail,
-            password: testPassword,
+            email: autoLoginEmail,
+            password: autoLoginPassword,
           });
           
           if (!signInError && signInData.user) {
@@ -48,10 +48,12 @@ export function useSupabaseUser(): UseSupabaseUserResult {
             setUser(signInData.user);
             setLoading(false);
             return;
+          } else if (signInError) {
+            console.warn("[useSupabaseUser] 자동 로그인 실패:", signInError.message);
           }
         } catch (err) {
           // 자동 로그인 실패 시 무시하고 계속 진행
-          console.warn("[useSupabaseUser] 자동 로그인 실패:", err);
+          console.warn("[useSupabaseUser] 자동 로그인 오류:", err);
         }
       }
 
