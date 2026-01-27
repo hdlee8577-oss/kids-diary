@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/shared/Button";
 import { Field } from "@/components/shared/Field";
 import { Input } from "@/components/shared/Input";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -44,7 +46,9 @@ export default function AuthPage() {
           password,
         });
         if (signInError) throw signInError;
-        setMessage("로그인 되었어요. 이제 페이지를 새로고침하면 반영됩니다.");
+        // 로그인 성공 시 홈 페이지로 리다이렉트
+        router.push("/");
+        router.refresh();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인/회원가입 중 오류가 발생했어요.");
