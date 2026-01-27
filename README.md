@@ -30,7 +30,7 @@ Pages:
 이 프로젝트는 `Settings Sidebar`에서 바꾼 값(아이 이름/소개/생년월일/테마)을 **실시간 프리뷰**하고,
 Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
 
-- **환경변수**: `.env.example` 참고
+- **환경변수**: `.env.local.example` 참고 또는 `.env.local` 파일 생성
   - `SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY` (서버에서만 사용)
   - `ADMIN_TOKEN` (선택: POST 보호용, 설정/사진/일기 추가 시 필요)

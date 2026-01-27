@@ -4,7 +4,8 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
-import { defaultSiteSettings } from "@/Site.config";
+import { siteConfig, type SiteSettings } from "@/Site.config";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,17 +27,35 @@ export const metadata: Metadata = {
   description: "커스터마이징 가능한 성장 기록 프레임워크",
 };
 
-export default function RootLayout({
+async function getInitialSettings(): Promise<SiteSettings | null> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("site_settings")
+      .select("settings")
+      .eq("site_id", siteConfig.siteId)
+      .maybeSingle<{ settings: SiteSettings }>();
+
+    if (error || !data) return null;
+    return data.settings;
+  } catch {
+    return null;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialSettings = await getInitialSettings();
+
   return (
     <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansKr.variable} min-h-dvh antialiased`}
       >
-        <ThemeProvider initialSettings={defaultSiteSettings}>
+        <ThemeProvider initialSettings={initialSettings}>
           <div className="min-h-dvh">
             <SiteHeader />
             <SettingsSidebar />

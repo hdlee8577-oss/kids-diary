@@ -21,16 +21,29 @@ async function fetchSettings(): Promise<SiteSettings | null> {
   return data.settings ?? null;
 }
 
-async function saveSettings(settings: SiteSettings) {
-  const adminToken = getAdminToken();
-  await fetch(`/api/site-settings`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      ...(adminToken ? { "x-admin-token": adminToken } : {}),
-    },
-    body: JSON.stringify({ siteId: siteConfig.siteId, settings }),
-  });
+async function saveSettings(settings: SiteSettings): Promise<boolean> {
+  try {
+    const adminToken = getAdminToken();
+    const res = await fetch(`/api/site-settings`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(adminToken ? { "x-admin-token": adminToken } : {}),
+      },
+      body: JSON.stringify({ siteId: siteConfig.siteId, settings }),
+    });
+    
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      console.error("설정 저장 실패:", data.error || res.statusText);
+      return false;
+    }
+    
+    return true;
+  } catch (err) {
+    console.error("설정 저장 중 오류:", err);
+    return false;
+  }
 }
 
 export function ThemeProvider({ initialSettings, children }: Props) {
@@ -40,6 +53,7 @@ export function ThemeProvider({ initialSettings, children }: Props) {
   const hydrateFromRemote = useSiteSettingsStore((s) => s.hydrateFromRemote);
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const ui = useMemo(
     () => ({
       isSettingsOpen,
@@ -86,8 +100,13 @@ export function ThemeProvider({ initialSettings, children }: Props) {
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
-      await saveSettings({ profile, theme });
-      lastSaved.current = serialized;
+      const success = await saveSettings({ profile, theme });
+      if (success) {
+        lastSaved.current = serialized;
+        setSaveError(null);
+      } else {
+        setSaveError("설정 저장에 실패했습니다. 브라우저 콘솔을 확인하세요.");
+      }
     }, 600);
   }, [isHydrated, profile, theme]);
 
