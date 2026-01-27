@@ -31,8 +31,8 @@ function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
       ...(partial.colors ?? {}),
     },
     layout: {
-      ...current.layout,
-      ...(partial.layout ?? {}),
+      mode: partial.layout?.mode ?? current.layout.mode,
+      thumbnailSize: partial.layout?.thumbnailSize ?? current.layout.thumbnailSize,
     },
     homeMood: partial.homeMood
       ? { ...current.homeMood, ...partial.homeMood }
