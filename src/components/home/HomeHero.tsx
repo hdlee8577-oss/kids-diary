@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { siteConfig } from "@/Site.config";
+import { siteConfig, type SiteSettings } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { getAdminToken } from "@/lib/admin/clientToken";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
@@ -116,18 +116,16 @@ export function HomeHero() {
       const currentTheme = useSiteSettingsStore.getState().theme;
       console.log("[Profile] 현재 프로필:", currentProfile);
       
-      // 프로필 즉시 업데이트 (상태 먼저 업데이트)
-      setProfile({ profilePhotoUrl: data.photoUrl });
-      console.log("[Profile] ✅ 상태 업데이트 완료, profilePhotoUrl:", data.photoUrl);
+      // 업데이트할 프로필 생성
+      const updatedProfile = {
+        ...currentProfile,
+        profilePhotoUrl: data.photoUrl,
+      };
+      console.log("[Profile] 업데이트할 프로필:", updatedProfile);
+      console.log("[Profile] profilePhotoUrl 포함 여부:", "profilePhotoUrl" in updatedProfile);
+      console.log("[Profile] profilePhotoUrl 값:", updatedProfile.profilePhotoUrl);
       
-      // 잠시 대기 후 저장 (상태가 반영될 시간을 줌)
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // 업데이트된 프로필 다시 가져오기
-      const updatedProfile = useSiteSettingsStore.getState().profile;
-      console.log("[Profile] 업데이트된 프로필:", updatedProfile);
-      
-      // 설정 저장 (userId 사용)
+      // 설정 저장 (userId 사용) - 상태 업데이트 전에 먼저 저장
       const settingsPayload = {
         userId: siteId,
         settings: {
@@ -135,7 +133,8 @@ export function HomeHero() {
           theme: currentTheme,
         },
       };
-      console.log("[Profile] 저장할 설정:", JSON.stringify(settingsPayload, null, 2));
+      console.log("[Profile] 저장할 설정 (전체):", JSON.stringify(settingsPayload, null, 2));
+      console.log("[Profile] 저장할 프로필만:", JSON.stringify(settingsPayload.settings.profile, null, 2));
       
       const settingsRes = await fetch("/api/site-settings", {
         method: "POST",
@@ -167,6 +166,17 @@ export function HomeHero() {
           saveResult = { ok: true };
         }
         console.log("[Profile] ✅ 프로필 사진 URL 저장 완료:", saveResult);
+        
+        // 저장 성공 후 상태 업데이트
+        setProfile({ profilePhotoUrl: data.photoUrl });
+        console.log("[Profile] ✅ 상태 업데이트 완료, profilePhotoUrl:", data.photoUrl);
+        
+        // 저장된 데이터 확인을 위해 다시 조회
+        const verifyRes = await fetch(`/api/site-settings?userId=${encodeURIComponent(siteId)}`);
+        if (verifyRes.ok) {
+          const verifyData = (await verifyRes.json()) as { settings?: SiteSettings | null };
+          console.log("[Profile] 저장 후 확인:", verifyData.settings?.profile);
+        }
         
         // 페이지 새로고침하여 이미지 표시
         alert("프로필 사진이 업로드되었습니다. 페이지를 새로고침합니다.");
