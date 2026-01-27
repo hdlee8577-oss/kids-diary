@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { siteConfig } from "@/Site.config";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
+import { getAdminToken } from "@/lib/admin/clientToken";
+import { Button } from "@/components/shared/Button";
 
 type ArtworkItem = {
   id: string;
@@ -35,8 +38,10 @@ export default function ArtworkDetailPage() {
   const { user } = useSupabaseUser();
   const siteId = user?.id ?? siteConfig.siteId;
 
+  const router = useRouter();
   const [artwork, setArtwork] = useState<ArtworkItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -53,6 +58,30 @@ export default function ArtworkDetailPage() {
       alive = false;
     };
   }, [artworkId, siteId]);
+
+  async function handleDelete() {
+    if (!confirm("이 작품을 삭제하시겠어요?")) return;
+
+    setIsDeleting(true);
+    try {
+      const adminToken = getAdminToken();
+      const res = await fetch(`/api/artworks?ids=${encodeURIComponent(artworkId)}`, {
+        method: "DELETE",
+        headers: {
+          ...(adminToken ? { "x-admin-token": adminToken } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("삭제 실패");
+      }
+
+      router.push("/artworks");
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+      setIsDeleting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -171,8 +200,17 @@ export default function ArtworkDetailPage() {
       )}
 
       {/* 메타 정보 */}
-      <div className="mt-6 text-xs text-black/50">
-        <p>작성일: {new Date(artwork.created_at).toLocaleDateString("ko-KR")}</p>
+      <div className="mt-6 flex items-center justify-between">
+        <div className="text-xs text-black/50">
+          <p>작성일: {new Date(artwork.created_at).toLocaleDateString("ko-KR")}</p>
+        </div>
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? "삭제 중..." : "삭제"}
+        </Button>
       </div>
     </main>
   );

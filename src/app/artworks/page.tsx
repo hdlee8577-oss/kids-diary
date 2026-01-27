@@ -172,17 +172,18 @@ export default function ArtworksPage() {
     }
   }
 
-  async function handleDelete() {
-    if (selectedIds.size === 0) return;
+  async function handleDelete(idsToDelete?: string[]) {
+    const ids = idsToDelete || Array.from(selectedIds);
+    if (ids.length === 0) return;
 
-    if (!confirm(`선택한 ${selectedIds.size}개의 작품을 삭제하시겠어요?`)) {
+    if (!confirm(`선택한 ${ids.length}개의 작품을 삭제하시겠어요?`)) {
       return;
     }
 
     try {
       const adminToken = getAdminToken();
-      const ids = Array.from(selectedIds).join(",");
-      const res = await fetch(`/api/artworks?ids=${encodeURIComponent(ids)}`, {
+      const idsParam = ids.join(",");
+      const res = await fetch(`/api/artworks?ids=${encodeURIComponent(idsParam)}`, {
         method: "DELETE",
         headers: {
           ...(adminToken ? { "x-admin-token": adminToken } : {}),
@@ -200,6 +201,10 @@ export default function ArtworksPage() {
     } catch (err) {
       alert("삭제 중 오류가 발생했습니다.");
     }
+  }
+
+  async function handleDeleteSingle(id: string) {
+    await handleDelete([id]);
   }
 
   const modeLabel = useMemo(
@@ -597,10 +602,21 @@ function ArtworkCard({
                   <Link
                     href={`/artworks/${item.id}/edit`}
                     onClick={() => setIsMenuOpen(false)}
-                    className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)] last:rounded-b-[var(--radius)]"
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)]"
                   >
                     수정
                   </Link>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsMenuOpen(false);
+                      handleDeleteSingle(item.id);
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 last:rounded-b-[var(--radius)]"
+                  >
+                    삭제
+                  </button>
                 </div>
               )}
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -252,6 +252,25 @@ export default function DiaryPage() {
                   }
                   setSelectedIds(newSet);
                 }}
+                onDelete={async () => {
+                  if (!confirm("이 일기를 삭제하시겠어요?")) return;
+                  try {
+                    const adminToken = getAdminToken();
+                    const res = await fetch(`/api/diary/${it.id}`, {
+                      method: "DELETE",
+                      headers: adminToken
+                        ? { "x-admin-token": adminToken }
+                        : {},
+                    });
+                    if (!res.ok) {
+                      throw new Error("삭제 실패");
+                    }
+                    const list = await fetchDiary(siteId);
+                    setItems(list);
+                  } catch (err) {
+                    alert("삭제 중 오류가 발생했습니다.");
+                  }
+                }}
               />
             ))}
           </div>
@@ -302,14 +321,54 @@ function DiaryCard({
   }
 
   return (
-    <Link href={`/diary/${item.id}`}>
-      <article className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm transition hover:shadow-md">
+    <article className="relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm transition hover:shadow-md">
+      <Link href={`/diary/${item.id}`}>
         <p className="text-xs text-black/50">{item.entry_date}</p>
         <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
           {item.title || "제목 없음"}
         </p>
-      </article>
-    </Link>
+      </Link>
+      <div className="absolute top-4 right-4" ref={menuRef}>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsMenuOpen(!isMenuOpen);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-black/5"
+          aria-label="메뉴"
+        >
+          <svg
+            className="h-5 w-5 text-[var(--color-text)]"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+            />
+          </svg>
+        </button>
+        {isMenuOpen && (
+          <div className="absolute right-0 top-full mt-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMenuOpen(false);
+                onDelete();
+              }}
+              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-[var(--radius)]"
+            >
+              삭제
+            </button>
+          </div>
+        )}
+      </div>
+    </article>
   );
 }
 
