@@ -172,8 +172,8 @@ export default function ArtworksPage() {
     }
   }
 
-  async function handleDelete(idsToDelete?: string[]) {
-    const ids = idsToDelete || Array.from(selectedIds);
+  async function handleDeleteSelected() {
+    const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
 
     if (!confirm(`선택한 ${ids.length}개의 작품을 삭제하시겠어요?`)) {
@@ -204,7 +204,28 @@ export default function ArtworksPage() {
   }
 
   async function handleDeleteSingle(id: string) {
-    await handleDelete([id]);
+    if (!confirm("이 작품을 삭제하시겠어요?")) {
+      return;
+    }
+
+    try {
+      const adminToken = getAdminToken();
+      const res = await fetch(`/api/artworks?ids=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: {
+          ...(adminToken ? { "x-admin-token": adminToken } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("삭제 실패");
+      }
+
+      const newItems = await fetchArtworks(siteId);
+      setItems(newItems);
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+    }
   }
 
   const modeLabel = useMemo(
@@ -235,7 +256,7 @@ export default function ArtworksPage() {
               </Button>
               <Button
                 variant="destructive"
-                onClick={handleDelete}
+                onClick={handleDeleteSelected}
                 disabled={selectedIds.size === 0}
               >
                 선택 삭제 ({selectedIds.size})
