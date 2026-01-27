@@ -45,6 +45,7 @@ export default function EditThumbnailPage() {
   const params = useParams();
   const router = useRouter();
   const photoId = params.id as string;
+  const thumbnailSize = useSiteSettingsStore((s) => s.theme.layout.thumbnailSize || "medium");
 
   const [photo, setPhoto] = useState<PhotoItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
