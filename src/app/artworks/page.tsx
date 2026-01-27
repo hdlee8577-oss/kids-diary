@@ -104,8 +104,12 @@ export default function ArtworksPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) {
-      setError("이미지를 선택해주세요.");
+    if (inputType === "file" && !file) {
+      setError("이미지 파일을 선택해주세요.");
+      return;
+    }
+    if (inputType === "url" && !url.trim()) {
+      setError("URL을 입력해주세요.");
       return;
     }
 
@@ -123,7 +127,12 @@ export default function ArtworksPage() {
       formData.append("artworkDate", artworkDate);
       formData.append("momNote", momNote);
       formData.append("tags", JSON.stringify([]));
-      formData.append("file", file);
+      
+      if (inputType === "file" && file) {
+        formData.append("file", file);
+      } else if (inputType === "url" && url.trim()) {
+        formData.append("url", url.trim());
+      }
 
       const res = await fetch("/api/artworks", {
         method: "POST",
