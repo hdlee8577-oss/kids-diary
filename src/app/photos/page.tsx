@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -39,7 +39,7 @@ export default function PhotosPage() {
 
   const [title, setTitle] = useState("");
   const [takenAt, setTakenAt] = useState<string>("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const modeLabel = useMemo(
     () => (layoutMode === "timeline" ? "타임라인형" : "카드형"),
@@ -62,7 +62,7 @@ export default function PhotosPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) {
+    if (files.length === 0) {
       setError("사진 파일을 선택해줘.");
       return;
     }
@@ -70,26 +70,31 @@ export default function PhotosPage() {
     setIsSubmitting(true);
 
     try {
-      const fd = new FormData();
-      fd.set("siteId", siteId);
-      fd.set("title", title);
-      if (takenAt) fd.set("takenAt", takenAt);
-      fd.set("file", file);
-
       const adminToken = getAdminToken();
-      const res = await fetch("/api/photos", {
-        method: "POST",
-        headers: adminToken ? { "x-admin-token": adminToken } : undefined,
-        body: fd,
-      });
-      if (!res.ok) {
-        const j = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(j?.error || "업로드에 실패했어.");
+      
+      // 여러 파일을 순차적으로 업로드
+      for (const file of files) {
+        const fd = new FormData();
+        fd.set("siteId", siteId);
+        fd.set("title", title || "");
+        if (takenAt) fd.set("takenAt", takenAt);
+        fd.set("file", file);
+
+        const res = await fetch("/api/photos", {
+          method: "POST",
+          headers: adminToken ? { "x-admin-token": adminToken } : undefined,
+          body: fd,
+        });
+        
+        if (!res.ok) {
+          const j = (await res.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(j?.error || "업로드에 실패했어.");
+        }
       }
 
       setTitle("");
       setTakenAt("");
-      setFile(null);
+      setFiles([]);
       const list = await fetchPhotos(siteId);
       setItems(list);
     } catch (err) {
@@ -131,8 +136,17 @@ export default function PhotosPage() {
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => setFile(e.currentTarget.files?.[0] ?? null)}
+              multiple
+              onChange={(e) => {
+                const selectedFiles = Array.from(e.currentTarget.files || []);
+                setFiles(selectedFiles);
+              }}
             />
+            {files.length > 0 && (
+              <p className="mt-2 text-xs text-black/60">
+                {files.length}개의 파일이 선택되었습니다.
+              </p>
+            )}
           </Field>
           {error ? (
             <p className="text-sm font-medium text-red-600">{error}</p>
@@ -183,10 +197,27 @@ function PhotoCard({
 }) {
   const thumbPosX = item.thumb_pos_x ?? 50.0;
   const thumbPosY = item.thumb_pos_y ?? 50.0;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   return (
-    <Link href={`/photos/${item.id}`}>
-      <article className="overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md">
+    <article className="group relative overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md">
+      <Link href={`/photos/${item.id}`}>
         <div className="relative aspect-[4/3] bg-black/5">
           <Image
             src={item.image_url}
@@ -200,16 +231,56 @@ function PhotoCard({
             draggable={false}
           />
         </div>
-        <div className="p-4">
-          <p className="text-sm font-semibold text-[var(--color-text)]">
-            {item.title || "제목 없음"}
-          </p>
-          <p className="mt-1 text-xs text-black/50">
-            {item.taken_at ? `촬영일 ${item.taken_at}` : "촬영일 없음"}
-          </p>
+      </Link>
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-[var(--color-text)]">
+              {item.title || "제목 없음"}
+            </p>
+            <p className="mt-1 text-xs text-black/50">
+              {item.taken_at ? `촬영일 ${item.taken_at}` : "촬영일 없음"}
+            </p>
+          </div>
+          <div className="relative ml-2" ref={menuRef}>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-black/5 group-hover:opacity-100"
+              aria-label="메뉴"
+            >
+              <svg
+                className="h-5 w-5 text-[var(--color-text)]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                />
+              </svg>
+            </button>
+            {isMenuOpen && (
+              <div className="absolute right-0 top-10 z-20 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+                <Link
+                  href={`/photos/${item.id}/edit`}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5"
+                >
+                  섬네일 수정
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      </article>
-    </Link>
+      </div>
+    </article>
   );
 }
 
