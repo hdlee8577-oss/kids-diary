@@ -3,8 +3,16 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { siteConfig } from "@/Site.config";
 import { requireAdminToken } from "@/lib/admin/requireAdminToken";
 
+async function getIdFromContext(context: unknown): Promise<string | null> {
+  const params = (context as { params?: unknown })?.params;
+  if (!params) return null;
+  const resolved = (await Promise.resolve(params)) as unknown;
+  const id = (resolved as { id?: unknown } | null)?.id;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
 export async function GET(_req: Request, context: unknown) {
-  const id = (context as { params?: { id?: string } })?.params?.id;
+  const id = await getIdFromContext(context);
   if (!id) return NextResponse.json({ item: null }, { status: 400 });
 
   let supabase: ReturnType<typeof getSupabaseAdmin>;
@@ -31,7 +39,7 @@ export async function PATCH(req: Request, context: unknown) {
   const auth = requireAdminToken(req);
   if (auth) return auth;
 
-  const id = (context as { params?: { id?: string } })?.params?.id;
+  const id = await getIdFromContext(context);
   if (!id) return NextResponse.json({ ok: false, error: "Missing id" }, { status: 400 });
 
   let supabase: ReturnType<typeof getSupabaseAdmin>;
