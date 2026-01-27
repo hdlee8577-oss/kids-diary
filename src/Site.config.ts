@@ -60,7 +60,8 @@ export const siteConfig: SiteConfig = {
   // Supabase `site_settings.site_id`로 저장/조회되는 키
   siteId: "default",
   profile: {
-    childName: "서아",
+    // 기본 이름은 실제 아이 이름이 아니라 '우리아이'로 노출
+    childName: "우리아이",
     intro:
       "사진과 일기를 차곡차곡 모아두는 공간이에요. 오늘의 한 장면이 내일의 소중한 기억이 되도록, 따뜻하게 기록해요.",
     birthDate: undefined,
