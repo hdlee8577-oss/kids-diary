@@ -71,13 +71,19 @@ export function HomeHero() {
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("[Profile] 🎯 handleFileChange 호출됨");
+    console.log("[Profile] 이벤트 타겟:", e.target);
+    console.log("[Profile] files 객체:", e.target.files);
+    console.log("[Profile] files.length:", e.target.files?.length ?? 0);
+    
     const file = e.target.files?.[0];
-    console.log("[Profile] 선택된 파일:", file ? file.name : "없음");
+    console.log("[Profile] 선택된 파일:", file ? `${file.name} (${file.size} bytes, ${file.type})` : "없음");
+    
     if (!file) {
-      console.log("[Profile] ❌ 파일이 선택되지 않음");
+      console.log("[Profile] ❌ 파일이 선택되지 않음 - 함수 종료");
       return;
     }
-    console.log("[Profile] ✅ 파일 선택됨:", file.name, file.size, "bytes");
+    
+    console.log("[Profile] ✅ 파일 선택됨:", file.name, file.size, "bytes", file.type);
 
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
     const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
@@ -375,10 +381,15 @@ export function HomeHero() {
                   accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                   onChange={(e) => {
                     console.log("[Profile] 🎯 input onChange 이벤트 발생");
+                    console.log("[Profile] 선택된 파일들:", e.target.files);
                     handleFileChange(e);
                   }}
                   onClick={(e) => {
                     console.log("[Profile] 🎯 input 클릭됨");
+                    // 파일 선택 다이얼로그가 열리도록 함
+                  }}
+                  onCancel={() => {
+                    console.log("[Profile] ⚠️ 파일 선택 취소됨");
                   }}
                   className="hidden"
                 />
