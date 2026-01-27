@@ -222,3 +222,65 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
+export async function PATCH(req: Request) {
+  const auth = requireAdminToken(req);
+  if (auth) return auth;
+
+  let supabase: ReturnType<typeof getSupabaseAdmin>;
+  try {
+    supabase = getSupabaseAdmin();
+  } catch {
+    return NextResponse.json(
+      { error: "Supabase env not configured", persistence: "disabled" },
+      { status: 501 },
+    );
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const {
+    id,
+    title,
+    description,
+    category,
+    grade,
+    artworkDate,
+    momNote,
+    tags,
+  } = body as {
+    id?: string;
+    title?: string;
+    description?: string;
+    category?: string;
+    grade?: string;
+    artworkDate?: string;
+    momNote?: string;
+    tags?: string[];
+  };
+
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  const updateData: any = {};
+  if (title !== undefined) updateData.title = title;
+  if (description !== undefined) updateData.description = description || null;
+  if (category !== undefined) updateData.category = category || null;
+  if (grade !== undefined) updateData.grade = grade || null;
+  if (artworkDate !== undefined) updateData.artwork_date = artworkDate || null;
+  if (momNote !== undefined) updateData.mom_note = momNote || null;
+  if (tags !== undefined) updateData.tags = tags && tags.length > 0 ? tags : null;
+
+  const { data, error } = await supabase
+    .from(siteConfig.data.artworks.table)
+    .update(updateData)
+    .eq("id", id)
+    .select("id")
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, id: data.id });
+}

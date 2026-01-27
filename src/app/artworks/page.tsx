@@ -400,9 +400,27 @@ function ArtworkCard({
   isSelected: boolean;
   onToggleSelect: () => void;
 }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   return (
     <article
-      className={`relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md ${
+      className={`relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md overflow-visible ${
         isSelectionMode ? "cursor-pointer" : ""
       } ${isSelected ? "ring-2 ring-[var(--color-primary)]" : ""}`}
       onClick={isSelectionMode ? onToggleSelect : undefined}
@@ -440,12 +458,17 @@ function ArtworkCard({
           )}
         </div>
       </Link>
-      <div className="p-4">
+      <div className="relative p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[var(--color-text)] truncate">
               {item.title || "제목 없음"}
             </p>
+            {item.artwork_date && (
+              <p className="mt-1 text-xs text-black/50">
+                {new Date(item.artwork_date).toLocaleDateString("ko-KR")}
+              </p>
+            )}
             {item.description && (
               <p className="mt-1 text-xs text-black/60 line-clamp-2">{item.description}</p>
             )}
@@ -462,6 +485,44 @@ function ArtworkCard({
               )}
             </div>
           </div>
+          {!isSelectionMode && (
+            <div className="relative ml-2 flex-shrink-0" ref={menuRef}>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsMenuOpen(!isMenuOpen);
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-black/5"
+                aria-label="메뉴"
+              >
+                <svg
+                  className="h-5 w-5 text-[var(--color-text)]"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  />
+                </svg>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 bottom-full mb-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+                  <Link
+                    href={`/artworks/${item.id}/edit`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)] last:rounded-b-[var(--radius)]"
+                  >
+                    수정
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </article>
