@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -36,6 +37,9 @@ export default function DiaryPage() {
   const [title, setTitle] = useState("");
   const [entryDate, setEntryDate] = useState<string>("");
   const [content, setContent] = useState("");
+
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Record<string, true>>({});
 
   const modeLabel = useMemo(
     () => (layoutMode === "timeline" ? "타임라인형" : "카드형"),
@@ -97,6 +101,54 @@ export default function DiaryPage() {
     }
   }
 
+  const selectedCount = useMemo(
+    () => Object.keys(selectedIds).length,
+    [selectedIds],
+  );
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      if (prev[id]) {
+        const copy = { ...prev };
+        delete copy[id];
+        return copy;
+      }
+      return { ...prev, [id]: true };
+    });
+  }
+
+  async function deleteSelected() {
+    const ids = Object.keys(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(`선택한 일기 ${ids.length}개를 삭제할까요?`)) return;
+
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const adminToken = getAdminToken();
+      const res = await fetch("/api/diary", {
+        method: "DELETE",
+        headers: {
+          "content-type": "application/json",
+          ...(adminToken ? { "x-admin-token": adminToken } : {}),
+        },
+        body: JSON.stringify({ siteId, ids }),
+      });
+      if (!res.ok) {
+        const j = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(j?.error || "삭제에 실패했어.");
+      }
+      setSelectedIds({});
+      setIsSelectMode(false);
+      const list = await fetchDiary(siteId);
+      setItems(list);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "삭제에 실패했어.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
       <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
@@ -147,9 +199,35 @@ export default function DiaryPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-base font-semibold text-[var(--color-text)]">
-          일기 목록
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-[var(--color-text)]">
+            일기 목록
+          </h2>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setIsSelectMode((v) => !v);
+                setSelectedIds({});
+              }}
+              disabled={isSubmitting || isLoading}
+            >
+              {isSelectMode ? "선택 해제" : "선택"}
+            </Button>
+            {isSelectMode ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={deleteSelected}
+                disabled={isSubmitting || selectedCount === 0}
+              >
+                선택 삭제 ({selectedCount})
+              </Button>
+            ) : null}
+          </div>
+        </div>
         {isLoading ? (
           <p className="mt-3 text-sm text-black/60">불러오는 중…</p>
         ) : items.length === 0 ? (
@@ -167,13 +245,25 @@ export default function DiaryPage() {
                 key={it.id}
                 className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm"
               >
-                <p className="text-xs text-black/50">{it.entry_date}</p>
-                <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
-                  {it.title || "제목 없음"}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-black/70">
-                  {it.content}
-                </p>
+                {isSelectMode ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleSelected(it.id)}
+                    className="block w-full text-left"
+                  >
+                    <p className="text-xs text-black/50">{it.entry_date}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
+                      {it.title || "제목 없음"}
+                    </p>
+                  </button>
+                ) : (
+                  <Link href={`/diary/${it.id}`} className="block">
+                    <p className="text-xs text-black/50">{it.entry_date}</p>
+                    <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
+                      {it.title || "제목 없음"}
+                    </p>
+                  </Link>
+                )}
               </article>
             ))}
           </div>

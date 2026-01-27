@@ -97,3 +97,38 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true, id: data.id });
 }
 
+export async function DELETE(req: Request) {
+  const auth = requireAdminToken(req);
+  if (auth) return auth;
+
+  let supabase: ReturnType<typeof getSupabaseAdmin>;
+  try {
+    supabase = getSupabaseAdmin();
+  } catch {
+    return NextResponse.json(
+      { error: "Supabase env not configured", persistence: "disabled" },
+      { status: 501 },
+    );
+  }
+
+  const body = (await req.json()) as { ids: string[]; siteId?: string };
+  const ids = Array.isArray(body.ids) ? body.ids : [];
+  const siteId = (body.siteId || siteConfig.siteId).trim();
+
+  if (ids.length === 0) {
+    return NextResponse.json({ error: "Missing ids" }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from(siteConfig.data.diary.table)
+    .delete()
+    .eq("site_id", siteId)
+    .in("id", ids);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, deleted: ids.length });
+}
+
