@@ -382,30 +382,38 @@ export function HomeHero() {
                   onChange={(e) => {
                     console.log("[Profile] 🎯 input onChange 이벤트 발생");
                     console.log("[Profile] 선택된 파일들:", e.target.files);
-                    handleFileChange(e);
+                    console.log("[Profile] 파일 개수:", e.target.files?.length ?? 0);
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleFileChange(e);
+                    } else {
+                      console.log("[Profile] ⚠️ 파일이 선택되지 않음 (onChange는 발생했지만 파일 없음)");
+                    }
                   }}
                   onClick={(e) => {
                     console.log("[Profile] 🎯 input 클릭됨");
                     // 파일 선택 다이얼로그가 열리도록 함
                   }}
-                  onCancel={() => {
-                    console.log("[Profile] ⚠️ 파일 선택 취소됨");
-                  }}
                   className="hidden"
                 />
                 <button
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log("[Profile] 🎯 사진 업로드 버튼 클릭");
                     console.log("[Profile] fileInputRef.current:", fileInputRef.current);
+                    
                     if (fileInputRef.current) {
+                      // 메뉴를 먼저 닫고
+                      setIsMenuOpen(false);
+                      
+                      // 약간의 지연 후 파일 선택 다이얼로그 열기
+                      await new Promise(resolve => setTimeout(resolve, 100));
+                      
                       fileInputRef.current.click();
                       console.log("[Profile] ✅ 파일 input 클릭 트리거됨");
                     } else {
                       console.error("[Profile] ❌ fileInputRef가 null");
                     }
-                    setIsMenuOpen(false);
                   }}
                   disabled={isUploading}
                   className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)]"
