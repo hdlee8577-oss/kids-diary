@@ -8,6 +8,7 @@ import { DynamicNav } from "./DynamicNav";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
+import { siteConfig } from "@/Site.config";
 
 function GearIcon() {
   return (
@@ -42,6 +43,8 @@ export function SiteHeader() {
   const { user } = useSupabaseUser();
   const router = useRouter();
   const resetSettings = useSiteSettingsStore((s) => s.resetToDefault);
+  const profile = useSiteSettingsStore((s) => s.profile);
+  const theme = useSiteSettingsStore((s) => s.theme);
 
   async function handleLogout() {
     if (!supabaseBrowserClient) return;
@@ -51,14 +54,29 @@ export function SiteHeader() {
     router.refresh();
   }
 
+  const childName = profile.childName || siteConfig.profile.childName;
+  const mood = theme.homeMood || siteConfig.defaults.theme.homeMood || {
+    accentColor1: "#FECDD3",
+    accentColor2: "#FDE68A",
+    character: "🌸",
+    preset: "warm",
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-black/5 bg-[var(--color-surface)]/60 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="text-sm font-semibold tracking-tight text-[var(--color-text)]"
+          className="group inline-flex items-center gap-2 rounded-full border border-black/10 bg-gradient-to-r from-[var(--color-surface)] to-[var(--color-surface)]/80 px-4 py-1.5 text-sm font-semibold tracking-tight text-[var(--color-text)] shadow-sm transition-all hover:border-black/20 hover:shadow-md"
+          style={{
+            background: `linear-gradient(135deg, ${mood.accentColor1}15, ${mood.accentColor2}15)`,
+            borderColor: `${mood.accentColor1}40`,
+          }}
         >
-          성장 기록
+          <span className="text-base leading-none">{mood.character || "🌸"}</span>
+          <span className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] bg-clip-text font-bold text-transparent group-hover:from-[var(--color-primary)] group-hover:to-[var(--color-primary)]/80">
+            {childName}의 성장기록
+          </span>
         </Link>
         <div className="flex items-center gap-2">
           <DynamicNav />
