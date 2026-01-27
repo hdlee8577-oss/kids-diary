@@ -719,19 +719,39 @@ export function useUserMenuSettings() {
 
 ## 📋 구현 체크리스트
 
-### Phase 1: 기본 구조
-- [ ] 메뉴 모듈 정의 (`menuModules.ts`)
-- [ ] 프리셋 정의 (`menuPresets.ts`)
-- [ ] DB 스키마 생성
-- [ ] API 라우트 생성
+### Phase 1: 기본 구조 ✅ 완료
+- [x] 메뉴 모듈 정의 (`menuModules.ts`)
+- [x] 프리셋 정의 (`menuPresets.ts`)
+- [x] DB 스키마 생성 (`user_menu_settings`)
+- [x] API 라우트 생성 (`/api/user/menu-settings`)
 
-### Phase 2: UI 구현
-- [ ] 동적 네비게이션 컴포넌트
-- [ ] 메뉴 설정 페이지
-- [ ] Hook 구현
+### Phase 2: UI 구현 ✅ 완료
+- [x] 동적 네비게이션 컴포넌트 (`DynamicNav`)
+- [x] 메뉴 설정 페이지 (`/settings/menu`)
+- [x] Hook 구현 (`useUserMenuSettings`)
 
-### Phase 3: 기능 추가
-- [ ] 나이 기반 자동 추천
+### Phase 3: 각 모듈 상세 페이지 구현 🚀 다음 단계
+**현재 완성:** ✅ 사진첩, ✅ 일기장
+
+**구현 필요:**
+- [ ] 타임라인 모듈 (`/timeline`)
+- [ ] 통계 모듈 (`/stats`)
+- [ ] 작품 모음 모듈 (`/artworks`)
+- [ ] 상장/인증서 모듈 (`/awards`)
+- [ ] 성장 기록 모듈 (`/growth`)
+- [ ] 수면 기록 모듈 (`/sleep`)
+- [ ] 수유 기록 모듈 (`/feeding`)
+- [ ] 건강 기록 모듈 (`/health`)
+- [ ] 독서 기록 모듈 (`/books`)
+- [ ] 활동 기록 모듈 (`/activities`)
+- [ ] 포트폴리오 모듈 (`/portfolio`)
+- [ ] 공유 앨범 모듈 (`/shared`)
+- [ ] 아이용 뷰 모듈 (`/kids`)
+
+**자세한 우선순위는 `IMPLEMENTATION_PRIORITY.md` 참고**
+
+### Phase 4: 기능 추가
+- [ ] 나이 기반 자동 추천 (이미 구현됨)
 - [ ] 메뉴 순서 드래그 앤 드롭
 - [ ] 역할 모드 전환
 
