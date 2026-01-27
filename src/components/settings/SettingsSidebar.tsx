@@ -11,6 +11,7 @@ import { Sidebar } from "@/components/shared/Sidebar";
 import { Textarea } from "@/components/shared/Textarea";
 import { getAdminToken, setAdminToken } from "@/lib/admin/clientToken";
 import { useState } from "react";
+import Link from "next/link";
 
 const FONT_OPTIONS: Array<{ value: FontChoice; label: string; cute?: boolean }> = [
   { value: "geist", label: "Geist" },
@@ -82,6 +83,22 @@ export function SettingsSidebar() {
 
   return (
     <Sidebar isOpen={isSettingsOpen} title="설정" onClose={closeSettings}>
+      <div className="mb-4 rounded-[var(--radius)] border border-[var(--color-primary)]/20 bg-[var(--color-primary)]/5 p-4">
+        <p className="text-sm font-semibold text-[var(--color-text)] mb-2">
+          🎨 메뉴 커스터마이징
+        </p>
+        <p className="text-xs text-black/60 mb-3">
+          아이의 나이와 필요에 맞게 메뉴를 선택하고 순서를 정할 수 있어요.
+        </p>
+        <Link
+          href="/settings/menu"
+          onClick={closeSettings}
+          className="inline-block rounded-[var(--radius)] bg-[var(--color-primary)] px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+        >
+          메뉴 설정하기 →
+        </Link>
+      </div>
+
       <div className="grid gap-3 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
         <p className="text-sm font-semibold text-[var(--color-text)]">
           Admin (선택)
