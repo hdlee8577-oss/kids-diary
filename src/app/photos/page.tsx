@@ -42,6 +42,31 @@ export default function PhotosPage() {
   const [title, setTitle] = useState("");
   const [takenAt, setTakenAt] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 파일 검증 상수
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+
+  function validateFile(file: File): { valid: boolean; error?: string } {
+    // 파일 형식 검증
+    if (!ALLOWED_TYPES.includes(file.type.toLowerCase())) {
+      return {
+        valid: false,
+        error: `지원하지 않는 파일 형식입니다.\n지원 형식: JPG, PNG, GIF, WEBP\n선택한 파일: ${file.name}`,
+      };
+    }
+
+    // 파일 크기 검증
+    if (file.size > MAX_FILE_SIZE) {
+      return {
+        valid: false,
+        error: `파일 크기가 너무 큽니다.\n최대 크기: ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB\n선택한 파일: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+      };
+    }
+
+    return { valid: true };
+  }
 
   const modeLabel = useMemo(
     () => (layoutMode === "timeline" ? "타임라인형" : "카드형"),
@@ -174,12 +199,38 @@ export default function PhotosPage() {
           </Field>
           <Field label="사진 파일">
             <Input
+              ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
               multiple
               onChange={(e) => {
                 const selectedFiles = Array.from(e.currentTarget.files || []);
-                setFiles(selectedFiles);
+                
+                // 각 파일 검증
+                const invalidFiles: string[] = [];
+                const validFiles: File[] = [];
+                
+                for (const file of selectedFiles) {
+                  const validation = validateFile(file);
+                  if (!validation.valid) {
+                    invalidFiles.push(validation.error || file.name);
+                  } else {
+                    validFiles.push(file);
+                  }
+                }
+                
+                // 검증 실패한 파일이 있으면 팝업 표시
+                if (invalidFiles.length > 0) {
+                  alert(invalidFiles.join("\n\n"));
+                  // input 리셋
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                  }
+                  // 유효한 파일만 설정
+                  setFiles(validFiles);
+                } else {
+                  setFiles(validFiles);
+                }
               }}
               className="cursor-pointer"
             />
