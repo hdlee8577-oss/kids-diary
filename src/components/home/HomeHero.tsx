@@ -149,15 +149,9 @@ export function HomeHero() {
         alert("사진은 업로드되었지만 설정 저장에 실패했습니다. 페이지를 새로고침해주세요.");
       } else {
         console.log("[Profile] 프로필 사진 URL 저장 완료");
-        // 강제로 상태 다시 확인
-        setTimeout(() => {
-          const latestProfile = useSiteSettingsStore.getState().profile;
-          console.log("[Profile] 최종 프로필 상태:", latestProfile);
-          if (latestProfile.profilePhotoUrl !== data.photoUrl) {
-            console.log("[Profile] 상태가 일치하지 않음, 강제 업데이트");
-            setProfile({ profilePhotoUrl: data.photoUrl });
-          }
-        }, 200);
+        // 페이지 새로고침하여 이미지 표시
+        alert("프로필 사진이 업로드되었습니다. 페이지를 새로고침합니다.");
+        window.location.reload();
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
@@ -269,15 +263,12 @@ export function HomeHero() {
                 <div
                   className={`relative h-32 w-32 overflow-hidden border-4 border-white shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
                 >
-                  <Image
-                    key={profilePhotoUrl} // URL이 변경되면 컴포넌트 재렌더링
-                    src={`${profilePhotoUrl}?t=${Date.now()}`} // 캐시 방지를 위한 타임스탬프
+                  {/* 일반 img 태그 사용 (Next.js Image 캐싱 문제 우회) */}
+                  <img
+                    key={`${profilePhotoUrl}-${Date.now()}`}
+                    src={`${profilePhotoUrl}?t=${Date.now()}`}
                     alt={name}
-                    fill
-                    className="object-cover"
-                    sizes="160px"
-                    priority
-                    unoptimized // Next.js 이미지 최적화 비활성화 (캐싱 문제 방지)
+                    className="h-full w-full object-cover"
                     onError={(e) => {
                       console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
                       // 이미지 로드 실패 시 기본 아이콘으로 대체
@@ -285,6 +276,9 @@ export function HomeHero() {
                       if (target.parentElement) {
                         target.parentElement.innerHTML = '<div class="flex h-full w-full items-center justify-center text-5xl">👶</div>';
                       }
+                    }}
+                    onLoad={() => {
+                      console.log("[Profile] 이미지 로드 성공:", profilePhotoUrl);
                     }}
                   />
                 </div>
