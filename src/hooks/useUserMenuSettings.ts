@@ -42,7 +42,14 @@ export function useUserMenuSettings() {
         if (!alive) return;
 
         if (data.settings) {
-          setSettings(data.settings);
+          // API 응답이 올바른 형식인지 확인
+          setSettings({
+            enabledModules: data.settings.enabledModules || [],
+            menuOrder: data.settings.menuOrder || [],
+            roleMode: data.settings.roleMode || "parent",
+            ageInMonths: data.settings.ageInMonths,
+            preset: data.settings.preset || "custom",
+          });
         }
       } catch (err) {
         if (!alive) return;

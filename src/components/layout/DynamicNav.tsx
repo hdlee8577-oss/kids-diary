@@ -7,7 +7,33 @@ import { MENU_MODULES } from "@/config/menuModules";
 
 export function DynamicNav() {
   const pathname = usePathname();
-  const { enabledModules, menuOrder, loading } = useUserMenuSettings();
+  const { enabledModules, menuOrder, loading, error } = useUserMenuSettings();
+
+  // 에러 발생 시 기본 메뉴만 표시
+  if (error) {
+    return (
+      <nav aria-label="주요 메뉴">
+        <ul className="flex items-center gap-1">
+          <li>
+            <Link
+              href="/photos"
+              className="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
+            >
+              📸 사진첩
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/diary"
+              className="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
+            >
+              📝 일기장
+            </Link>
+          </li>
+        </ul>
+      </nav>
+    );
+  }
 
   if (loading) {
     return (

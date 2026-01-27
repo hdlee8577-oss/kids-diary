@@ -18,16 +18,6 @@ export async function GET(req: Request) {
   const siteId = searchParams.get("siteId") || siteConfig.siteId;
   // 나중에 인증 추가 시: const userId = searchParams.get("userId");
 
-  let supabase: ReturnType<typeof getSupabaseAdmin>;
-  try {
-    supabase = getSupabaseAdmin();
-  } catch {
-    return NextResponse.json(
-      { error: "Supabase env not configured", persistence: "disabled" },
-      { status: 501 }
-    );
-  }
-
   let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
   try {
     supabaseAdmin = getSupabaseAdmin();
@@ -54,20 +44,21 @@ export async function GET(req: Request) {
   if (!data) {
     return NextResponse.json({
       settings: {
-        enabled_modules: ["photos", "diary"], // 기본 메뉴
-        menu_order: [],
-        role_mode: "parent",
+        enabledModules: ["photos", "diary"], // 기본 메뉴
+        menuOrder: [],
+        roleMode: "parent",
         preset: "custom",
       },
     });
   }
 
+  // snake_case를 camelCase로 변환
   return NextResponse.json({
     settings: {
-      enabled_modules: data.enabled_modules || [],
-      menu_order: data.menu_order || [],
-      role_mode: data.role_mode || "parent",
-      age_in_months: data.age_in_months,
+      enabledModules: data.enabled_modules || [],
+      menuOrder: data.menu_order || [],
+      roleMode: data.role_mode || "parent",
+      ageInMonths: data.age_in_months,
       preset: data.preset || "custom",
     },
   });
@@ -98,15 +89,16 @@ export async function POST(req: Request) {
 
   // 현재는 siteId를 user_id로 사용 (임시)
   // 나중에 인증 추가 시 user_id로 변경
+  // camelCase를 snake_case로 변환하여 DB에 저장
   const { error } = await supabaseAdmin
     .from("user_menu_settings")
     .upsert(
       {
         user_id: siteId, // 임시: siteId를 user_id로 사용
-        enabled_modules: body.settings.enabled_modules || [],
-        menu_order: body.settings.menu_order || [],
-        role_mode: body.settings.role_mode || "parent",
-        age_in_months: body.settings.age_in_months,
+        enabled_modules: body.settings.enabledModules || [],
+        menu_order: body.settings.menuOrder || [],
+        role_mode: body.settings.roleMode || "parent",
+        age_in_months: body.settings.ageInMonths,
         preset: body.settings.preset || "custom",
         updated_at: new Date().toISOString(),
       },
