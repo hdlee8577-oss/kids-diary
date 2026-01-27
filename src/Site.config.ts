@@ -1,7 +1,7 @@
 export type LayoutMode = "timeline" | "cards";
 export type ThumbnailSize = "small" | "medium" | "large";
 
-export type FontChoice = "geist" | "notoSansKr" | "system";
+export type FontChoice = "geist" | "notoSansKr" | "comicSans" | "nanumGothic" | "jua" | "system";
 
 export type MoodPreset = "warm" | "cool" | "playful" | "calm" | "custom";
 

@@ -12,9 +12,12 @@ import { Textarea } from "@/components/shared/Textarea";
 import { getAdminToken, setAdminToken } from "@/lib/admin/clientToken";
 import { useState } from "react";
 
-const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
+const FONT_OPTIONS: Array<{ value: FontChoice; label: string; cute?: boolean }> = [
   { value: "geist", label: "Geist" },
   { value: "notoSansKr", label: "Noto Sans KR" },
+  { value: "comicSans", label: "Comic Sans MS", cute: true },
+  { value: "nanumGothic", label: "나눔고딕" },
+  { value: "jua", label: "주아", cute: true },
   { value: "system", label: "System" },
 ];
 
@@ -186,19 +189,26 @@ export function SettingsSidebar() {
           />
         </Field>
 
-        <Field label="Font">
-          <Select
-            value={theme.font}
-            onChange={(e) =>
-              setTheme({ font: e.currentTarget.value as FontChoice })
-            }
-          >
-            {FONT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </Select>
+        <Field label="폰트">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {FONT_OPTIONS.map((o) => {
+              const isActive = theme.font === o.value;
+              return (
+                <Button
+                  key={o.value}
+                  type="button"
+                  variant={isActive ? "primary" : "secondary"}
+                  onClick={() => setTheme({ font: o.value })}
+                  className={o.cute ? "relative" : ""}
+                >
+                  {o.label}
+                  {o.cute && (
+                    <span className="ml-1 text-xs">✨</span>
+                  )}
+                </Button>
+              );
+            })}
+          </div>
         </Field>
 
         <Field label="Layout">

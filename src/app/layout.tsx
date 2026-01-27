@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_KR, Nanum_Gothic, Jua } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ThemeProvider } from "@/theme/ThemeProvider";
@@ -20,6 +20,19 @@ const geistMono = Geist_Mono({
 const notoSansKr = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
   subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const nanumGothic = Nanum_Gothic({
+  variable: "--font-nanum-gothic",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const jua = Jua({
+  variable: "--font-jua",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -53,7 +66,7 @@ export default async function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansKr.variable} min-h-dvh antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansKr.variable} ${nanumGothic.variable} ${jua.variable} min-h-dvh antialiased`}
       >
         <ThemeProvider initialSettings={initialSettings}>
           <div className="min-h-dvh">
