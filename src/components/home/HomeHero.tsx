@@ -136,8 +136,10 @@ export function HomeHero() {
         alert("사진은 업로드되었지만 설정 저장에 실패했습니다. 페이지를 새로고침해주세요.");
       } else {
         console.log("[Profile] 프로필 사진 URL 저장 완료");
-        // 페이지 새로고침하여 이미지 표시 확인
-        window.location.reload();
+        // 상태가 이미 업데이트되었으므로 강제 리렌더링을 위해 약간의 지연 후 상태 재설정
+        setTimeout(() => {
+          setProfile({ profilePhotoUrl: data.photoUrl });
+        }, 100);
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
@@ -250,12 +252,14 @@ export function HomeHero() {
                   className={`relative h-32 w-32 overflow-hidden border-4 border-white shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
                 >
                   <Image
-                    src={profilePhotoUrl}
+                    key={profilePhotoUrl} // URL이 변경되면 컴포넌트 재렌더링
+                    src={`${profilePhotoUrl}?t=${Date.now()}`} // 캐시 방지를 위한 타임스탬프
                     alt={name}
                     fill
                     className="object-cover"
                     sizes="160px"
                     priority
+                    unoptimized // Next.js 이미지 최적화 비활성화 (캐싱 문제 방지)
                     onError={(e) => {
                       console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
                       // 이미지 로드 실패 시 기본 아이콘으로 대체
