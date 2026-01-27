@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { IconButton } from "@/components/shared/IconButton";
 import { useThemeUI } from "@/theme/ThemeProvider";
-
-const links = [
-  { href: "/", label: "홈" },
-  { href: "/photos", label: "사진첩" },
-  { href: "/diary", label: "일기장" },
-] as const;
+import { DynamicNav } from "./DynamicNav";
 
 function GearIcon() {
   return (
@@ -51,20 +46,7 @@ export function SiteHeader() {
           성장 기록
         </Link>
         <div className="flex items-center gap-2">
-          <nav aria-label="주요 메뉴">
-            <ul className="flex items-center gap-1">
-              {links.map((l) => (
-                <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    className="rounded-[var(--radius)] px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5 hover:text-[var(--color-text)]"
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <DynamicNav />
           <IconButton label="설정" onClick={toggleSettings}>
             <GearIcon />
           </IconButton>
