@@ -28,9 +28,9 @@ export async function GET(req: Request) {
     );
   }
 
-  let supabase: ReturnType<typeof getSupabaseAdmin>;
+  let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
   try {
-    supabase = getSupabaseAdmin();
+    supabaseAdmin = getSupabaseAdmin();
   } catch {
     return NextResponse.json(
       { error: "Supabase env not configured", persistence: "disabled" },
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
 
   // 현재는 siteId를 user_id로 사용 (임시)
   // 나중에 인증 추가 시 user_id로 변경
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("user_menu_settings")
     .select("*")
     .eq("user_id", siteId) // 임시: siteId를 user_id로 사용
@@ -86,9 +86,9 @@ export async function POST(req: Request) {
   const siteId = body.siteId || siteConfig.siteId;
   // 나중에 인증 추가 시: const userId = body.userId;
 
-  let supabase: ReturnType<typeof getSupabaseAdmin>;
+  let supabaseAdmin: ReturnType<typeof getSupabaseAdmin>;
   try {
-    supabase = getSupabaseAdmin();
+    supabaseAdmin = getSupabaseAdmin();
   } catch {
     return NextResponse.json(
       { error: "Supabase env not configured", persistence: "disabled" },
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
 
   // 현재는 siteId를 user_id로 사용 (임시)
   // 나중에 인증 추가 시 user_id로 변경
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from("user_menu_settings")
     .upsert(
       {
