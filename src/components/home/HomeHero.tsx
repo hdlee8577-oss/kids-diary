@@ -104,12 +104,18 @@ export function HomeHero() {
       const data = (await res.json()) as { photoUrl: string };
       console.log("[Profile] 업로드된 사진 URL:", data.photoUrl);
       
+      // 현재 프로필과 테마 가져오기
+      const currentProfile = useSiteSettingsStore.getState().profile;
+      const currentTheme = useSiteSettingsStore.getState().theme;
+      
       // 프로필 즉시 업데이트
-      setProfile({ profilePhotoUrl: data.photoUrl });
+      const updatedProfile = {
+        ...currentProfile,
+        profilePhotoUrl: data.photoUrl,
+      };
+      setProfile(updatedProfile);
       
       // 설정 저장
-      const currentTheme = useSiteSettingsStore.getState().theme;
-      const currentProfile = useSiteSettingsStore.getState().profile;
       const settingsRes = await fetch("/api/site-settings", {
         method: "POST",
         headers: {
@@ -118,19 +124,20 @@ export function HomeHero() {
         },
         body: JSON.stringify({
           settings: {
-            profile: {
-              ...currentProfile,
-              profilePhotoUrl: data.photoUrl,
-            },
+            profile: updatedProfile,
             theme: currentTheme,
           },
         }),
       });
 
       if (!settingsRes.ok) {
-        console.warn("프로필 사진 URL 저장 실패");
+        const errorData = await settingsRes.json().catch(() => ({}));
+        console.error("[Profile] 프로필 사진 URL 저장 실패:", errorData);
+        alert("사진은 업로드되었지만 설정 저장에 실패했습니다. 페이지를 새로고침해주세요.");
       } else {
         console.log("[Profile] 프로필 사진 URL 저장 완료");
+        // 페이지 새로고침하여 이미지 표시 확인
+        window.location.reload();
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
@@ -237,43 +244,44 @@ export function HomeHero() {
 
           {/* 오른쪽: 프로필 사진 */}
           <div className="relative flex flex-shrink-0 flex-col items-center" ref={menuRef}>
-            {profilePhotoUrl ? (
-              <div
-                className={`relative h-32 w-32 overflow-hidden border-4 border-white shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
+            <div className="relative">
+              {profilePhotoUrl ? (
+                <div
+                  className={`relative h-32 w-32 overflow-hidden border-4 border-white shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
+                >
+                  <Image
+                    src={profilePhotoUrl}
+                    alt={name}
+                    fill
+                    className="object-cover"
+                    sizes="160px"
+                    priority
+                    onError={(e) => {
+                      console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
+                      // 이미지 로드 실패 시 기본 아이콘으로 대체
+                      const target = e.target as HTMLImageElement;
+                      if (target.parentElement) {
+                        target.parentElement.innerHTML = '<div class="flex h-full w-full items-center justify-center text-5xl">👶</div>';
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div
+                  className={`flex h-32 w-32 items-center justify-center border-4 border-white bg-gradient-to-br from-pink-200 to-amber-200 text-5xl shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
+                >
+                  👶
+                </div>
+              )}
+              
+              {/* 편집 버튼 - 사진 우측 상단에 배치 */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:opacity-90 z-10"
+                aria-label="프로필 사진 편집"
               >
-                <Image
-                  src={profilePhotoUrl}
-                  alt={name}
-                  fill
-                  className="object-cover"
-                  sizes="160px"
-                  priority
-                  onError={(e) => {
-                    console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
-                    // 이미지 로드 실패 시 기본 아이콘으로 대체
-                    const target = e.target as HTMLImageElement;
-                    if (target.parentElement) {
-                      target.parentElement.innerHTML = '<div class="flex h-full w-full items-center justify-center text-5xl">👶</div>';
-                    }
-                  }}
-                />
-              </div>
-            ) : (
-              <div
-                className={`flex h-32 w-32 items-center justify-center border-4 border-white bg-gradient-to-br from-pink-200 to-amber-200 text-5xl shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
-              >
-                👶
-              </div>
-            )}
-            
-            {/* 편집 버튼 */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:opacity-90"
-              aria-label="프로필 사진 편집"
-            >
               <svg
-                className="h-5 w-5"
+                className="h-4 w-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -286,6 +294,7 @@ export function HomeHero() {
                 />
               </svg>
             </button>
+            </div>
 
             {/* 생일 정보 - 사진 밑에 표시 */}
             {birthDate && (
