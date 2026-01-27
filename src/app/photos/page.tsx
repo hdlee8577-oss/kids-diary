@@ -251,9 +251,9 @@ function PhotoCard({
   }, [isMenuOpen]);
 
   return (
-    <article className="group relative overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md">
+    <article className="relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md overflow-visible">
       <Link href={`/photos/${item.id}`}>
-        <div className="relative aspect-[4/3] bg-black/5">
+        <div className="relative aspect-[4/3] bg-black/5 overflow-hidden rounded-t-[var(--radius)]">
           <Image
             src={item.image_url}
             alt={item.title || "photo"}
@@ -267,24 +267,24 @@ function PhotoCard({
           />
         </div>
       </Link>
-      <div className="p-4">
+      <div className="relative p-4">
         <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-[var(--color-text)]">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-[var(--color-text)] truncate">
               {item.title || "제목 없음"}
             </p>
             <p className="mt-1 text-xs text-black/50">
               {item.taken_at ? `촬영일 ${item.taken_at}` : "촬영일 없음"}
             </p>
           </div>
-          <div className="relative ml-2" ref={menuRef}>
+          <div className="relative ml-2 flex-shrink-0" ref={menuRef}>
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-full opacity-0 transition-opacity hover:bg-black/5 group-hover:opacity-100"
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-black/5"
               aria-label="메뉴"
             >
               <svg
@@ -302,11 +302,11 @@ function PhotoCard({
               </svg>
             </button>
             {isMenuOpen && (
-              <div className="absolute right-0 top-10 z-20 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+              <div className="absolute right-0 bottom-full mb-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
                 <Link
                   href={`/photos/${item.id}/edit`}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5"
+                  className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)] last:rounded-b-[var(--radius)]"
                 >
                   섬네일 수정
                 </Link>
