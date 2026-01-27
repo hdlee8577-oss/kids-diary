@@ -28,6 +28,7 @@ async function fetchDiary(siteId: string): Promise<DiaryItem[]> {
 export default function DiaryPage() {
   const layoutMode = useSiteSettingsStore((s) => s.theme.layout.mode);
   const siteId = siteConfig.siteId;
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const [items, setItems] = useState<DiaryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +36,7 @@ export default function DiaryPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
-  const [entryDate, setEntryDate] = useState<string>("");
+  const [entryDate, setEntryDate] = useState<string>(today);
   const [content, setContent] = useState("");
 
   const [isSelectMode, setIsSelectMode] = useState(false);
@@ -90,7 +91,7 @@ export default function DiaryPage() {
       }
 
       setTitle("");
-      setEntryDate("");
+      setEntryDate(today);
       setContent("");
       const list = await fetchDiary(siteId);
       setItems(list);
