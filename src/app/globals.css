@@ -6,6 +6,8 @@
   --color-background: #fff7ed;
   --color-surface: #ffffff;
   --color-text: #18181b;
+  --color-accent-a: #fde68a;
+  --color-accent-b: #fda4af;
 
   --radius: 24px;
   --font-family-sans: var(--font-geist-sans);

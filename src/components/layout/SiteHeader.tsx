@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconButton } from "@/components/shared/IconButton";
 import { useThemeUI } from "@/theme/ThemeProvider";
+import { Mascot } from "@/components/cute/Mascot";
 
 const links = [
   { href: "/", label: "홈" },
@@ -41,11 +42,13 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-black/5 bg-[var(--color-surface)]/60 backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link
-          href="/"
-          className="text-sm font-semibold tracking-tight text-[var(--color-text)]"
-        >
-          성장 기록
+        <Link href="/" className="flex items-center gap-2">
+          <span className="inline-block h-7 w-7">
+            <Mascot className="h-full w-full" />
+          </span>
+          <span className="text-sm font-semibold tracking-tight text-[var(--color-text)]">
+            성장 기록
+          </span>
         </Link>
         <div className="flex items-center gap-2">
           <nav aria-label="주요 메뉴">

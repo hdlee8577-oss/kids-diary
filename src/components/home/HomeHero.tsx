@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
+import { Mascot } from "@/components/cute/Mascot";
 
 export function HomeHero() {
   const profile = useSiteSettingsStore((s) => s.profile);
@@ -18,6 +19,9 @@ export function HomeHero() {
       </div>
 
       <div className="relative">
+        <div className="absolute -right-2 -top-6 hidden h-24 w-24 sm:block">
+          <Mascot className="h-full w-full drop-shadow-sm" />
+        </div>
         <p className="inline-flex items-center gap-2 rounded-[999px] bg-black/5 px-3 py-1 text-sm font-medium text-black/70">
           우리 가족만의 작은 아카이브
         </p>

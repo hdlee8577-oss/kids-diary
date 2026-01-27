@@ -9,6 +9,8 @@ export function applyThemeToDom(theme: ThemeSettings) {
   r.style.setProperty("--color-background", theme.colors.background);
   r.style.setProperty("--color-surface", theme.colors.surface);
   r.style.setProperty("--color-text", theme.colors.text);
+  r.style.setProperty("--color-accent-a", theme.accents.a);
+  r.style.setProperty("--color-accent-b", theme.accents.b);
 
   r.style.setProperty("--radius", `${theme.radiusPx}px`);
 
@@ -22,5 +24,7 @@ export function applyThemeToDom(theme: ThemeSettings) {
 
   r.style.setProperty("--font-family-sans", fontVar);
   r.dataset.layout = theme.layout.mode;
+  r.dataset.pattern = theme.cute.pattern;
+  r.dataset.mascot = theme.cute.mascot;
 }
 

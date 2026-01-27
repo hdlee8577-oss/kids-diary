@@ -7,8 +7,10 @@ import {
 
 export type ThemeSettingsPatch = Omit<Partial<ThemeSettings>, "colors" | "layout"> & {
   colors?: Partial<ThemeSettings["colors"]>;
+  accents?: Partial<ThemeSettings["accents"]>;
   layout?: Partial<ThemeSettings["layout"]>;
   gallery?: Partial<ThemeSettings["gallery"]>;
+  cute?: Partial<ThemeSettings["cute"]>;
 };
 
 export type SiteProfilePatch = Partial<SiteProfile>;
@@ -31,6 +33,10 @@ function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
       ...current.colors,
       ...(partial.colors ?? {}),
     },
+    accents: {
+      ...current.accents,
+      ...(partial.accents ?? {}),
+    },
     layout: {
       ...current.layout,
       ...(partial.layout ?? {}),
@@ -39,7 +45,15 @@ function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
       ...current.gallery,
       ...(partial.gallery ?? {}),
     },
+    cute: {
+      ...current.cute,
+      ...(partial.cute ?? {}),
+    },
   };
+}
+
+function mergeThemeWithDefaults(partial?: ThemeSettings) {
+  return mergeTheme(defaultSiteSettings.theme, partial ?? {});
 }
 
 export const useSiteSettingsStore = create<SiteSettingsState>((set) => ({
@@ -58,7 +72,7 @@ export const useSiteSettingsStore = create<SiteSettingsState>((set) => ({
   hydrateFromRemote: (settings) =>
     set({
       profile: settings?.profile ?? defaultSiteSettings.profile,
-      theme: settings?.theme ?? defaultSiteSettings.theme,
+      theme: mergeThemeWithDefaults(settings?.theme),
       isHydrated: true,
     }),
 }));

@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
 import { defaultSiteSettings } from "@/Site.config";
+import { BackgroundDecor } from "@/components/cute/BackgroundDecor";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <ThemeProvider initialSettings={defaultSiteSettings}>
           <div className="min-h-dvh">
+            <BackgroundDecor />
             <SiteHeader />
             <SettingsSidebar />
             {children}

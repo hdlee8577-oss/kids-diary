@@ -3,12 +3,20 @@ export type ThumbnailSize = "sm" | "md" | "lg";
 
 export type FontChoice = "geist" | "notoSansKr" | "system";
 
+export type CutePresetId = "warmBear" | "rainbowBunny" | "mintDino" | "starlitCat";
+export type MascotId = "bear" | "bunny" | "dino" | "cat";
+export type BackgroundPattern = "none" | "dots" | "stars" | "clouds";
+
 export type ThemeSettings = {
   colors: {
     primary: string; // hex
     background: string; // hex
     surface: string; // hex
     text: string; // hex
+  };
+  accents: {
+    a: string; // hex
+    b: string; // hex
   };
   radiusPx: number;
   font: FontChoice;
@@ -17,6 +25,11 @@ export type ThemeSettings = {
   };
   gallery: {
     thumbnailSize: ThumbnailSize;
+  };
+  cute: {
+    presetId: CutePresetId;
+    mascot: MascotId;
+    pattern: BackgroundPattern;
   };
 };
 
@@ -75,6 +88,10 @@ export const siteConfig: SiteConfig = {
         surface: "#FFFFFF",
         text: "#18181B",
       },
+      accents: {
+        a: "#FDE68A",
+        b: "#FDA4AF",
+      },
       radiusPx: 24,
       font: "geist",
       layout: {
@@ -82,6 +99,11 @@ export const siteConfig: SiteConfig = {
       },
       gallery: {
         thumbnailSize: "md",
+      },
+      cute: {
+        presetId: "warmBear",
+        mascot: "bear",
+        pattern: "dots",
       },
     },
   },

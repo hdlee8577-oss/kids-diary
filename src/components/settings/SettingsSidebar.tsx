@@ -1,6 +1,12 @@
 "use client";
 
-import { siteConfig, type FontChoice, type LayoutMode, type ThumbnailSize } from "@/Site.config";
+import {
+  siteConfig,
+  type FontChoice,
+  type LayoutMode,
+  type ThumbnailSize,
+  type CutePresetId,
+} from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { useThemeUI } from "@/theme/ThemeProvider";
 import { Button } from "@/components/shared/Button";
@@ -11,6 +17,7 @@ import { Sidebar } from "@/components/shared/Sidebar";
 import { Textarea } from "@/components/shared/Textarea";
 import { getAdminToken, setAdminToken } from "@/lib/admin/clientToken";
 import { useState } from "react";
+import { cutePresets } from "@/theme/cutePresets";
 
 const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
   { value: "geist", label: "Geist" },
@@ -41,6 +48,85 @@ export function SettingsSidebar() {
 
   return (
     <Sidebar isOpen={isSettingsOpen} title="설정" onClose={closeSettings}>
+      <div className="grid gap-3 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
+        <p className="text-sm font-semibold text-[var(--color-text)]">
+          디자인 프리셋
+        </p>
+        <p className="text-xs text-black/50">
+          귀여운 분위기를 한 번에 바꿔요. (색/배경/캐릭터 포함)
+        </p>
+        <div className="grid gap-2">
+          {cutePresets.map((p) => {
+            const isActive = theme.cute.presetId === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => replaceTheme(p.theme)}
+                className={`flex items-center justify-between gap-3 rounded-[var(--radius)] border p-3 text-left transition ${
+                  isActive
+                    ? "border-[var(--color-primary)] bg-[var(--color-surface)]"
+                    : "border-black/10 bg-[var(--color-surface)]/60 hover:bg-[var(--color-surface)]"
+                }`}
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[var(--color-text)]">
+                    {p.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-black/50">
+                    {p.theme.cute.mascot} · {p.theme.cute.pattern}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span
+                    className="h-5 w-5 rounded-full border border-black/10"
+                    style={{ background: p.theme.accents.a }}
+                    aria-label="accent a"
+                  />
+                  <span
+                    className="h-5 w-5 rounded-full border border-black/10"
+                    style={{ background: p.theme.accents.b }}
+                    aria-label="accent b"
+                  />
+                  <span
+                    className="h-5 w-5 rounded-full border border-black/10"
+                    style={{ background: p.theme.colors.primary }}
+                    aria-label="primary"
+                  />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() =>
+              setTheme({
+                cute: {
+                  presetId: theme.cute.presetId as CutePresetId,
+                  mascot: theme.cute.mascot,
+                  pattern: "none",
+                },
+              })
+            }
+          >
+            배경 패턴 끄기
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => replaceTheme(siteConfig.defaults.theme)}
+          >
+            기본(따뜻)으로
+          </Button>
+        </div>
+      </div>
+
       <div className="grid gap-3 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
         <p className="text-sm font-semibold text-[var(--color-text)]">
           Admin (선택)
