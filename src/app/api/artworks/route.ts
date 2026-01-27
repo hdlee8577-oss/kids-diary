@@ -30,13 +30,16 @@ export async function GET(req: Request) {
 
   console.log("[API Artworks GET] siteId:", siteId, "table:", siteConfig.data.artworks.table);
 
-  // artwork_date 컬럼이 있을 수도 있고 없을 수도 있으므로, 모든 컬럼을 조회
   const { data, error } = await supabase
     .from(siteConfig.data.artworks.table)
-    .select("*")
+    .select(
+      "id, site_id, title, description, image_url, category, grade, tags, mom_note, artwork_date, created_at"
+    )
     .eq("site_id", siteId)
+    .order("artwork_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
-    .limit(100);
+    .limit(100)
+    .returns<ArtworkRow[]>();
 
   if (error) {
     console.error("[API Artworks GET] Supabase Error:", error);
@@ -55,7 +58,7 @@ export async function GET(req: Request) {
   console.log("[API Artworks GET] Found", data?.length || 0, "items for siteId:", siteId);
 
   const items =
-    data?.map((r: any) => ({
+    data?.map((r) => ({
       id: r.id,
       title: r.title ?? "",
       description: r.description ?? "",
@@ -64,19 +67,9 @@ export async function GET(req: Request) {
       grade: r.grade ?? null,
       tags: (r.tags as string[]) ?? [],
       mom_note: r.mom_note ?? null,
-      artwork_date: r.artwork_date ?? null, // 컬럼이 없으면 null
+      artwork_date: r.artwork_date ?? null,
       created_at: r.created_at,
     })) ?? [];
-  
-  // artwork_date가 있는 경우 날짜순으로 정렬
-  items.sort((a, b) => {
-    if (a.artwork_date && b.artwork_date) {
-      return new Date(b.artwork_date).getTime() - new Date(a.artwork_date).getTime();
-    }
-    if (a.artwork_date) return -1;
-    if (b.artwork_date) return 1;
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-  });
 
   return NextResponse.json({ items });
 }
