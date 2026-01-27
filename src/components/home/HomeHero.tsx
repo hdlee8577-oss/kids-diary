@@ -233,22 +233,10 @@ export function HomeHero() {
             <p className="mt-4 max-w-2xl text-base leading-7 text-black/70 sm:text-lg sm:leading-8">
               {intro}
             </p>
-            {birthDate && (
-              <div className="mt-4 text-sm text-black/70">
-                <span>
-                  생일: {new Date(birthDate).toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-                {age && <span className="ml-2">• {age}</span>}
-              </div>
-            )}
           </div>
 
           {/* 오른쪽: 프로필 사진 */}
-          <div className="relative flex-shrink-0" ref={menuRef}>
+          <div className="relative flex flex-shrink-0 flex-col items-center" ref={menuRef}>
             {profilePhotoUrl ? (
               <div
                 className={`relative h-32 w-32 overflow-hidden border-4 border-white shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
@@ -299,9 +287,23 @@ export function HomeHero() {
               </svg>
             </button>
 
-            {/* 메뉴 - 위쪽으로 열리도록 수정 */}
+            {/* 생일 정보 - 사진 밑에 표시 */}
+            {birthDate && (
+              <div className="mt-3 text-center text-sm text-black/70">
+                <div>
+                  생일: {new Date(birthDate).toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </div>
+                {age && <div className="mt-1">{age}</div>}
+              </div>
+            )}
+
+            {/* 메뉴 - 아래쪽으로 열리도록 수정 */}
             {isMenuOpen && (
-              <div className="absolute right-0 bottom-full z-[100] mb-2 min-w-[200px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+              <div className="absolute left-0 top-full z-[100] mt-2 min-w-[200px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl">
                 <input
                   ref={fileInputRef}
                   type="file"
