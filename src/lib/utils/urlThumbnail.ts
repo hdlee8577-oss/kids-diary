@@ -41,9 +41,25 @@ function getYouTubeThumbnail(videoId: string): string {
 }
 
 /**
+ * YouTube 채널 URL인지 확인
+ */
+function isYouTubeChannelUrl(url: string): boolean {
+  return (
+    url.includes("youtube.com/@") ||
+    url.includes("youtube.com/channel/") ||
+    url.includes("youtube.com/c/") ||
+    url.includes("youtube.com/user/")
+  );
+}
+
+/**
  * URL 타입 감지
  */
 export function detectArtworkType(url: string): ArtworkType {
+  // YouTube 채널 URL은 링크로 처리 (개별 동영상이 아님)
+  if (isYouTubeChannelUrl(url)) {
+    return "link";
+  }
   if (url.includes("youtube.com") || url.includes("youtu.be")) {
     return "video";
   }
@@ -60,7 +76,12 @@ export function extractThumbnailFromUrl(url: string): {
   thumbnailUrl: string;
   type: ArtworkType;
 } | null {
-  // YouTube
+  // YouTube 채널 URL은 썸네일 추출 불가
+  if (isYouTubeChannelUrl(url)) {
+    return null;
+  }
+
+  // YouTube 개별 동영상
   const youtubeId = extractYouTubeVideoId(url);
   if (youtubeId) {
     return {
