@@ -179,7 +179,7 @@ export function HomeHero() {
         }
         console.log("[Profile] ✅ 프로필 사진 URL 저장 완료:", saveResult);
         
-        // 저장 성공 후 상태 업데이트
+        // 저장 성공 후 상태 업데이트 (이미 위에서 했지만 확실히 하기 위해 다시)
         setProfile({ profilePhotoUrl: data.photoUrl });
         console.log("[Profile] ✅ 상태 업데이트 완료, profilePhotoUrl:", data.photoUrl);
         
@@ -188,11 +188,16 @@ export function HomeHero() {
         if (verifyRes.ok) {
           const verifyData = (await verifyRes.json()) as { settings?: SiteSettings | null };
           console.log("[Profile] 저장 후 확인:", verifyData.settings?.profile);
+          
+          // 저장된 데이터로 상태 동기화
+          if (verifyData.settings?.profile?.profilePhotoUrl) {
+            setProfile({ profilePhotoUrl: verifyData.settings.profile.profilePhotoUrl });
+            console.log("[Profile] ✅ 저장된 데이터로 상태 동기화 완료");
+          }
         }
         
-        // 페이지 새로고침하여 이미지 표시
-        alert("프로필 사진이 업로드되었습니다. 페이지를 새로고침합니다.");
-        window.location.reload();
+        // 성공 메시지만 표시 (새로고침 없이)
+        alert("프로필 사진이 업로드되었습니다.");
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
@@ -326,7 +331,7 @@ export function HomeHero() {
                 >
                   {/* 일반 img 태그 사용 (Next.js Image 캐싱 문제 우회) */}
                   <img
-                    key={`${profilePhotoUrl}-${Date.now()}`}
+                    key={profilePhotoUrl} // URL만 key로 사용 (타임스탬프 제거)
                     src={`${profilePhotoUrl}?t=${Date.now()}`}
                     alt={name}
                     className="h-full w-full object-cover"
@@ -339,7 +344,7 @@ export function HomeHero() {
                       }
                     }}
                     onLoad={() => {
-                      console.log("[Profile] 이미지 로드 성공:", profilePhotoUrl);
+                      console.log("[Profile] ✅ 이미지 로드 성공:", profilePhotoUrl);
                     }}
                   />
                 </div>
