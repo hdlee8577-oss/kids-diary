@@ -3,11 +3,21 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireAdminToken } from "@/lib/admin/requireAdminToken";
 import { siteConfig } from "@/Site.config";
 
-type UserMenuSettings = {
+// DB 스키마용 타입 (snake_case)
+type UserMenuSettingsDB = {
   enabled_modules: string[];
   menu_order: string[];
   role_mode: "parent" | "child" | "both";
   age_in_months?: number;
+  preset?: string;
+};
+
+// API 요청/응답용 타입 (camelCase)
+type UserMenuSettingsAPI = {
+  enabledModules: string[];
+  menuOrder: string[];
+  roleMode: "parent" | "child" | "both";
+  ageInMonths?: number;
   preset?: string;
 };
 
@@ -34,7 +44,7 @@ export async function GET(req: Request) {
     .from("user_menu_settings")
     .select("*")
     .eq("user_id", siteId) // 임시: siteId를 user_id로 사용
-    .maybeSingle<UserMenuSettings & { id: string; created_at: string; updated_at: string }>();
+    .maybeSingle<UserMenuSettingsDB & { id: string; created_at: string; updated_at: string }>();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -71,7 +81,7 @@ export async function POST(req: Request) {
 
   const body = (await req.json()) as {
     siteId?: string;
-    settings: UserMenuSettings;
+    settings: UserMenuSettingsAPI;
   };
 
   const siteId = body.siteId || siteConfig.siteId;
