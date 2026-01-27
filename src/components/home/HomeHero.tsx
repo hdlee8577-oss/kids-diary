@@ -299,6 +299,26 @@ export function HomeHero() {
 
           {/* 오른쪽: 프로필 사진 */}
           <div className="relative flex flex-shrink-0 flex-col items-center" ref={menuRef}>
+            {/* 파일 input을 메뉴 밖에 배치 (메뉴가 닫혀도 유지되도록) */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              onChange={(e) => {
+                console.log("[Profile] 🎯 input onChange 이벤트 발생");
+                console.log("[Profile] 선택된 파일들:", e.target.files);
+                console.log("[Profile] 파일 개수:", e.target.files?.length ?? 0);
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFileChange(e);
+                } else {
+                  console.log("[Profile] ⚠️ 파일이 선택되지 않음 (onChange는 발생했지만 파일 없음)");
+                }
+              }}
+              onClick={(e) => {
+                console.log("[Profile] 🎯 input 클릭됨");
+              }}
+              className="hidden"
+            />
             <div className="relative">
               {profilePhotoUrl ? (
                 <div
