@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { IconButton } from "@/components/shared/IconButton";
 import { useThemeUI } from "@/theme/ThemeProvider";
 import { DynamicNav } from "./DynamicNav";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
+import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 function GearIcon() {
   return (
@@ -35,6 +38,14 @@ function GearIcon() {
 
 export function SiteHeader() {
   const { toggleSettings } = useThemeUI();
+  const { user } = useSupabaseUser();
+  const router = useRouter();
+
+  async function handleLogout() {
+    if (!supabaseBrowserClient) return;
+    await supabaseBrowserClient.auth.signOut();
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/5 bg-[var(--color-surface)]/60 backdrop-blur">
@@ -47,12 +58,22 @@ export function SiteHeader() {
         </Link>
         <div className="flex items-center gap-2">
           <DynamicNav />
-          <Link
-            href="/auth"
-            className="hidden text-xs font-medium text-black/60 hover:text-[var(--color-text)] sm:inline-block"
-          >
-            로그인 / 회원가입
-          </Link>
+          {user ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="hidden text-xs font-medium text-black/60 hover:text-[var(--color-text)] sm:inline-block"
+            >
+              로그아웃
+            </button>
+          ) : (
+            <Link
+              href="/auth"
+              className="hidden text-xs font-medium text-black/60 hover:text-[var(--color-text)] sm:inline-block"
+            >
+              로그인 / 회원가입
+            </Link>
+          )}
           <IconButton label="설정" onClick={toggleSettings}>
             <GearIcon />
           </IconButton>
