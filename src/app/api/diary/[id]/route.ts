@@ -5,7 +5,7 @@ import { requireAdminToken } from "@/lib/admin/requireAdminToken";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const auth = requireAdminToken(req);
   if (auth) return auth;
@@ -20,7 +20,7 @@ export async function DELETE(
     );
   }
 
-  const { id } = params;
+  const { id } = await params;
 
   const { error } = await supabase
     .from(siteConfig.data.diary.table)
