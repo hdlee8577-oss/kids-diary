@@ -18,8 +18,8 @@ export function Sidebar({ isOpen, title, onClose, children }: Props) {
         className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      <aside className="absolute right-0 top-0 h-full w-[min(420px,100vw)] border-l border-black/10 bg-[var(--color-surface)]/90 p-5 shadow-xl backdrop-blur">
-        <div className="flex items-start justify-between gap-3">
+      <aside className="absolute right-0 top-0 h-full w-[min(420px,100vw)] border-l border-black/10 bg-[var(--color-surface)]/90 shadow-xl backdrop-blur flex flex-col">
+        <div className="flex items-start justify-between gap-3 p-5 pb-4 flex-shrink-0">
           <div>
             <h2 className="text-base font-semibold text-[var(--color-text)]">
               {title}
@@ -36,7 +36,9 @@ export function Sidebar({ isOpen, title, onClose, children }: Props) {
             닫기
           </button>
         </div>
-        <div className="mt-6 grid gap-5">{children}</div>
+        <div className="flex-1 overflow-y-auto px-5 pb-5">
+          <div className="grid gap-5">{children}</div>
+        </div>
       </aside>
     </div>
   );

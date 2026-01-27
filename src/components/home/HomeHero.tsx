@@ -6,15 +6,26 @@ import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 
 export function HomeHero() {
   const profile = useSiteSettingsStore((s) => s.profile);
+  const theme = useSiteSettingsStore((s) => s.theme);
 
   const name = profile.childName || siteConfig.profile.childName;
   const intro = profile.intro || siteConfig.profile.intro;
+  const mood = theme.homeMood || siteConfig.defaults.theme.homeMood || {
+    accentColor1: "#FECDD3",
+    accentColor2: "#FDE68A",
+  };
 
   return (
     <section className="relative overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-8 shadow-sm backdrop-blur sm:p-12">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-rose-200/40 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
+        <div 
+          className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl" 
+          style={{ backgroundColor: `${mood.accentColor1}66` }}
+        />
+        <div 
+          className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl" 
+          style={{ backgroundColor: `${mood.accentColor2}66` }}
+        />
       </div>
 
       <div className="relative">

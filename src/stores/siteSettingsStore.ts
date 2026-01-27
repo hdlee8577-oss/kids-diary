@@ -34,6 +34,9 @@ function mergeTheme(current: ThemeSettings, partial: ThemeSettingsPatch) {
       ...current.layout,
       ...(partial.layout ?? {}),
     },
+    homeMood: partial.homeMood
+      ? { ...current.homeMood, ...partial.homeMood }
+      : current.homeMood,
   };
 }
 

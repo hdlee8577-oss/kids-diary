@@ -2,6 +2,11 @@ export type LayoutMode = "timeline" | "cards";
 
 export type FontChoice = "geist" | "notoSansKr" | "system";
 
+export type HomeMood = {
+  accentColor1: string; // hex
+  accentColor2: string; // hex
+};
+
 export type ThemeSettings = {
   colors: {
     primary: string; // hex
@@ -14,6 +19,7 @@ export type ThemeSettings = {
   layout: {
     mode: LayoutMode;
   };
+  homeMood?: HomeMood;
 };
 
 export type SiteProfile = {
@@ -75,6 +81,10 @@ export const siteConfig: SiteConfig = {
       font: "geist",
       layout: {
         mode: "cards",
+      },
+      homeMood: {
+        accentColor1: "#FECDD3", // rose-200
+        accentColor2: "#FDE68A", // amber-200
       },
     },
   },

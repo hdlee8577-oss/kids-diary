@@ -182,6 +182,73 @@ export function SettingsSidebar() {
           기본값으로 리셋
         </Button>
       </div>
+
+      <div className="grid gap-4 rounded-[var(--radius)] border border-black/5 bg-white/40 p-4">
+        <p className="text-sm font-semibold text-[var(--color-text)]">
+          홈페이지 분위기
+        </p>
+        <p className="text-xs text-black/50">
+          아이가 좋아하는 색상으로 홈페이지 배경을 바꿔요.
+        </p>
+
+        <Field label="첫 번째 배경 색상" hint="우측 상단 배경">
+          <div className="flex items-center gap-3">
+            <Input
+              type="color"
+              value={theme.homeMood?.accentColor1 || "#FECDD3"}
+              onChange={(e) =>
+                setTheme({
+                  homeMood: {
+                    accentColor1: e.currentTarget.value,
+                    accentColor2: theme.homeMood?.accentColor2 || "#FDE68A",
+                  },
+                })
+              }
+              className="h-10 w-14 px-1"
+            />
+            <Input
+              value={theme.homeMood?.accentColor1 || "#FECDD3"}
+              onChange={(e) =>
+                setTheme({
+                  homeMood: {
+                    accentColor1: e.currentTarget.value,
+                    accentColor2: theme.homeMood?.accentColor2 || "#FDE68A",
+                  },
+                })
+              }
+            />
+          </div>
+        </Field>
+
+        <Field label="두 번째 배경 색상" hint="좌측 하단 배경">
+          <div className="flex items-center gap-3">
+            <Input
+              type="color"
+              value={theme.homeMood?.accentColor2 || "#FDE68A"}
+              onChange={(e) =>
+                setTheme({
+                  homeMood: {
+                    accentColor1: theme.homeMood?.accentColor1 || "#FECDD3",
+                    accentColor2: e.currentTarget.value,
+                  },
+                })
+              }
+              className="h-10 w-14 px-1"
+            />
+            <Input
+              value={theme.homeMood?.accentColor2 || "#FDE68A"}
+              onChange={(e) =>
+                setTheme({
+                  homeMood: {
+                    accentColor1: theme.homeMood?.accentColor1 || "#FECDD3",
+                    accentColor2: e.currentTarget.value,
+                  },
+                })
+              }
+            />
+          </div>
+        </Field>
+      </div>
     </Sidebar>
   );
 }
