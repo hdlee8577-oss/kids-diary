@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { siteConfig } from "@/Site.config";
 import { getAdminToken } from "@/lib/admin/clientToken";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
-import { Button } from "@/components/shared/Button";
 
 export function ProfileSection() {
   const { user } = useSupabaseUser();
@@ -23,6 +22,22 @@ export function ProfileSection() {
   const profilePhotoShape = profile.profilePhotoShape || "circle";
   const childName = profile.childName || siteConfig.profile.childName;
   const birthDate = profile.birthDate;
+  const theme = useSiteSettingsStore((s) => s.theme);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   // 생일로부터 나이 계산
   const getAge = (birthDate: string | undefined): string | null => {
@@ -84,6 +99,7 @@ export function ProfileSection() {
       setProfile({ profilePhotoUrl: data.photoUrl });
       
       // 설정 저장
+      const currentTheme = useSiteSettingsStore.getState().theme;
       const settingsRes = await fetch("/api/site-settings", {
         method: "POST",
         headers: {
@@ -96,7 +112,7 @@ export function ProfileSection() {
               ...profile,
               profilePhotoUrl: data.photoUrl,
             },
-            theme: useSiteSettingsStore.getState().theme,
+            theme: currentTheme,
           },
         }),
       });
@@ -127,6 +143,7 @@ export function ProfileSection() {
       setProfile(updatedProfile);
 
       // 설정 저장
+      const currentTheme = useSiteSettingsStore.getState().theme;
       const res = await fetch("/api/site-settings", {
         method: "POST",
         headers: {
@@ -136,7 +153,7 @@ export function ProfileSection() {
         body: JSON.stringify({
           settings: {
             profile: updatedProfile,
-            theme: useSiteSettingsStore.getState().theme,
+            theme: currentTheme,
           },
         }),
       });
@@ -154,6 +171,7 @@ export function ProfileSection() {
     
     // 설정 저장
     const adminToken = getAdminToken();
+    const currentTheme = useSiteSettingsStore.getState().theme;
     fetch("/api/site-settings", {
       method: "POST",
       headers: {
@@ -166,7 +184,7 @@ export function ProfileSection() {
             ...profile,
             profilePhotoShape: shape,
           },
-          theme: useSiteSettingsStore.getState().theme,
+          theme: currentTheme,
         },
       }),
     }).catch(() => {
