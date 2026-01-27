@@ -50,6 +50,10 @@ export type SiteConfig = {
     diary: {
       table: string;
     };
+    artworks: {
+      table: string;
+      bucket: string;
+    };
   };
   defaults: {
     theme: ThemeSettings;
