@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -14,6 +14,8 @@ type PhotoItem = {
   title: string;
   image_url: string;
   taken_at: string | null;
+  thumb_pos_x: number | null;
+  thumb_pos_y: number | null;
   created_at: string;
 };
 
@@ -22,6 +24,23 @@ async function fetchPhotos(siteId: string): Promise<PhotoItem[]> {
   if (!res.ok) return [];
   const data = (await res.json()) as { items: PhotoItem[] };
   return data.items ?? [];
+}
+
+async function updateThumbnailPosition(
+  photoId: string,
+  thumbPosX: number,
+  thumbPosY: number,
+): Promise<boolean> {
+  const adminToken = getAdminToken();
+  const res = await fetch("/api/photos", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(adminToken ? { "x-admin-token": adminToken } : {}),
+    },
+    body: JSON.stringify({ id: photoId, thumbPosX, thumbPosY }),
+  });
+  return res.ok;
 }
 
 export default function PhotosPage() {
@@ -109,14 +128,14 @@ export default function PhotosPage() {
           사진 추가
         </h2>
         <form className="mt-4 grid gap-4" onSubmit={onSubmit}>
-          <Field label="제목 (선택)">
+          <Field label="제목">
             <Input
               value={title}
               onChange={(e) => setTitle(e.currentTarget.value)}
               placeholder="예: 첫 눈 오는 날"
             />
           </Field>
-          <Field label="촬영일 (선택)">
+          <Field label="촬영일 (비워두면 사진정보에서 자동으로 추출)">
             <Input
               type="date"
               value={takenAt}
@@ -161,33 +180,174 @@ export default function PhotosPage() {
             }
           >
             {items.map((it) => (
-              <article
-                key={it.id}
-                className="overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm"
-              >
-                <div className="relative aspect-[4/3] bg-black/5">
-                  <Image
-                    src={it.image_url}
-                    alt={it.title || "photo"}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 50vw, 33vw"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="text-sm font-semibold text-[var(--color-text)]">
-                    {it.title || "제목 없음"}
-                  </p>
-                  <p className="mt-1 text-xs text-black/50">
-                    {it.taken_at ? `촬영일 ${it.taken_at}` : "촬영일 없음"}
-                  </p>
-                </div>
-              </article>
+              <PhotoCard 
+                key={it.id} 
+                item={it} 
+                layoutMode={layoutMode}
+                onUpdate={async () => {
+                  const list = await fetchPhotos(siteId);
+                  setItems(list);
+                }} 
+              />
             ))}
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+function PhotoCard({
+  item,
+  onUpdate,
+  layoutMode,
+}: {
+  item: PhotoItem;
+  onUpdate: () => void;
+  layoutMode: "timeline" | "cards";
+}) {
+  const [thumbPosX, setThumbPosX] = useState(item.thumb_pos_x ?? 50.0);
+  const [thumbPosY, setThumbPosY] = useState(item.thumb_pos_y ?? 50.0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const posRef = useRef({ x: thumbPosX, y: thumbPosY });
+  
+
+  // item이 변경되면 위치도 업데이트
+  useEffect(() => {
+    const newX = item.thumb_pos_x ?? 50.0;
+    const newY = item.thumb_pos_y ?? 50.0;
+    setThumbPosX(newX);
+    setThumbPosY(newY);
+    posRef.current = { x: newX, y: newY };
+  }, [item.thumb_pos_x, item.thumb_pos_y]);
+
+  // 위치가 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    posRef.current = { x: thumbPosX, y: thumbPosY };
+  }, [thumbPosX, thumbPosY]);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return; // 왼쪽 버튼만
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // 0-100 범위로 제한
+    const clampedX = Math.max(0, Math.min(100, x));
+    const clampedY = Math.max(0, Math.min(100, y));
+
+    setThumbPosX(clampedX);
+    setThumbPosY(clampedY);
+  };
+
+  const savePosition = useCallback(async () => {
+    const currentPos = posRef.current;
+    setIsSaving(true);
+    try {
+      await updateThumbnailPosition(item.id, currentPos.x, currentPos.y);
+      onUpdate();
+    } catch (err) {
+      console.error("Failed to save thumbnail position:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [item.id, onUpdate]);
+
+  const handleMouseUp = async () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    await savePosition();
+  };
+
+  // 전역 마우스 이벤트 처리
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      const clampedX = Math.max(0, Math.min(100, x));
+      const clampedY = Math.max(0, Math.min(100, y));
+
+      setThumbPosX(clampedX);
+      setThumbPosY(clampedY);
+    };
+
+    const handleGlobalMouseUp = async () => {
+      setIsDragging(false);
+      const currentPos = posRef.current;
+      setIsSaving(true);
+      try {
+        await updateThumbnailPosition(item.id, currentPos.x, currentPos.y);
+        onUpdate();
+      } catch (err) {
+        console.error("Failed to save thumbnail position:", err);
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    document.addEventListener("mousemove", handleGlobalMouseMove);
+    document.addEventListener("mouseup", handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDragging, item.id, onUpdate]);
+
+  return (
+    <article className="overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm">
+      <div
+        ref={containerRef}
+        className={`relative aspect-[4/3] bg-black/5 ${
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        } ${isSaving ? "opacity-75" : ""}`}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <Image
+          src={item.image_url}
+          alt={item.title || "photo"}
+          fill
+          className="object-cover select-none"
+          style={{
+            objectPosition: `${thumbPosX}% ${thumbPosY}%`,
+          }}
+          sizes="(max-width: 640px) 50vw, 33vw"
+          draggable={false}
+        />
+        {isDragging && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
+            <div className="bg-white/90 px-3 py-1.5 rounded text-xs font-medium">
+              {Math.round(thumbPosX)}%, {Math.round(thumbPosY)}%
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="p-4">
+        <p className="text-sm font-semibold text-[var(--color-text)]">
+          {item.title || "제목 없음"}
+        </p>
+        <p className="mt-1 text-xs text-black/50">
+          {item.taken_at ? `촬영일 ${item.taken_at}` : "촬영일 없음"}
+        </p>
+      </div>
+    </article>
   );
 }
 

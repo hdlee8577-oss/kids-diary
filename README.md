@@ -41,9 +41,13 @@ Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
 
 Supabase `public` 스키마에 아래가 있어야 합니다:
 - `site_settings(site_id, settings, updated_at)`
-- `photos(id, site_id, title, image_path, image_url, taken_at, created_at)`
+- `photos(id, site_id, title, image_path, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at)`
 - `diary_entries(id, site_id, title, content, entry_date, created_at)`
 - Storage bucket: `photos`
+
+### 마이그레이션
+
+섬네일 위치 기능을 사용하려면 마이그레이션이 필요합니다. 자세한 내용은 [MIGRATION.md](./MIGRATION.md)를 참고하세요.
 
 API:
 - `GET /api/site-settings?siteId=default`

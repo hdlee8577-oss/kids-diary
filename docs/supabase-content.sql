@@ -11,6 +11,8 @@ create table if not exists public.photos (
   image_path text not null,
   image_url text not null,
   taken_at date null,
+  thumb_pos_x numeric(5, 2) null default 50.0,
+  thumb_pos_y numeric(5, 2) null default 50.0,
   created_at timestamptz not null default now()
 );
 
@@ -28,6 +30,11 @@ create table if not exists public.diary_entries (
 
 create index if not exists diary_entries_site_id_entry_date_idx
   on public.diary_entries (site_id, entry_date desc);
+
+-- 기존 테이블에 섬네일 위치 컬럼 추가 (마이그레이션)
+alter table if exists public.photos
+  add column if not exists thumb_pos_x numeric(5, 2) null default 50.0,
+  add column if not exists thumb_pos_y numeric(5, 2) null default 50.0;
 
 -- Storage
 -- 1) Supabase Dashboard → Storage → New bucket: "photos"
