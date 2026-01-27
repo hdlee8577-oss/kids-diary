@@ -285,11 +285,13 @@ function DiaryCard({
   isSelected,
   isSelectionMode,
   onToggleSelect,
+  onDelete,
 }: {
   item: DiaryItem;
   isSelected: boolean;
   isSelectionMode: boolean;
   onToggleSelect: () => void;
+  onDelete: () => void | Promise<void>;
 }) {
   if (isSelectionMode) {
     return (
