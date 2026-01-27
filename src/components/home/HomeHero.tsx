@@ -123,32 +123,51 @@ export function HomeHero() {
       };
       console.log("[Profile] 업데이트할 프로필:", updatedProfile);
       
-      // 상태 먼저 업데이트
-      setProfile({ profilePhotoUrl: data.photoUrl });
-      console.log("[Profile] 상태 업데이트 완료");
+      // 설정 저장 (userId 사용)
+      const settingsPayload = {
+        userId: siteId, // userId로 명시적으로 전달
+        settings: {
+          profile: updatedProfile,
+          theme: currentTheme,
+        },
+      };
+      console.log("[Profile] 저장할 설정:", JSON.stringify(settingsPayload, null, 2));
       
-      // 설정 저장
       const settingsRes = await fetch("/api/site-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(adminToken ? { "x-admin-token": adminToken } : {}),
         },
-        body: JSON.stringify({
-          settings: {
-            profile: updatedProfile,
-            theme: currentTheme,
-          },
-        }),
+        body: JSON.stringify(settingsPayload),
       });
 
+      const settingsResponseText = await settingsRes.text();
+      console.log("[Profile] 설정 저장 응답 상태:", settingsRes.status);
+      console.log("[Profile] 설정 저장 응답:", settingsResponseText);
+
       if (!settingsRes.ok) {
-        const errorData = await settingsRes.json().catch(() => ({}));
+        let errorData;
+        try {
+          errorData = JSON.parse(settingsResponseText);
+        } catch {
+          errorData = { message: settingsResponseText };
+        }
         console.error("[Profile] 프로필 사진 URL 저장 실패:", errorData);
-        console.error("[Profile] 응답 상태:", settingsRes.status);
-        alert("사진은 업로드되었지만 설정 저장에 실패했습니다. 페이지를 새로고침해주세요.");
+        alert(`사진은 업로드되었지만 설정 저장에 실패했습니다.\n에러: ${JSON.stringify(errorData)}\n페이지를 새로고침해주세요.`);
       } else {
-        console.log("[Profile] 프로필 사진 URL 저장 완료");
+        let saveResult;
+        try {
+          saveResult = JSON.parse(settingsResponseText);
+        } catch {
+          saveResult = { ok: true };
+        }
+        console.log("[Profile] 프로필 사진 URL 저장 완료:", saveResult);
+        
+        // 상태 업데이트
+        setProfile({ profilePhotoUrl: data.photoUrl });
+        console.log("[Profile] 상태 업데이트 완료, profilePhotoUrl:", data.photoUrl);
+        
         // 페이지 새로고침하여 이미지 표시
         alert("프로필 사진이 업로드되었습니다. 페이지를 새로고침합니다.");
         window.location.reload();
