@@ -466,6 +466,7 @@ export default function ArtworksPage() {
                   }
                   setSelectedIds(newSet);
                 }}
+                onDelete={() => handleDeleteSingle(it.id)}
               />
             ))}
           </div>
@@ -482,6 +483,7 @@ function ArtworkCard({
   isSelectionMode,
   isSelected,
   onToggleSelect,
+  onDelete,
 }: {
   item: ArtworkItem;
   layoutMode: "timeline" | "cards";
@@ -489,6 +491,7 @@ function ArtworkCard({
   isSelectionMode: boolean;
   isSelected: boolean;
   onToggleSelect: () => void;
+  onDelete: () => void;
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -632,7 +635,7 @@ function ArtworkCard({
                       e.preventDefault();
                       e.stopPropagation();
                       setIsMenuOpen(false);
-                      handleDeleteSingle(item.id);
+                      onDelete();
                     }}
                     className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 last:rounded-b-[var(--radius)]"
                   >
