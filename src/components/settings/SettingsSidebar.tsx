@@ -306,28 +306,32 @@ export function SettingsSidebar() {
                 <Input
                   type="color"
                   value={theme.homeMood?.accentColor1 || "#FECDD3"}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const currentMood = theme.homeMood || siteConfig.defaults.theme.homeMood!;
                     setTheme({
                       homeMood: {
-                        ...theme.homeMood,
                         accentColor1: e.currentTarget.value,
+                        accentColor2: currentMood.accentColor2,
+                        character: currentMood.character,
                         preset: "custom",
                       },
-                    })
-                  }
+                    });
+                  }}
                   className="h-10 w-14 px-1"
                 />
                 <Input
                   value={theme.homeMood?.accentColor1 || "#FECDD3"}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const currentMood = theme.homeMood || siteConfig.defaults.theme.homeMood!;
                     setTheme({
                       homeMood: {
-                        ...theme.homeMood,
                         accentColor1: e.currentTarget.value,
+                        accentColor2: currentMood.accentColor2,
+                        character: currentMood.character,
                         preset: "custom",
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
               </div>
             </Field>
@@ -337,28 +341,32 @@ export function SettingsSidebar() {
                 <Input
                   type="color"
                   value={theme.homeMood?.accentColor2 || "#FDE68A"}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const currentMood = theme.homeMood || siteConfig.defaults.theme.homeMood!;
                     setTheme({
                       homeMood: {
-                        ...theme.homeMood,
+                        accentColor1: currentMood.accentColor1,
                         accentColor2: e.currentTarget.value,
+                        character: currentMood.character,
                         preset: "custom",
                       },
-                    })
-                  }
+                    });
+                  }}
                   className="h-10 w-14 px-1"
                 />
                 <Input
                   value={theme.homeMood?.accentColor2 || "#FDE68A"}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const currentMood = theme.homeMood || siteConfig.defaults.theme.homeMood!;
                     setTheme({
                       homeMood: {
-                        ...theme.homeMood,
+                        accentColor1: currentMood.accentColor1,
                         accentColor2: e.currentTarget.value,
+                        character: currentMood.character,
                         preset: "custom",
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
               </div>
             </Field>
