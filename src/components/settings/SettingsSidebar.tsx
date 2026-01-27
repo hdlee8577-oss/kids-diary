@@ -1,6 +1,6 @@
 "use client";
 
-import { siteConfig, type FontChoice, type LayoutMode } from "@/Site.config";
+import { siteConfig, type FontChoice, type LayoutMode, type MoodPreset } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { useThemeUI } from "@/theme/ThemeProvider";
 import { Button } from "@/components/shared/Button";
@@ -21,6 +21,44 @@ const FONT_OPTIONS: Array<{ value: FontChoice; label: string }> = [
 const LAYOUT_OPTIONS: Array<{ value: LayoutMode; label: string }> = [
   { value: "cards", label: "카드형" },
   { value: "timeline", label: "타임라인형" },
+];
+
+const getMoodPresets = (currentMood?: { accentColor1?: string; accentColor2?: string }) => [
+  {
+    value: "warm" as MoodPreset,
+    label: "따뜻한",
+    character: "🌸",
+    accentColor1: "#FECDD3",
+    accentColor2: "#FDE68A",
+  },
+  {
+    value: "cool" as MoodPreset,
+    label: "시원한",
+    character: "🌊",
+    accentColor1: "#BFDBFE",
+    accentColor2: "#A5F3FC",
+  },
+  {
+    value: "playful" as MoodPreset,
+    label: "활발한",
+    character: "🎈",
+    accentColor1: "#FBCFE8",
+    accentColor2: "#FCD34D",
+  },
+  {
+    value: "calm" as MoodPreset,
+    label: "차분한",
+    character: "🌙",
+    accentColor1: "#E9D5FF",
+    accentColor2: "#C7D2FE",
+  },
+  {
+    value: "custom" as MoodPreset,
+    label: "직접 설정",
+    character: "✨",
+    accentColor1: currentMood?.accentColor1 || "#FECDD3",
+    accentColor2: currentMood?.accentColor2 || "#FDE68A",
+  },
 ];
 
 export function SettingsSidebar() {
@@ -188,66 +226,118 @@ export function SettingsSidebar() {
           홈페이지 분위기
         </p>
         <p className="text-xs text-black/50">
-          아이가 좋아하는 색상으로 홈페이지 배경을 바꿔요.
+          아이가 좋아하는 분위기로 홈페이지를 바꿔요. 분위기를 선택하면 캐릭터와 색상이 자동으로 바뀌어요.
         </p>
 
-        <Field label="첫 번째 배경 색상" hint="우측 상단 배경">
-          <div className="flex items-center gap-3">
-            <Input
-              type="color"
-              value={theme.homeMood?.accentColor1 || "#FECDD3"}
-              onChange={(e) =>
-                setTheme({
-                  homeMood: {
-                    accentColor1: e.currentTarget.value,
-                    accentColor2: theme.homeMood?.accentColor2 || "#FDE68A",
-                  },
-                })
-              }
-              className="h-10 w-14 px-1"
-            />
-            <Input
-              value={theme.homeMood?.accentColor1 || "#FECDD3"}
-              onChange={(e) =>
-                setTheme({
-                  homeMood: {
-                    accentColor1: e.currentTarget.value,
-                    accentColor2: theme.homeMood?.accentColor2 || "#FDE68A",
-                  },
-                })
-              }
-            />
+        <Field label="분위기 선택">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {getMoodPresets(theme.homeMood).map((preset) => {
+              const isActive = theme.homeMood?.preset === preset.value;
+              return (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() => {
+                    if (preset.value === "custom") {
+                      setTheme({
+                        homeMood: {
+                          ...theme.homeMood,
+                          preset: "custom",
+                          character: preset.character,
+                        },
+                      });
+                    } else {
+                      setTheme({
+                        homeMood: {
+                          accentColor1: preset.accentColor1,
+                          accentColor2: preset.accentColor2,
+                          character: preset.character,
+                          preset: preset.value,
+                        },
+                      });
+                    }
+                  }}
+                  className={`flex flex-col items-center gap-2 rounded-[var(--radius)] border-2 p-3 transition ${
+                    isActive
+                      ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                      : "border-black/10 bg-[var(--color-surface)]/60 hover:border-[var(--color-primary)]/30"
+                  }`}
+                >
+                  <span className="text-2xl">{preset.character}</span>
+                  <span className="text-xs font-medium text-[var(--color-text)]">
+                    {preset.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </Field>
 
-        <Field label="두 번째 배경 색상" hint="좌측 하단 배경">
-          <div className="flex items-center gap-3">
-            <Input
-              type="color"
-              value={theme.homeMood?.accentColor2 || "#FDE68A"}
-              onChange={(e) =>
-                setTheme({
-                  homeMood: {
-                    accentColor1: theme.homeMood?.accentColor1 || "#FECDD3",
-                    accentColor2: e.currentTarget.value,
-                  },
-                })
-              }
-              className="h-10 w-14 px-1"
-            />
-            <Input
-              value={theme.homeMood?.accentColor2 || "#FDE68A"}
-              onChange={(e) =>
-                setTheme({
-                  homeMood: {
-                    accentColor1: theme.homeMood?.accentColor1 || "#FECDD3",
-                    accentColor2: e.currentTarget.value,
-                  },
-                })
-              }
-            />
-          </div>
-        </Field>
+        {theme.homeMood?.preset === "custom" && (
+          <>
+            <Field label="첫 번째 배경 색상" hint="우측 상단 배경">
+              <div className="flex items-center gap-3">
+                <Input
+                  type="color"
+                  value={theme.homeMood?.accentColor1 || "#FECDD3"}
+                  onChange={(e) =>
+                    setTheme({
+                      homeMood: {
+                        ...theme.homeMood,
+                        accentColor1: e.currentTarget.value,
+                        preset: "custom",
+                      },
+                    })
+                  }
+                  className="h-10 w-14 px-1"
+                />
+                <Input
+                  value={theme.homeMood?.accentColor1 || "#FECDD3"}
+                  onChange={(e) =>
+                    setTheme({
+                      homeMood: {
+                        ...theme.homeMood,
+                        accentColor1: e.currentTarget.value,
+                        preset: "custom",
+                      },
+                    })
+                  }
+                />
+              </div>
+            </Field>
+
+            <Field label="두 번째 배경 색상" hint="좌측 하단 배경">
+              <div className="flex items-center gap-3">
+                <Input
+                  type="color"
+                  value={theme.homeMood?.accentColor2 || "#FDE68A"}
+                  onChange={(e) =>
+                    setTheme({
+                      homeMood: {
+                        ...theme.homeMood,
+                        accentColor2: e.currentTarget.value,
+                        preset: "custom",
+                      },
+                    })
+                  }
+                  className="h-10 w-14 px-1"
+                />
+                <Input
+                  value={theme.homeMood?.accentColor2 || "#FDE68A"}
+                  onChange={(e) =>
+                    setTheme({
+                      homeMood: {
+                        ...theme.homeMood,
+                        accentColor2: e.currentTarget.value,
+                        preset: "custom",
+                      },
+                    })
+                  }
+                />
+              </div>
+            </Field>
+          </>
+        )}
       </div>
     </Sidebar>
   );

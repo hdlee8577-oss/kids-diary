@@ -2,9 +2,13 @@ export type LayoutMode = "timeline" | "cards";
 
 export type FontChoice = "geist" | "notoSansKr" | "system";
 
+export type MoodPreset = "warm" | "cool" | "playful" | "calm" | "custom";
+
 export type HomeMood = {
   accentColor1: string; // hex
   accentColor2: string; // hex
+  character?: string; // emoji or character identifier
+  preset?: MoodPreset;
 };
 
 export type ThemeSettings = {
@@ -85,6 +89,8 @@ export const siteConfig: SiteConfig = {
       homeMood: {
         accentColor1: "#FECDD3", // rose-200
         accentColor2: "#FDE68A", // amber-200
+        character: "🌸",
+        preset: "warm",
       },
     },
   },

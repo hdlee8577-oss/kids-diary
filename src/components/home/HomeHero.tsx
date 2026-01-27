@@ -13,6 +13,8 @@ export function HomeHero() {
   const mood = theme.homeMood || siteConfig.defaults.theme.homeMood || {
     accentColor1: "#FECDD3",
     accentColor2: "#FDE68A",
+    character: "🌸",
+    preset: "warm",
   };
 
   return (
@@ -30,6 +32,7 @@ export function HomeHero() {
 
       <div className="relative">
         <p className="inline-flex items-center gap-2 rounded-[999px] bg-black/5 px-3 py-1 text-sm font-medium text-black/70">
+          <span className="text-lg">{mood.character || "🌸"}</span>
           우리 가족만의 작은 아카이브
         </p>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl">

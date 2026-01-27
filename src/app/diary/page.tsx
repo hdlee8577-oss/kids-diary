@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
@@ -36,6 +37,8 @@ export default function DiaryPage() {
   const [title, setTitle] = useState("");
   const [entryDate, setEntryDate] = useState<string>("");
   const [content, setContent] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   const modeLabel = useMemo(
     () => (layoutMode === "timeline" ? "타임라인형" : "카드형"),
@@ -147,9 +150,68 @@ export default function DiaryPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-base font-semibold text-[var(--color-text)]">
-          일기 목록
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-[var(--color-text)]">
+            일기 목록
+          </h2>
+          {items.length > 0 && (
+            <div className="flex items-center gap-2">
+              {isSelectionMode ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setIsSelectionMode(false);
+                      setSelectedIds(new Set());
+                    }}
+                  >
+                    취소
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={async () => {
+                      if (selectedIds.size === 0) return;
+                      if (!confirm(`${selectedIds.size}개의 일기를 삭제하시겠어요?`)) {
+                        return;
+                      }
+                      const adminToken = getAdminToken();
+                      try {
+                        for (const id of selectedIds) {
+                          const res = await fetch(`/api/diary/${id}`, {
+                            method: "DELETE",
+                            headers: adminToken
+                              ? { "x-admin-token": adminToken }
+                              : {},
+                          });
+                          if (!res.ok) {
+                            throw new Error("삭제 실패");
+                          }
+                        }
+                        setSelectedIds(new Set());
+                        setIsSelectionMode(false);
+                        const list = await fetchDiary(siteId);
+                        setItems(list);
+                      } catch (err) {
+                        console.error("삭제 실패:", err);
+                        alert("일부 일기 삭제에 실패했어요.");
+                      }
+                    }}
+                    disabled={selectedIds.size === 0}
+                  >
+                    선택 삭제 ({selectedIds.size})
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsSelectionMode(true)}
+                >
+                  선택
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
         {isLoading ? (
           <p className="mt-3 text-sm text-black/60">불러오는 중…</p>
         ) : items.length === 0 ? (
@@ -163,23 +225,78 @@ export default function DiaryPage() {
             }
           >
             {items.map((it) => (
-              <article
+              <DiaryCard
                 key={it.id}
-                className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm"
-              >
-                <p className="text-xs text-black/50">{it.entry_date}</p>
-                <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
-                  {it.title || "제목 없음"}
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-black/70">
-                  {it.content}
-                </p>
-              </article>
+                item={it}
+                isSelected={selectedIds.has(it.id)}
+                isSelectionMode={isSelectionMode}
+                onToggleSelect={() => {
+                  const newSet = new Set(selectedIds);
+                  if (newSet.has(it.id)) {
+                    newSet.delete(it.id);
+                  } else {
+                    newSet.add(it.id);
+                  }
+                  setSelectedIds(newSet);
+                }}
+              />
             ))}
           </div>
         )}
       </section>
     </main>
+  );
+}
+
+function DiaryCard({
+  item,
+  isSelected,
+  isSelectionMode,
+  onToggleSelect,
+}: {
+  item: DiaryItem;
+  isSelected: boolean;
+  isSelectionMode: boolean;
+  onToggleSelect: () => void;
+}) {
+  if (isSelectionMode) {
+    return (
+      <article
+        onClick={onToggleSelect}
+        className={`cursor-pointer rounded-[var(--radius)] border-2 p-5 shadow-sm transition ${
+          isSelected
+            ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+            : "border-black/5 bg-[var(--color-surface)]/70 hover:border-[var(--color-primary)]/30"
+        }`}
+      >
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={onToggleSelect}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-0.5 h-4 w-4 rounded border-black/20 text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
+          />
+          <div className="flex-1">
+            <p className="text-xs text-black/50">{item.entry_date}</p>
+            <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
+              {item.title || "제목 없음"}
+            </p>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <Link href={`/diary/${item.id}`}>
+      <article className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm transition hover:shadow-md">
+        <p className="text-xs text-black/50">{item.entry_date}</p>
+        <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
+          {item.title || "제목 없음"}
+        </p>
+      </article>
+    </Link>
   );
 }
 
