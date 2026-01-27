@@ -264,6 +264,7 @@ export default function PhotosPage() {
               type="file"
               accept="image/*"
               multiple
+              className="h-auto py-2"
               onChange={(e) => {
                 const list = Array.from(e.currentTarget.files ?? []);
                 const newDrafts: UploadDraft[] = list.map((file) => ({
