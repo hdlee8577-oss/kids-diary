@@ -108,7 +108,7 @@ export function HomeHero() {
       }
 
       const data = (await res.json()) as { photoUrl: string };
-      console.log("[Profile] 업로드된 사진 URL:", data.photoUrl);
+      console.log("[Profile] ✅ 업로드된 사진 URL:", data.photoUrl);
       console.log("[Profile] 현재 siteId:", siteId);
       
       // 현재 프로필과 테마 가져오기
@@ -116,16 +116,20 @@ export function HomeHero() {
       const currentTheme = useSiteSettingsStore.getState().theme;
       console.log("[Profile] 현재 프로필:", currentProfile);
       
-      // 프로필 즉시 업데이트
-      const updatedProfile = {
-        ...currentProfile,
-        profilePhotoUrl: data.photoUrl,
-      };
-      console.log("[Profile] 업데이트할 프로필:", updatedProfile);
+      // 프로필 즉시 업데이트 (상태 먼저 업데이트)
+      setProfile({ profilePhotoUrl: data.photoUrl });
+      console.log("[Profile] ✅ 상태 업데이트 완료, profilePhotoUrl:", data.photoUrl);
+      
+      // 잠시 대기 후 저장 (상태가 반영될 시간을 줌)
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // 업데이트된 프로필 다시 가져오기
+      const updatedProfile = useSiteSettingsStore.getState().profile;
+      console.log("[Profile] 업데이트된 프로필:", updatedProfile);
       
       // 설정 저장 (userId 사용)
       const settingsPayload = {
-        userId: siteId, // userId로 명시적으로 전달
+        userId: siteId,
         settings: {
           profile: updatedProfile,
           theme: currentTheme,
@@ -153,7 +157,7 @@ export function HomeHero() {
         } catch {
           errorData = { message: settingsResponseText };
         }
-        console.error("[Profile] 프로필 사진 URL 저장 실패:", errorData);
+        console.error("[Profile] ❌ 프로필 사진 URL 저장 실패:", errorData);
         alert(`사진은 업로드되었지만 설정 저장에 실패했습니다.\n에러: ${JSON.stringify(errorData)}\n페이지를 새로고침해주세요.`);
       } else {
         let saveResult;
@@ -162,11 +166,7 @@ export function HomeHero() {
         } catch {
           saveResult = { ok: true };
         }
-        console.log("[Profile] 프로필 사진 URL 저장 완료:", saveResult);
-        
-        // 상태 업데이트
-        setProfile({ profilePhotoUrl: data.photoUrl });
-        console.log("[Profile] 상태 업데이트 완료, profilePhotoUrl:", data.photoUrl);
+        console.log("[Profile] ✅ 프로필 사진 URL 저장 완료:", saveResult);
         
         // 페이지 새로고침하여 이미지 표시
         alert("프로필 사진이 업로드되었습니다. 페이지를 새로고침합니다.");
