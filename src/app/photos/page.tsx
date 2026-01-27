@@ -478,8 +478,31 @@ export default function PhotosPage() {
                         }}
                         sizes="(max-width: 640px) 50vw, 33vw"
                       />
-                      <div className="absolute left-3 top-3 rounded-full bg-white/80 px-2 py-1 text-xs font-semibold text-zinc-900">
-                        {selectedIds[it.id] ? "선택됨" : "선택"}
+                      <div
+                        className={`absolute right-3 top-3 inline-flex h-7 w-7 items-center justify-center rounded-full border shadow-sm ${
+                          selectedIds[it.id]
+                            ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                            : "border-black/15 bg-white/80 text-black/50"
+                        }`}
+                        aria-label={selectedIds[it.id] ? "선택됨" : "선택"}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden
+                        >
+                          <path
+                            d="M20 6L9 17l-5-5"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            opacity={selectedIds[it.id] ? 1 : 0.2}
+                          />
+                        </svg>
                       </div>
                     </div>
                   </button>
@@ -503,9 +526,14 @@ export default function PhotosPage() {
                   <p className="text-sm font-semibold text-[var(--color-text)]">
                     {it.title || "제목 없음"}
                   </p>
-                  <p className="mt-1 text-xs text-black/50">
-                    {it.taken_at ? `촬영일 ${it.taken_at}` : "촬영일 없음"}
-                  </p>
+                  <div className="mt-2 grid gap-0.5">
+                    <p className="text-[11px] font-semibold text-black/50">
+                      촬영일
+                    </p>
+                    <p className="text-xs text-black/70">
+                      {it.taken_at ?? "없음"}
+                    </p>
+                  </div>
                 </div>
               </article>
             ))}
