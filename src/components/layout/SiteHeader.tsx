@@ -47,6 +47,12 @@ export function SiteHeader() {
         </Link>
         <div className="flex items-center gap-2">
           <DynamicNav />
+          <Link
+            href="/auth"
+            className="hidden text-xs font-medium text-black/60 hover:text-[var(--color-text)] sm:inline-block"
+          >
+            로그인 / 회원가입
+          </Link>
           <IconButton label="설정" onClick={toggleSettings}>
             <GearIcon />
           </IconButton>
