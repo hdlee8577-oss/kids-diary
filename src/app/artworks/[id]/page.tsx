@@ -11,7 +11,7 @@ type ArtworkItem = {
   id: string;
   title: string;
   description: string;
-  image_url: string;
+  image_url: string | null;
   url: string | null;
   type: "image" | "video" | "writing" | "link";
   category: string | null;
