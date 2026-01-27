@@ -32,6 +32,8 @@ export type SiteProfile = {
   childName: string;
   intro: string;
   birthDate?: string; // ISO date string
+  profilePhotoUrl?: string; // 프로필 사진 URL
+  profilePhotoShape?: "circle" | "square" | "rounded"; // 프로필 사진 모양
 };
 
 export type SiteSettings = {
