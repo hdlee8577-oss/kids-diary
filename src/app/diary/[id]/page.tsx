@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { siteConfig } from "@/Site.config";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
+import { getAdminToken } from "@/lib/admin/clientToken";
+import { Button } from "@/components/shared/Button";
 
 type DiaryItem = {
   id: string;
@@ -12,8 +17,8 @@ type DiaryItem = {
   created_at: string;
 };
 
-async function fetchDiary(id: string): Promise<DiaryItem | null> {
-  const res = await fetch(`/api/diary?siteId=default`);
+async function fetchDiary(id: string, siteId: string): Promise<DiaryItem | null> {
+  const res = await fetch(`/api/diary?siteId=${encodeURIComponent(siteId)}`);
   if (!res.ok) return null;
   const data = (await res.json()) as { items: DiaryItem[] };
   return data.items.find((item) => item.id === id) ?? null;
@@ -22,15 +27,19 @@ async function fetchDiary(id: string): Promise<DiaryItem | null> {
 export default function DiaryDetailPage() {
   const params = useParams();
   const diaryId = params.id as string;
+  const router = useRouter();
+  const { user } = useSupabaseUser();
+  const siteId = user?.id ?? siteConfig.siteId;
 
   const [diary, setDiary] = useState<DiaryItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       setIsLoading(true);
-      const data = await fetchDiary(diaryId);
+      const data = await fetchDiary(diaryId, siteId);
       if (!alive) return;
       if (data) {
         setDiary(data);
@@ -40,7 +49,31 @@ export default function DiaryDetailPage() {
     return () => {
       alive = false;
     };
-  }, [diaryId]);
+  }, [diaryId, siteId]);
+
+  async function handleDelete() {
+    if (!confirm("이 일기를 삭제하시겠어요?")) return;
+
+    setIsDeleting(true);
+    try {
+      const adminToken = getAdminToken();
+      const res = await fetch(`/api/diary/${diaryId}`, {
+        method: "DELETE",
+        headers: adminToken
+          ? { "x-admin-token": adminToken }
+          : {},
+      });
+
+      if (!res.ok) {
+        throw new Error("삭제 실패");
+      }
+
+      router.push("/diary");
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+      setIsDeleting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -83,6 +116,16 @@ export default function DiaryDetailPage() {
         <p className="whitespace-pre-wrap text-base leading-7 text-[var(--color-text)]">
           {diary.content}
         </p>
+      </div>
+
+      <div className="mt-6 flex items-center justify-end">
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? "삭제 중..." : "삭제"}
+        </Button>
       </div>
     </main>
   );
