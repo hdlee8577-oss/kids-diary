@@ -102,9 +102,14 @@ export function HomeHero() {
       }
 
       const data = (await res.json()) as { photoUrl: string };
+      console.log("[Profile] 업로드된 사진 URL:", data.photoUrl);
+      
+      // 프로필 즉시 업데이트
       setProfile({ profilePhotoUrl: data.photoUrl });
       
+      // 설정 저장
       const currentTheme = useSiteSettingsStore.getState().theme;
+      const currentProfile = useSiteSettingsStore.getState().profile;
       const settingsRes = await fetch("/api/site-settings", {
         method: "POST",
         headers: {
@@ -114,7 +119,7 @@ export function HomeHero() {
         body: JSON.stringify({
           settings: {
             profile: {
-              ...profile,
+              ...currentProfile,
               profilePhotoUrl: data.photoUrl,
             },
             theme: currentTheme,
@@ -124,6 +129,8 @@ export function HomeHero() {
 
       if (!settingsRes.ok) {
         console.warn("프로필 사진 URL 저장 실패");
+      } else {
+        console.log("[Profile] 프로필 사진 URL 저장 완료");
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
@@ -253,6 +260,14 @@ export function HomeHero() {
                   className="object-cover"
                   sizes="160px"
                   priority
+                  onError={(e) => {
+                    console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
+                    // 이미지 로드 실패 시 기본 아이콘으로 대체
+                    const target = e.target as HTMLImageElement;
+                    if (target.parentElement) {
+                      target.parentElement.innerHTML = '<div class="flex h-full w-full items-center justify-center text-5xl">👶</div>';
+                    }
+                  }}
                 />
               </div>
             ) : (
