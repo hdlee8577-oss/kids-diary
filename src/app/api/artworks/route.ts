@@ -28,6 +28,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: [], persistence: "disabled" });
   }
 
+  console.log("[API Artworks GET] siteId:", siteId);
+
   const { data, error } = await supabase
     .from(siteConfig.data.artworks.table)
     .select(
@@ -40,8 +42,11 @@ export async function GET(req: Request) {
     .returns<ArtworkRow[]>();
 
   if (error) {
+    console.error("[API Artworks GET] Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  console.log("[API Artworks GET] Found", data?.length || 0, "items for siteId:", siteId);
 
   const items =
     data?.map((r) => ({

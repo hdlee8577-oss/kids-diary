@@ -36,7 +36,7 @@ async function fetchArtworks(siteId: string): Promise<ArtworkItem[]> {
 export default function ArtworksPage() {
   const layoutMode = useSiteSettingsStore((s) => s.theme.layout.mode);
   const thumbnailSize = useSiteSettingsStore((s) => s.theme.layout.thumbnailSize || "medium");
-  const { user } = useSupabaseUser();
+  const { user, loading: userLoading } = useSupabaseUser();
   const siteId = user?.id ?? siteConfig.siteId;
 
   const [items, setItems] = useState<ArtworkItem[]>([]);
@@ -77,18 +77,26 @@ export default function ArtworksPage() {
   }
 
   useEffect(() => {
+    // 사용자 로딩이 완료된 후에만 데이터 조회
+    if (userLoading) {
+      setIsLoading(true);
+      return;
+    }
+
     let alive = true;
     (async () => {
       setIsLoading(true);
+      console.log("[Artworks] Fetching with siteId:", siteId, "user:", user?.id);
       const data = await fetchArtworks(siteId);
       if (!alive) return;
+      console.log("[Artworks] Fetched items:", data.length);
       setItems(data);
       setIsLoading(false);
     })();
     return () => {
       alive = false;
     };
-  }, [siteId]);
+  }, [siteId, userLoading, user?.id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
