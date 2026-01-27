@@ -70,8 +70,14 @@ export function HomeHero() {
   const age = getAge(birthDate);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log("[Profile] 🎯 handleFileChange 호출됨");
     const file = e.target.files?.[0];
-    if (!file) return;
+    console.log("[Profile] 선택된 파일:", file ? file.name : "없음");
+    if (!file) {
+      console.log("[Profile] ❌ 파일이 선택되지 않음");
+      return;
+    }
+    console.log("[Profile] ✅ 파일 선택됨:", file.name, file.size, "bytes");
 
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
     const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
@@ -321,7 +327,12 @@ export function HomeHero() {
               
               {/* 편집 버튼 - 사진 우측 상단에 배치 */}
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("[Profile] 🎯 편집 버튼 클릭, 현재 isMenuOpen:", isMenuOpen);
+                  setIsMenuOpen(!isMenuOpen);
+                }}
                 className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:opacity-90 z-10"
                 aria-label="프로필 사진 편집"
               >
@@ -362,12 +373,27 @@ export function HomeHero() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                  onChange={handleFileChange}
+                  onChange={(e) => {
+                    console.log("[Profile] 🎯 input onChange 이벤트 발생");
+                    handleFileChange(e);
+                  }}
+                  onClick={(e) => {
+                    console.log("[Profile] 🎯 input 클릭됨");
+                  }}
                   className="hidden"
                 />
                 <button
-                  onClick={() => {
-                    fileInputRef.current?.click();
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("[Profile] 🎯 사진 업로드 버튼 클릭");
+                    console.log("[Profile] fileInputRef.current:", fileInputRef.current);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                      console.log("[Profile] ✅ 파일 input 클릭 트리거됨");
+                    } else {
+                      console.error("[Profile] ❌ fileInputRef가 null");
+                    }
                     setIsMenuOpen(false);
                   }}
                   disabled={isUploading}
