@@ -169,7 +169,8 @@ export function HomeHero() {
           errorData = { message: settingsResponseText };
         }
         console.error("[Profile] ❌ 프로필 사진 URL 저장 실패:", errorData);
-        alert(`사진은 업로드되었지만 설정 저장에 실패했습니다.\n에러: ${JSON.stringify(errorData)}\n페이지를 새로고침해주세요.`);
+        // 에러는 콘솔에만 표시 (사용자 경험 개선)
+        console.warn("[Profile] ⚠️ 설정 저장 실패 - 페이지를 새로고침하면 반영될 수 있습니다.");
       } else {
         let saveResult;
         try {
@@ -196,8 +197,7 @@ export function HomeHero() {
           }
         }
         
-        // 성공 메시지만 표시 (새로고침 없이)
-        alert("프로필 사진이 업로드되었습니다.");
+        // 팝업 없이 조용히 완료 (이미지가 즉시 표시됨)
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "업로드 중 오류가 발생했습니다.");
