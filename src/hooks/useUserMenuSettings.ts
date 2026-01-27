@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { create } from "zustand";
 import { getAdminToken } from "@/lib/admin/clientToken";
 import { supabaseBrowserClient } from "@/lib/supabase/client";
+import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
 type UserMenuSettings = {
   enabledModules: string[];
@@ -36,26 +37,19 @@ const useUserMenuSettingsStore = create<UserMenuSettingsState>((set) => ({
   setError: (error) => set({ error }),
 }));
 
-let hasFetchedOnce = false;
-
 export function useUserMenuSettings() {
   const { settings, loading, error, setSettings, setLoading, setError } =
     useUserMenuSettingsStore();
+  const { user } = useSupabaseUser();
 
-  // 최초 1회만 서버에서 설정을 불러와서 전역 스토어에 넣는다.
+  // 로그인 상태(user) 변경 시마다 설정을 다시 불러온다
   useEffect(() => {
-    if (hasFetchedOnce) return;
-    hasFetchedOnce = true;
-
     let alive = true;
     (async () => {
+      setLoading(true);
       try {
-        // 1) 현재 로그인한 사용자 ID 가져오기 (없으면 undefined)
-        let userId: string | undefined;
-        if (supabaseBrowserClient) {
-          const { data } = await supabaseBrowserClient.auth.getUser();
-          userId = data.user?.id ?? undefined;
-        }
+        // 현재 로그인한 사용자 ID (없으면 undefined)
+        const userId = user?.id;
 
         const adminToken = getAdminToken();
         const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
@@ -78,10 +72,25 @@ export function useUserMenuSettings() {
             ageInMonths: data.settings.ageInMonths,
             preset: data.settings.preset || "custom",
           });
+        } else {
+          // 기본값 설정
+          setSettings({
+            enabledModules: ["photos", "diary"],
+            menuOrder: [],
+            roleMode: "parent",
+            preset: "custom",
+          });
         }
       } catch (err) {
         if (!alive) return;
         setError(err instanceof Error ? err.message : "Unknown error");
+        // 에러 시 기본값 설정
+        setSettings({
+          enabledModules: ["photos", "diary"],
+          menuOrder: [],
+          roleMode: "parent",
+          preset: "custom",
+        });
       } finally {
         if (alive) {
           setLoading(false);
@@ -92,7 +101,7 @@ export function useUserMenuSettings() {
     return () => {
       alive = false;
     };
-  }, [setError, setLoading, setSettings]);
+  }, [user?.id, setError, setLoading, setSettings]);
 
   async function updateSettings(updates: Partial<UserMenuSettings>) {
     const previous = settings;
@@ -103,11 +112,8 @@ export function useUserMenuSettings() {
     setError(null);
 
     try {
-      let userId: string | undefined;
-      if (supabaseBrowserClient) {
-        const { data } = await supabaseBrowserClient.auth.getUser();
-        userId = data.user?.id ?? undefined;
-      }
+      // 현재 로그인한 사용자 ID
+      const userId = user?.id;
 
       const adminToken = getAdminToken();
       const res = await fetch(`/api/user/menu-settings`, {
