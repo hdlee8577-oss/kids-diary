@@ -55,7 +55,7 @@ export function HomeHero() {
   }, [isMenuOpen]);
 
   // 생일로부터 나이 계산
-  const getAge = (birthDate: string | undefined): string | null => {
+  const getAge = (birthDate: string | undefined): number | null => {
     if (!birthDate) return null;
     const birth = new Date(birthDate);
     const today = new Date();
@@ -64,10 +64,28 @@ export function HomeHero() {
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--;
     }
-    return `${age}세`;
+    return age;
+  };
+
+  // 생일 포맷팅 (YYYY-MM-DD 형식을 한국어 형식으로)
+  const formatBirthDate = (birthDate: string | undefined): string | null => {
+    if (!birthDate) return null;
+    try {
+      const date = new Date(birthDate);
+      // 날짜가 유효한지 확인
+      if (isNaN(date.getTime())) return null;
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return null;
+    }
   };
 
   const age = getAge(birthDate);
+  const formattedBirthDate = formatBirthDate(birthDate);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     console.log("[Profile] 🎯 handleFileChange 호출됨");
@@ -384,16 +402,10 @@ export function HomeHero() {
             </div>
 
             {/* 생일 정보 - 사진 밑에 표시 */}
-            {birthDate && (
+            {formattedBirthDate && (
               <div className="mt-3 text-center text-sm text-black/70">
-                <div>
-                  생일: {new Date(birthDate).toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </div>
-                {age && <div className="mt-1">{age}</div>}
+                {formattedBirthDate}
+                {age !== null && ` (${age}세)`}
               </div>
             )}
 
@@ -587,7 +599,7 @@ export function HomeHero() {
           </Link>
           <Link
             href="/diary"
-            className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)]/60 px-5 text-sm font-semibold text-[var(--color-text)] shadow-sm transition hover:bg-[var(--color-surface)]"
+            className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
           >
             일기장 쓰기
         </Link>
