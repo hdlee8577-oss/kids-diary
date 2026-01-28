@@ -577,10 +577,9 @@ export function HomeHero() {
             </div>
           </div>
         </div>
-      </div>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link
+        <Link
             href="/photos"
             className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
           >
@@ -591,10 +590,10 @@ export function HomeHero() {
             className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)]/60 px-5 text-sm font-semibold text-[var(--color-text)] shadow-sm transition hover:bg-[var(--color-surface)]"
           >
             일기장 쓰기
-          </Link>
-        </div>
+        </Link>
+      </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <div className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/60 p-5">
             <p className="text-sm font-semibold text-[var(--color-text)]">사진첩</p>
             <p className="mt-1 text-sm leading-6 text-black/70">
@@ -614,7 +613,6 @@ export function HomeHero() {
             </p>
           </div>
         </div>
-      </div>
     </section>
   );
 }
