@@ -29,15 +29,19 @@
 - [x] 작품 상세 페이지 썸네일 링크 연결
 - [x] 작품 상세 페이지 이미지 크기 최적화 (max-w-2xl)
 
-**최근 커밋:** `adbbb5d` - 모바일 레이아웃 개선
+### 개발 환경 설정 (완료 - 2026.01.28)
+- [x] Supabase CLI 설치 및 설정
+- [x] 섬네일 위치 마이그레이션 완료 (`20250126_add_thumb_pos.sql`)
+
+**최근 커밋:** `61ff82d` - Supabase CLI 추가
 
 ---
 
 ## 📋 다음 작업
 
-### DB 마이그레이션 (필수)
+### DB 마이그레이션 (남은 작업)
 - [ ] Supabase Dashboard에서 `docs/supabase-menu-settings.sql` 실행
-- [ ] Supabase Dashboard에서 `docs/supabase-artworks.sql` 실행
+- [ ] Supabase Dashboard에서 `docs/supabase-artworks.sql` 실행 (또는 확인)
 
 ### 추가 개선 사항
 - [ ] 프로필 사진 편집 모드 UX 개선 (편집 모드 명확히 표시)

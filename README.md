@@ -53,7 +53,9 @@ Supabase `public` 스키마에 아래가 있어야 합니다:
 
 ### 마이그레이션
 
-섬네일 위치 기능을 사용하려면 마이그레이션이 필요합니다. 자세한 내용은 [MIGRATION.md](./MIGRATION.md)를 참고하세요.
+**✅ 완료됨** - 섬네일 위치 기능 마이그레이션 (`thumb_pos_x`, `thumb_pos_y`)
+
+추가 마이그레이션이 필요한 경우 [MIGRATION.md](./MIGRATION.md)를 참고하세요.
 
 API:
 - `GET /api/site-settings?siteId=default`
