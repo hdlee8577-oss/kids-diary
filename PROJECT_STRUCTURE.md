@@ -89,15 +89,42 @@ kids-diary/
 ### 주요 컴포넌트 역할
 
 #### 1. **SiteHeader** (`src/components/layout/SiteHeader.tsx`)
-- **위치**: 상단 고정 (`sticky top-0`)
+- **위치**: 상단 고정 (`sticky top-0`, z-50)
 - **기능**:
   - 로고/제목 표시 (아이 이름 + "의 성장기록")
-  - 데스크톱: 가로 메뉴 표시
-  - 모바일: 햄버거 버튼 → 오른쪽 사이드 메뉴
+  - 데스크톱: 가로 메뉴 표시 (DynamicNav)
+  - 모바일: 햄버거 버튼 → 오른쪽 슬라이드 사이드 메뉴 (Portal, z-100)
   - 로그인 상태 표시
   - 설정 버튼 (데스크톱만)
+- **모바일 메뉴 특징**:
+  - React Portal로 `document.body`에 직접 렌더링
+  - 오른쪽에서 슬라이드 애니메이션
+  - 오버레이 배경 클릭 시 닫기
+  - 메뉴 외부 클릭 감지
 
 #### 2. **DynamicNav** (`src/components/layout/DynamicNav.tsx`)
+- **위치**: 데스크톱 헤더 내부
+- **기능**:
+  - 사용자 메뉴 설정에 따라 동적으로 네비게이션 생성
+  - 활성 페이지 하이라이트
+  - 메뉴 순서 및 활성화 모듈 반영
+
+#### 3. **HomeHero** (`src/components/home/HomeHero.tsx`)
+- **위치**: 홈페이지 메인 섹션
+- **기능**:
+  - 프로필 사진 표시 및 편집
+  - 생일/나이 정보 표시 (타임존 문제 해결됨)
+  - 사진첩/일기장 바로가기 버튼
+  - 주요 기능 소개 카드
+- **프로필 사진 편집 기능**:
+  - 마우스 드래그로 위치 이동
+  - 터치 제스처 지원 (모바일)
+  - 트랙패드 핀치 줌 (Ctrl+휠)
+  - 확대/가로/세로 슬라이더 제공
+  - 실시간 미리보기 및 자동 저장
+  - 데이터 저장: `profilePhotoZoom`, `profilePhotoOffsetX`, `profilePhotoOffsetY`
+
+#### 4. **SettingsSidebar** (`src/components/settings/SettingsSidebar.tsx`)
 - **위치**: SiteHeader 내부
 - **기능**:
   - 사용자 설정에 따라 메뉴 동적 표시
@@ -111,7 +138,7 @@ kids-diary/
   - 테마 설정 (색상, 폰트, 레이아웃, 홈 분위기)
   - 썸네일 사이즈 설정
 
-#### 4. **ThemeProvider** (`src/theme/ThemeProvider.tsx`)
+#### 5. **ThemeProvider** (`src/theme/ThemeProvider.tsx`)
 - **위치**: 최상위 래퍼
 - **기능**:
   - 전역 테마 상태 관리
@@ -126,19 +153,24 @@ kids-diary/
 - **파일**: `src/app/page.tsx`
 - **컴포넌트**: `HomeHero`
 - **내용**:
-  - 프로필 섹션 (사진, 이름, 생일)
+  - 프로필 섹션 (사진, 이름, 생일/나이)
   - 소개 문구
   - 빠른 액션 버튼 (사진첩 보기, 일기장 쓰기)
   - 기능 소개 카드
+- **프로필 사진 편집**:
+  - 드래그로 위치 조정
+  - 트랙패드/휠로 확대/축소
+  - 슬라이더로 세밀한 조정
 
 ### 사진첩 (`/photos`)
 - **파일**: `src/app/photos/page.tsx`
 - **기능**:
-  - 사진 목록 그리드 표시
-  - 사진 추가 버튼
+  - 사진 목록 그리드 표시 (모바일 2열, 데스크톱 3열)
+  - 다중 파일 업로드 지원
   - 썸네일 클릭 → 상세 페이지
   - 여러 개 선택 삭제
   - 개별 삭제
+- **모바일 최적화**: 헤더 버튼 세로 배치, 터치 친화적 간격
 
 ### 사진 상세 (`/photos/[id]`)
 - **파일**: `src/app/photos/[id]/page.tsx`
@@ -155,18 +187,42 @@ kids-diary/
   - 일기 추가 팝업
   - 여러 개 선택 삭제
   - 개별 삭제
+- **모바일 최적화**: 헤더 버튼 세로 배치
 
 ### 일기 상세 (`/diary/[id]`)
 - **파일**: `src/app/diary/[id]/page.tsx`
 - **기능**: 전체 내용 표시, 삭제 버튼
 
-### 작품활동 (`/artworks`)
+### 작품 모음 (`/artworks`)
 - **파일**: `src/app/artworks/page.tsx`
-- **기능**: 작품 목록, 추가, 수정, 삭제
+- **기능**:
+  - 작품 목록 그리드 (모바일 2열, 데스크톱 3열)
+  - 이미지 파일 또는 URL 링크로 추가
+  - 유튜브 동영상 자동 썸네일 추출
+  - 카테고리/학년 분류
+  - 엄마의 한마디 (mom_note)
+  - 여러 개 선택 삭제
+- **URL 링크 기능**:
+  - "원본 영상 보기" / "원본 링크 열기" 배지 클릭으로 외부 링크 이동
+  - 동영상 썸네일 중앙에 플레이 버튼 오버레이
+- **모바일 최적화**: 헤더 버튼 세로 배치, 터치 친화적 그리드
+
+### 작품 상세 (`/artworks/[id]`)
+- **파일**: `src/app/artworks/[id]/page.tsx`
+- **기능**:
+  - 작품 이미지 표시 (max-w-2xl로 크기 제한)
+  - 동영상인 경우 썸네일 클릭 시 원본 URL로 이동
+  - 작품 정보 (제목, 설명, 날짜, 카테고리, 학년)
+  - 엄마의 한마디 표시
+  - 삭제 기능
 
 ### 타임라인 (`/timeline`)
 - **파일**: `src/app/timeline/page.tsx`
-- **기능**: 사진과 일기를 날짜별로 통합 표시
+- **기능**:
+  - 사진과 일기를 날짜별로 통합 표시
+  - 필터링 (전체/사진/일기)
+  - 날짜별 그룹화
+- **모바일 최적화**: 필터 버튼 배치 개선
 
 ### 통계 (`/stats`)
 - **파일**: `src/app/stats/page.tsx`
@@ -210,24 +266,40 @@ kids-diary/
 - id: UUID
 - site_id: TEXT
 - title: TEXT
-- image_url: TEXT (또는 external_url)
-- artwork_type: TEXT ('image', 'url', 'writing')
-- external_url: TEXT (유튜브 등)
+- description: TEXT
+- image_url: TEXT (썸네일 또는 이미지 URL)
+- image_path: TEXT (Storage 경로, 파일 업로드 시)
+- url: TEXT (외부 링크: 유튜브, 블로그 등)
+- type: TEXT ('image' | 'video' | 'writing' | 'link')
+- category: TEXT ('Art', 'STEM', 'Writing', 'Music', 'Other')
+- grade: TEXT ('Pre-K', 'K', '1st', ..., '12th')
+- tags: JSONB []
+- mom_note: TEXT (엄마의 한마디)
 - artwork_date: DATE
 - created_at: TIMESTAMPTZ
 ```
+**참고**: 유튜브 URL 입력 시 자동으로 썸네일 추출 (`lib/utils/urlThumbnail.ts`)
 
 #### 4. **site_settings** (사이트 설정)
 ```sql
-- id: UUID
-- site_id: TEXT (사용자 ID)
+- site_id: TEXT (PRIMARY KEY, 사용자 ID)
 - settings: JSONB {
     profile: {
-      childName, intro, birthDate, 
-      profilePhotoUrl, profilePhotoShape
+      childName: string,
+      intro: string,
+      birthDate?: string,
+      profilePhotoUrl?: string,
+      profilePhotoShape?: 'circle' | 'square' | 'rounded',
+      profilePhotoZoom?: number (1~2.5),
+      profilePhotoOffsetX?: number (-50~50%),
+      profilePhotoOffsetY?: number (-50~50%)
     },
     theme: {
-      colors, radiusPx, font, layout, homeMood
+      colors: { primary, background, surface, text },
+      radiusPx: number,
+      font: string,
+      layout: { mode, thumbnailSize },
+      homeMood: { accentColor1, accentColor2, character, preset }
     }
   }
 - updated_at: TIMESTAMPTZ
@@ -248,6 +320,7 @@ kids-diary/
 ### Storage 버킷
 - **photos**: 사진 파일 저장
 - **artworks**: 작품 이미지 저장
+- **profile-photos**: 프로필 사진 저장
 
 ---
 
@@ -306,9 +379,12 @@ site_id로 필터링하여 사용자별 데이터 분리
 ### Zustand Stores
 
 #### **siteSettingsStore** (`src/stores/siteSettingsStore.ts`)
-- `profile`: 프로필 정보 (이름, 생일, 사진 등)
+- `profile`: 프로필 정보
+  - 기본: `childName`, `intro`, `birthDate`
+  - 사진: `profilePhotoUrl`, `profilePhotoShape`
+  - 편집: `profilePhotoZoom`, `profilePhotoOffsetX`, `profilePhotoOffsetY`
 - `theme`: 테마 설정 (색상, 폰트, 레이아웃 등)
-- `setProfile()`: 프로필 업데이트
+- `setProfile()`: 프로필 업데이트 (부분 업데이트 지원)
 - `setTheme()`: 테마 업데이트
 - `resetToDefault()`: 기본값으로 리셋
 
@@ -392,6 +468,58 @@ site_id로 필터링하여 사용자별 데이터 분리
 - **Hook**: `useSupabaseUser()`
 - **상태**: 로그인/로그아웃 시 자동 업데이트
 - **데이터 분리**: `user.id`를 `siteId`로 사용
+
+---
+
+## 🛠️ 개발 도구 및 스크립트
+
+### NPM 스크립트
+```bash
+npm run dev        # 개발 서버 실행
+npm run build      # 프로덕션 빌드
+npm run start      # 프로덕션 서버 실행
+npm run lint       # ESLint 실행
+npm run migrate    # DB 마이그레이션 실행
+npm run commit     # 자동 커밋 (변경사항 감지 및 커밋)
+```
+
+### 유틸리티 스크립트
+- **scripts/auto-commit.sh**: 자동 커밋 스크립트
+  - 변경된 파일 자동 감지
+  - 파일명 기반 커밋 메시지 생성
+  - 사용법: `npm run commit` 또는 `bash scripts/auto-commit.sh`
+
+- **scripts/auto-push.sh**: 자동 푸시 스크립트
+  - 네트워크 연결 재시도
+  - 최대 10회 재시도
+
+- **scripts/run-migration.ts**: DB 마이그레이션 실행
+  - SQL 파일 실행
+  - 사용법: `npm run migrate`
+
+---
+
+## 🎨 최근 주요 업데이트 (2026.01.27)
+
+### 1. 모바일 UX 개선
+- 햄버거 메뉴 구현 (Portal, z-100)
+- 모바일 목록 레이아웃 최적화
+- 터치 친화적 버튼 및 간격 조정
+
+### 2. 프로필 사진 인터랙티브 편집
+- 드래그로 위치 이동
+- 트랙패드 핀치 줌
+- 슬라이더로 세밀 조정
+- 실시간 저장
+
+### 3. 작품 모음 멀티미디어 지원
+- URL 링크 클릭 가능
+- 유튜브 동영상 플레이 버튼 오버레이
+- 상세 페이지 썸네일 링크 연결
+
+### 4. 생일/나이 표시 개선
+- 타임존 문제 해결 (로컬 날짜 파싱)
+- 한 줄 포맷: "2018년 6월 19일 (10세)"
 
 ---
 

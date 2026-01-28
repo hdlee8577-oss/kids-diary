@@ -24,6 +24,10 @@ Pages:
 - `/` 홈
 - `/photos` 사진첩
 - `/diary` 일기장
+- `/artworks` 작품 모음
+- `/timeline` 타임라인
+- `/stats` 통계
+- `/settings/menu` 메뉴 설정
 
 ## Settings (Theme/Profile) + Supabase Persistence
 
@@ -43,7 +47,9 @@ Supabase `public` 스키마에 아래가 있어야 합니다:
 - `site_settings(site_id, settings, updated_at)`
 - `photos(id, site_id, title, image_path, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at)`
 - `diary_entries(id, site_id, title, content, entry_date, created_at)`
-- Storage bucket: `photos`
+- `artworks(id, site_id, title, description, image_url, image_path, url, type, category, grade, tags, mom_note, artwork_date, created_at)`
+- `user_menu_settings(user_id, enabled_modules, menu_order, updated_at)`
+- Storage buckets: `photos`, `artworks`, `profile-photos`
 
 ### 마이그레이션
 
