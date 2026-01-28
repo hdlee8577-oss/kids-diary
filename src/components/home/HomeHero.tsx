@@ -32,6 +32,9 @@ export function HomeHero() {
   const profilePhotoUrl = profile.profilePhotoUrl;
   const profilePhotoShape = profile.profilePhotoShape || "circle";
   const birthDate = profile.birthDate;
+  const photoZoom = profile.profilePhotoZoom ?? 1;
+  const photoOffsetX = profile.profilePhotoOffsetX ?? 0;
+  const photoOffsetY = profile.profilePhotoOffsetY ?? 0;
 
   // 디버깅: 프로필 사진 URL 확인
   useEffect(() => {
@@ -303,6 +306,55 @@ export function HomeHero() {
     rounded: "rounded-[var(--radius)]",
   };
 
+  // 프로필 사진 확대/이동 설정 저장
+  function updatePhotoTransform(updates: {
+    zoom?: number;
+    offsetX?: number;
+    offsetY?: number;
+  }) {
+    const currentProfile = useSiteSettingsStore.getState().profile;
+    const updatedProfile = {
+      ...currentProfile,
+      profilePhotoZoom:
+        updates.zoom !== undefined
+          ? updates.zoom
+          : currentProfile.profilePhotoZoom ?? 1,
+      profilePhotoOffsetX:
+        updates.offsetX !== undefined
+          ? updates.offsetX
+          : currentProfile.profilePhotoOffsetX ?? 0,
+      profilePhotoOffsetY:
+        updates.offsetY !== undefined
+          ? updates.offsetY
+          : currentProfile.profilePhotoOffsetY ?? 0,
+    };
+
+    // 상태 업데이트 (부분 업데이트)
+    setProfile({
+      profilePhotoZoom: updatedProfile.profilePhotoZoom,
+      profilePhotoOffsetX: updatedProfile.profilePhotoOffsetX,
+      profilePhotoOffsetY: updatedProfile.profilePhotoOffsetY,
+    });
+
+    const adminToken = getAdminToken();
+    const currentTheme = useSiteSettingsStore.getState().theme;
+    fetch("/api/site-settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(adminToken ? { "x-admin-token": adminToken } : {}),
+      },
+      body: JSON.stringify({
+        settings: {
+          profile: updatedProfile,
+          theme: currentTheme,
+        },
+      }),
+    }).catch(() => {
+      console.warn("프로필 사진 편집 옵션 저장 실패");
+    });
+  }
+
   return (
     <section className="relative overflow-visible rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-4 shadow-sm backdrop-blur sm:overflow-hidden sm:p-12">
       <div className="pointer-events-none absolute inset-0">
@@ -365,6 +417,10 @@ export function HomeHero() {
                     src={`${profilePhotoUrl}?t=${Date.now()}`}
                     alt={name}
                     className="h-full w-full object-cover"
+                    style={{
+                      transform: `translate(${photoOffsetX}%, ${photoOffsetY}%) scale(${photoZoom})`,
+                      transformOrigin: "center",
+                    }}
                     onError={(e) => {
                       console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
                       // 이미지 로드 실패 시 기본 아이콘으로 대체
@@ -511,6 +567,58 @@ export function HomeHero() {
                             aria-label="사각형"
                           />
                         </div>
+                        {/* 확대 / 위치 조정 */}
+                        <div className="mt-4 space-y-2">
+                          <p className="text-xs font-medium text-black/60">확대 / 위치 조정</p>
+                          <label className="flex items-center gap-2">
+                            <span className="w-14 text-[11px] text-black/50">확대</span>
+                            <input
+                              type="range"
+                              min={1}
+                              max={2.5}
+                              step={0.05}
+                              value={photoZoom}
+                              onChange={(e) =>
+                                updatePhotoTransform({
+                                  zoom: Number(e.currentTarget.value),
+                                })
+                              }
+                              className="flex-1"
+                            />
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <span className="w-14 text-[11px] text-black/50">가로</span>
+                            <input
+                              type="range"
+                              min={-50}
+                              max={50}
+                              step={1}
+                              value={photoOffsetX}
+                              onChange={(e) =>
+                                updatePhotoTransform({
+                                  offsetX: Number(e.currentTarget.value),
+                                })
+                              }
+                              className="flex-1"
+                            />
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <span className="w-14 text-[11px] text-black/50">세로</span>
+                            <input
+                              type="range"
+                              min={-50}
+                              max={50}
+                              step={1}
+                              value={photoOffsetY}
+                              onChange={(e) =>
+                                updatePhotoTransform({
+                                  offsetY: Number(e.currentTarget.value),
+                                })
+                              }
+                              className="flex-1"
+                            />
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -593,6 +701,58 @@ export function HomeHero() {
                       }`}
                       aria-label="사각형"
                     />
+                  </div>
+                  {/* 확대 / 위치 조정 */}
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-medium text-black/60">확대 / 위치 조정</p>
+                    <label className="flex items-center gap-2">
+                      <span className="w-14 text-[11px] text-black/50">확대</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={2.5}
+                        step={0.05}
+                        value={photoZoom}
+                        onChange={(e) =>
+                          updatePhotoTransform({
+                            zoom: Number(e.currentTarget.value),
+                          })
+                        }
+                        className="flex-1"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <span className="w-14 text-[11px] text-black/50">가로</span>
+                      <input
+                        type="range"
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={photoOffsetX}
+                        onChange={(e) =>
+                          updatePhotoTransform({
+                            offsetX: Number(e.currentTarget.value),
+                          })
+                        }
+                        className="flex-1"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <span className="w-14 text-[11px] text-black/50">세로</span>
+                      <input
+                        type="range"
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={photoOffsetY}
+                        onChange={(e) =>
+                          updatePhotoTransform({
+                            offsetY: Number(e.currentTarget.value),
+                          })
+                        }
+                        className="flex-1"
+                      />
+                    </label>
                   </div>
                 </div>
                 </div>

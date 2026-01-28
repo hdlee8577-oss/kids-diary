@@ -34,6 +34,10 @@ export type SiteProfile = {
   birthDate?: string; // ISO date string
   profilePhotoUrl?: string; // 프로필 사진 URL
   profilePhotoShape?: "circle" | "square" | "rounded"; // 프로필 사진 모양
+  // 프로필 사진 편집 옵션
+  profilePhotoZoom?: number; // 확대 배율 (기본 1)
+  profilePhotoOffsetX?: number; // 가로 이동 (% 단위, 기본 0)
+  profilePhotoOffsetY?: number; // 세로 이동 (% 단위, 기본 0)
 };
 
 export type SiteSettings = {
