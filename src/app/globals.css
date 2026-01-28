@@ -23,6 +23,18 @@
   --font-mono: var(--font-family-mono);
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-text);
