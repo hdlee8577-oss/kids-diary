@@ -577,8 +577,9 @@ export function HomeHero() {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/photos"
             className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
