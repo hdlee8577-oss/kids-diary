@@ -83,7 +83,7 @@ export function SiteHeader() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <DynamicNav />
+          <DynamicNav toggleSettings={toggleSettings} user={user} onLogout={handleLogout} />
           {user ? (
             <div className="hidden items-center gap-2 text-xs sm:flex">
               <span className="max-w-[140px] truncate text-black/60">
@@ -105,9 +105,12 @@ export function SiteHeader() {
               로그인 / 회원가입
             </Link>
           )}
-          <IconButton label="설정" onClick={toggleSettings}>
-            <GearIcon />
-          </IconButton>
+          {/* 데스크톱에서만 설정 버튼 표시 */}
+          <div className="hidden sm:block">
+            <IconButton label="설정" onClick={toggleSettings}>
+              <GearIcon />
+            </IconButton>
+          </div>
         </div>
       </div>
     </header>
