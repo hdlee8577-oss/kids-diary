@@ -437,7 +437,7 @@ export function HomeHero() {
         borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
         background: 'linear-gradient(to bottom right, white, color-mix(in srgb, var(--color-primary) 5%, transparent), color-mix(in srgb, var(--color-secondary) 8%, transparent))',
         boxShadow: '0 20px 25px -5px color-mix(in srgb, var(--color-primary) 10%, transparent)'
-      }}
+      }}>
       {/* 배경 그라데이션 효과 */}
       <div className="pointer-events-none absolute inset-0 opacity-30 rounded-3xl overflow-hidden">
         <div 
