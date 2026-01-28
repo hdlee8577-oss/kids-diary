@@ -274,7 +274,7 @@ export function HomeHero() {
   };
 
   return (
-    <section className="relative overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-8 shadow-sm backdrop-blur sm:p-12">
+    <section className="relative overflow-visible rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-4 shadow-sm backdrop-blur sm:overflow-hidden sm:p-12">
       <div className="pointer-events-none absolute inset-0">
         <div 
           className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl" 
@@ -364,7 +364,7 @@ export function HomeHero() {
                   console.log("[Profile] 🎯 편집 버튼 클릭, 현재 isMenuOpen:", isMenuOpen);
                   setIsMenuOpen(!isMenuOpen);
                 }}
-                className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:opacity-90 z-10"
+                className="absolute -top-2 -right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary)] text-white shadow-lg transition hover:opacity-90"
                 aria-label="프로필 사진 편집"
               >
               <svg
@@ -402,10 +402,10 @@ export function HomeHero() {
               <>
                 {/* 모바일: 전체 화면 오버레이 + 중앙 모달 */}
                 <div 
-                  className="fixed inset-0 z-[90] bg-black/20 sm:hidden"
+                  className="fixed inset-0 z-40 bg-black/20 sm:hidden"
                   onClick={() => setIsMenuOpen(false)}
                 />
-                <div className="fixed inset-x-4 bottom-4 z-[100] mx-auto max-w-sm rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl sm:hidden">
+                <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-sm rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl sm:hidden">
                   <div className="p-4">
                     <div className="mb-3 flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-[var(--color-text)]">프로필 사진 편집</h3>

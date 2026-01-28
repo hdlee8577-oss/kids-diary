@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Sans_KR, Nanum_Gothic, Jua } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -38,6 +38,12 @@ const jua = Jua({
 export const metadata: Metadata = {
   title: "성장 기록",
   description: "커스터마이징 가능한 성장 기록 프레임워크",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 async function getInitialSettings(): Promise<SiteSettings | null> {
