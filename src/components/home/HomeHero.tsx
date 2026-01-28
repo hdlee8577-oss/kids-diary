@@ -429,21 +429,22 @@ export function HomeHero() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="group relative overflow-visible rounded-3xl border border-primary/10 
-                        bg-gradient-to-br from-primary/5 to-secondary/5 p-4 
-                        shadow-2xl shadow-primary/10 backdrop-blur 
+      className="group relative overflow-visible rounded-3xl border border-primary/20 
+                        bg-gradient-to-br from-white via-primary/5 to-secondary/8
+                        p-4 
+                        shadow-2xl shadow-primary/10 
                         hover:shadow-3xl hover:shadow-primary/20 
                         transition-all duration-300
                         sm:overflow-hidden sm:p-12">
       {/* 배경 그라데이션 효과 */}
-      <div className="pointer-events-none absolute inset-0 opacity-40">
+      <div className="pointer-events-none absolute inset-0 opacity-30 rounded-3xl overflow-hidden">
         <div 
           className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl 
-                     bg-gradient-to-br from-primary/30 to-secondary/30" 
+                     bg-gradient-to-br from-primary/20 to-secondary/20" 
         />
         <div 
           className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl 
-                     bg-gradient-to-br from-accent/30 to-primary/30" 
+                     bg-gradient-to-br from-accent/20 to-primary/20" 
         />
       </div>
 
@@ -455,9 +456,9 @@ export function HomeHero() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 
-                          text-sm font-medium text-primary shadow-lg shadow-primary/10 
-                          backdrop-blur-sm border border-primary/10">
+              className="inline-flex items-center gap-2 rounded-full bg-white/95 px-5 py-2.5 
+                          text-sm font-semibold text-primary shadow-lg shadow-primary/20 
+                          backdrop-blur-sm border border-primary/20">
               <Sparkles className="w-4 h-4 text-primary animate-pulse" />
               우리 가족만의 작은 아카이브
             </motion.p>
@@ -637,7 +638,8 @@ export function HomeHero() {
                           }
                         }}
                         disabled={isUploading}
-                        className="block w-full rounded-[var(--radius)] bg-[var(--color-primary)] px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-95 disabled:opacity-50"
+                        className="block w-full rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
+                        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}
                       >
                         {profilePhotoUrl ? "사진 변경" : "사진 업로드"}
                       </button>
@@ -647,7 +649,7 @@ export function HomeHero() {
                             handleDeletePhoto();
                             setIsMenuOpen(false);
                           }}
-                          className="block w-full rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600 hover:bg-red-100"
+                          className="block w-full rounded-xl border-2 border-red-300 bg-white px-4 py-3.5 text-center text-sm font-bold text-red-600 shadow-md hover:bg-red-50 hover:border-red-400 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
                         >
                           사진 삭제
                         </button>
@@ -892,41 +894,45 @@ export function HomeHero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
         className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Link href="/photos">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
+        <Link href="/photos" className="block w-full sm:w-auto">
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="group relative overflow-hidden inline-flex h-12 items-center justify-center gap-2
-                       rounded-2xl px-6 text-sm font-semibold text-white 
-                       bg-gradient-to-r from-primary to-primary-dark
-                       shadow-lg shadow-primary/30
-                       hover:shadow-xl hover:shadow-primary/40
-                       transition-all duration-200 w-full sm:w-auto"
+            className="group relative overflow-hidden flex h-14 w-full items-center justify-center gap-2
+                       rounded-2xl px-8 text-base font-bold text-white 
+                       bg-gradient-to-r from-[#6366f1] via-[#4f46e5] to-[#4338ca]
+                       shadow-[0_4px_14px_0_rgba(99,102,241,0.4)]
+                       hover:shadow-[0_6px_20px_rgba(99,102,241,0.5)]
+                       transition-all duration-300
+                       border border-white/20"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}
           >
-            <Camera className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">사진첩 보기</span>
-            <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
-            <div className="absolute inset-0 bg-white/20 translate-y-full 
-                            group-hover:translate-y-0 transition-transform duration-300" />
-          </motion.div>
+            <Camera className="w-5 h-5 relative z-10 drop-shadow-lg" />
+            <span className="relative z-10 drop-shadow-lg">사진첩 보기</span>
+            <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform drop-shadow-lg" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 
+                            -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+          </motion.button>
         </Link>
-        <Link href="/diary">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
+        <Link href="/diary" className="block w-full sm:w-auto">
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="group relative overflow-hidden inline-flex h-12 items-center justify-center gap-2
-                       rounded-2xl px-6 text-sm font-semibold text-white 
-                       bg-gradient-to-r from-secondary to-secondary-dark
-                       shadow-lg shadow-secondary/30
-                       hover:shadow-xl hover:shadow-secondary/40
-                       transition-all duration-200 w-full sm:w-auto"
+            className="group relative overflow-hidden flex h-14 w-full items-center justify-center gap-2
+                       rounded-2xl px-8 text-base font-bold text-white 
+                       bg-gradient-to-r from-[#ec4899] via-[#db2777] to-[#be185d]
+                       shadow-[0_4px_14px_0_rgba(236,72,153,0.4)]
+                       hover:shadow-[0_6px_20px_rgba(236,72,153,0.5)]
+                       transition-all duration-300
+                       border border-white/20"
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}
           >
-            <BookOpen className="w-4 h-4 relative z-10" />
-            <span className="relative z-10">일기장 쓰기</span>
-            <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
-            <div className="absolute inset-0 bg-white/20 translate-y-full 
-                            group-hover:translate-y-0 transition-transform duration-300" />
-          </motion.div>
+            <BookOpen className="w-5 h-5 relative z-10 drop-shadow-lg" />
+            <span className="relative z-10 drop-shadow-lg">일기장 쓰기</span>
+            <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform drop-shadow-lg" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 
+                            -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+          </motion.button>
         </Link>
       </motion.div>
 
@@ -935,16 +941,18 @@ export function HomeHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.5 }}
-            whileHover={{ y: -4 }}
-            className="group rounded-2xl border border-primary/10 bg-white/80 backdrop-blur-sm p-6
-                          shadow-lg shadow-primary/5 
-                          hover:shadow-2xl hover:shadow-primary/10
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="group rounded-2xl border-2 border-primary/20 bg-white/95 backdrop-blur-sm p-6
+                          shadow-xl shadow-primary/10 
+                          hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/40
                           transition-all duration-300">
-            <div className="flex items-center gap-2 mb-2">
-              <Camera className="w-5 h-5 text-primary" />
-              <p className="text-sm font-bold text-primary">사진첩</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Camera className="w-5 h-5 text-primary" />
+              </div>
+              <p className="text-base font-bold text-primary">사진첩</p>
             </div>
-            <p className="text-sm leading-6 text-gray-600">
+            <p className="text-sm leading-6 text-gray-700 font-medium">
               계절마다, 생일마다, 작은 순간들을 모아봐요.
             </p>
           </motion.div>
@@ -952,16 +960,18 @@ export function HomeHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
-            whileHover={{ y: -4 }}
-            className="group rounded-2xl border border-secondary/10 bg-white/80 backdrop-blur-sm p-6
-                          shadow-lg shadow-secondary/5 
-                          hover:shadow-2xl hover:shadow-secondary/10
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="group rounded-2xl border-2 border-secondary/20 bg-white/95 backdrop-blur-sm p-6
+                          shadow-xl shadow-secondary/10 
+                          hover:shadow-2xl hover:shadow-secondary/20 hover:border-secondary/40
                           transition-all duration-300">
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="w-5 h-5 text-secondary" />
-              <p className="text-sm font-bold text-secondary">일기장</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-secondary/10">
+                <BookOpen className="w-5 h-5 text-secondary" />
+              </div>
+              <p className="text-base font-bold text-secondary">일기장</p>
             </div>
-            <p className="text-sm leading-6 text-gray-600">
+            <p className="text-sm leading-6 text-gray-700 font-medium">
               오늘의 웃음, 말, 표정을 짧게라도 남겨요.
             </p>
           </motion.div>
@@ -969,16 +979,18 @@ export function HomeHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
-            whileHover={{ y: -4 }}
-            className="group rounded-2xl border border-accent/10 bg-white/80 backdrop-blur-sm p-6
-                          shadow-lg shadow-accent/5 
-                          hover:shadow-2xl hover:shadow-accent/10
+            whileHover={{ y: -6, scale: 1.02 }}
+            className="group rounded-2xl border-2 border-accent/20 bg-white/95 backdrop-blur-sm p-6
+                          shadow-xl shadow-accent/10 
+                          hover:shadow-2xl hover:shadow-accent/20 hover:border-accent/40
                           transition-all duration-300">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-5 h-5 text-accent" />
-              <p className="text-sm font-bold text-accent">타임라인</p>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-lg bg-accent/10">
+                <Calendar className="w-5 h-5 text-accent" />
+              </div>
+              <p className="text-base font-bold text-accent">타임라인</p>
             </div>
-            <p className="text-sm leading-6 text-gray-600">
+            <p className="text-sm leading-6 text-gray-700 font-medium">
               시간순으로 우리 아이의 성장 스토리를 봐요.
             </p>
           </motion.div>
