@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "migrate": "tsx scripts/run-migration.ts",
-    "commit": "bash scripts/auto-commit.sh"
+    "commit": "bash scripts/auto-commit.sh",
+    "supabase": "npx supabase",
+    "db:push": "npx supabase db push",
+    "db:pull": "npx supabase db pull"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.1",
@@ -24,6 +27,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
+    "supabase": "^2.72.9",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
