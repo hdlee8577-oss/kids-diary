@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Sparkles, Camera, BookOpen, Calendar, ArrowRight } from "lucide-react";
 import { siteConfig, type SiteSettings } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { getAdminToken } from "@/lib/admin/clientToken";
@@ -423,7 +425,11 @@ export function HomeHero() {
   }
 
   return (
-    <section className="group relative overflow-visible rounded-3xl border border-primary/10 
+    <motion.section 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="group relative overflow-visible rounded-3xl border border-primary/10 
                         bg-gradient-to-br from-primary/5 to-secondary/5 p-4 
                         shadow-2xl shadow-primary/10 backdrop-blur 
                         hover:shadow-3xl hover:shadow-primary/20 
@@ -445,20 +451,32 @@ export function HomeHero() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
           {/* 왼쪽: 텍스트 콘텐츠 */}
           <div className="flex-1">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 
+            <motion.p 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 
                           text-sm font-medium text-primary shadow-lg shadow-primary/10 
                           backdrop-blur-sm border border-primary/10">
-              <span className="text-lg animate-bounce">{mood.character || "🌸"}</span>
+              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
               우리 가족만의 작은 아카이브
-            </p>
-            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl
+            </motion.p>
+            <motion.h1 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl
                            bg-gradient-to-r from-primary via-secondary to-accent 
                            bg-clip-text text-transparent">
               {name}의 성장 기록
-            </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-gray-700 sm:text-lg sm:leading-8">
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="mt-4 max-w-2xl text-base leading-7 text-gray-700 sm:text-lg sm:leading-8">
               {intro}
-            </p>
+            </motion.p>
           </div>
 
           {/* 오른쪽: 프로필 사진 */}
@@ -869,76 +887,103 @@ export function HomeHero() {
           </div>
         </div>
 
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Link
-            href="/photos"
-            className="group relative overflow-hidden inline-flex h-12 items-center justify-center 
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Link href="/photos">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative overflow-hidden inline-flex h-12 items-center justify-center gap-2
                        rounded-2xl px-6 text-sm font-semibold text-white 
                        bg-gradient-to-r from-primary to-primary-dark
                        shadow-lg shadow-primary/30
-                       hover:shadow-xl hover:shadow-primary/40 hover:scale-105
-                       active:scale-95
-                       transition-all duration-200"
+                       hover:shadow-xl hover:shadow-primary/40
+                       transition-all duration-200 w-full sm:w-auto"
           >
+            <Camera className="w-4 h-4 relative z-10" />
             <span className="relative z-10">사진첩 보기</span>
+            <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
             <div className="absolute inset-0 bg-white/20 translate-y-full 
                             group-hover:translate-y-0 transition-transform duration-300" />
-          </Link>
-          <Link
-            href="/diary"
-            className="group relative overflow-hidden inline-flex h-12 items-center justify-center 
+          </motion.div>
+        </Link>
+        <Link href="/diary">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative overflow-hidden inline-flex h-12 items-center justify-center gap-2
                        rounded-2xl px-6 text-sm font-semibold text-white 
                        bg-gradient-to-r from-secondary to-secondary-dark
                        shadow-lg shadow-secondary/30
-                       hover:shadow-xl hover:shadow-secondary/40 hover:scale-105
-                       active:scale-95
-                       transition-all duration-200"
+                       hover:shadow-xl hover:shadow-secondary/40
+                       transition-all duration-200 w-full sm:w-auto"
           >
+            <BookOpen className="w-4 h-4 relative z-10" />
             <span className="relative z-10">일기장 쓰기</span>
+            <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition-transform" />
             <div className="absolute inset-0 bg-white/20 translate-y-full 
                             group-hover:translate-y-0 transition-transform duration-300" />
+          </motion.div>
         </Link>
-      </div>
+      </motion.div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          <div className="group rounded-2xl border border-primary/10 bg-white/80 backdrop-blur-sm p-6
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group rounded-2xl border border-primary/10 bg-white/80 backdrop-blur-sm p-6
                           shadow-lg shadow-primary/5 
-                          hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1
+                          hover:shadow-2xl hover:shadow-primary/10
                           transition-all duration-300">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">📸</span>
+              <Camera className="w-5 h-5 text-primary" />
               <p className="text-sm font-bold text-primary">사진첩</p>
             </div>
             <p className="text-sm leading-6 text-gray-600">
               계절마다, 생일마다, 작은 순간들을 모아봐요.
             </p>
-          </div>
-          <div className="group rounded-2xl border border-secondary/10 bg-white/80 backdrop-blur-sm p-6
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group rounded-2xl border border-secondary/10 bg-white/80 backdrop-blur-sm p-6
                           shadow-lg shadow-secondary/5 
-                          hover:shadow-2xl hover:shadow-secondary/10 hover:-translate-y-1
+                          hover:shadow-2xl hover:shadow-secondary/10
                           transition-all duration-300">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">📝</span>
+              <BookOpen className="w-5 h-5 text-secondary" />
               <p className="text-sm font-bold text-secondary">일기장</p>
             </div>
             <p className="text-sm leading-6 text-gray-600">
               오늘의 웃음, 말, 표정을 짧게라도 남겨요.
             </p>
-          </div>
-          <div className="group rounded-2xl border border-accent/10 bg-white/80 backdrop-blur-sm p-6
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            whileHover={{ y: -4 }}
+            className="group rounded-2xl border border-accent/10 bg-white/80 backdrop-blur-sm p-6
                           shadow-lg shadow-accent/5 
-                          hover:shadow-2xl hover:shadow-accent/10 hover:-translate-y-1
+                          hover:shadow-2xl hover:shadow-accent/10
                           transition-all duration-300">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">📏</span>
-              <p className="text-sm font-bold text-accent">성장 기록</p>
+              <Calendar className="w-5 h-5 text-accent" />
+              <p className="text-sm font-bold text-accent">타임라인</p>
             </div>
             <p className="text-sm leading-6 text-gray-600">
-              키·몸무게·좋아하는 것들을 천천히 업데이트해요.
+              시간순으로 우리 아이의 성장 스토리를 봐요.
             </p>
-          </div>
+          </motion.div>
         </div>
-    </section>
+    </motion.section>
   );
 }
 
