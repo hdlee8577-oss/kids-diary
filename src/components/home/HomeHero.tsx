@@ -925,9 +925,15 @@ export function HomeHero() {
               오늘의 웃음, 말, 표정을 짧게라도 남겨요.
             </p>
           </div>
-          <div className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/60 p-5">
-            <p className="text-sm font-semibold text-[var(--color-text)]">성장 기록</p>
-            <p className="mt-1 text-sm leading-6 text-black/70">
+          <div className="group rounded-2xl border border-accent/10 bg-white/80 backdrop-blur-sm p-6
+                          shadow-lg shadow-accent/5 
+                          hover:shadow-2xl hover:shadow-accent/10 hover:-translate-y-1
+                          transition-all duration-300">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">📏</span>
+              <p className="text-sm font-bold text-accent">성장 기록</p>
+            </div>
+            <p className="text-sm leading-6 text-gray-600">
               키·몸무게·좋아하는 것들을 천천히 업데이트해요.
             </p>
           </div>
