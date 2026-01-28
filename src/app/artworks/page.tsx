@@ -521,14 +521,30 @@ function ArtworkCard({
       <Link href={`/artworks/${item.id}`} onClick={(e) => isSelectionMode && e.preventDefault()}>
         <div className="relative aspect-[4/3] bg-black/5 overflow-hidden rounded-t-[var(--radius)]">
           {item.image_url ? (
-            <Image
-              src={item.image_url}
-              alt={item.title || "artwork"}
-              fill
-              className="object-cover select-none"
-              sizes="(max-width: 640px) 50vw, 33vw"
-              draggable={false}
-            />
+            <>
+              <Image
+                src={item.image_url}
+                alt={item.title || "artwork"}
+                fill
+                className="object-cover select-none"
+                sizes="(max-width: 640px) 50vw, 33vw"
+                draggable={false}
+              />
+              {item.type === "video" && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white shadow-lg">
+                    <svg
+                      className="h-6 w-6"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex h-full items-center justify-center bg-gradient-to-br from-black/5 to-black/10">
               <div className="text-center">
@@ -593,6 +609,29 @@ function ArtworkCard({
                 <span className="inline-flex items-center rounded-full bg-black/5 px-2 py-0.5 text-xs text-black/70">
                   {item.grade}
                 </span>
+              )}
+              {item.url && (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    // 카드 전체 링크로 인한 상세 페이지 이동 방지
+                    e.stopPropagation();
+                  }}
+                  className="inline-flex items-center gap-1 rounded-full bg-black/5 px-2 py-0.5 text-xs text-[var(--color-text)] hover:bg-black/10"
+                >
+                  <span>{item.type === "video" ? "원본 영상 보기" : "원본 링크 열기"}</span>
+                  <svg
+                    className="h-3 w-3"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M11 3a1 1 0 000 2h2.586L8.293 10.293a1 1 0 001.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                    <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                  </svg>
+                </a>
               )}
             </div>
           </div>
