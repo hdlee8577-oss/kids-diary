@@ -91,16 +91,34 @@ export function SiteHeader() {
 
   // 모바일 메뉴 데이터 준비
   const getMobileMenuData = () => {
+    // 기본 메뉴 (항상 표시)
+    const defaultModules = [
+      { id: "photos", path: "/photos", icon: "📸", label: "사진첩", description: "사진첩" },
+      { id: "diary", path: "/diary", icon: "📝", label: "일기장", description: "일기장" },
+    ];
+
     if (error) {
-      return [
-        { id: "photos", path: "/photos", icon: "📸", label: "사진첩", description: "사진첩" },
-        { id: "diary", path: "/diary", icon: "📝", label: "일기장", description: "일기장" },
-      ];
+      return defaultModules;
     }
-    if (loading) return [];
+    
+    if (loading) {
+      return defaultModules; // 로딩 중에도 기본 메뉴 표시
+    }
+
+    // enabledModules가 비어있으면 기본 메뉴만 표시
+    if (!enabledModules || enabledModules.length === 0) {
+      return defaultModules;
+    }
+
     const activeModules = MENU_MODULES.filter((module) =>
       enabledModules.includes(module.id)
     );
+
+    // 활성화된 모듈이 없으면 기본 메뉴 반환
+    if (activeModules.length === 0) {
+      return defaultModules;
+    }
+
     return [...activeModules].sort((a, b) => {
       const aIndex = menuOrder.indexOf(a.id);
       const bIndex = menuOrder.indexOf(b.id);
