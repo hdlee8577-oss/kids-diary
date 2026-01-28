@@ -224,12 +224,12 @@ export function SiteHeader() {
       {isMobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0 z-[60] bg-black/20 sm:hidden"
+            className="fixed inset-0 z-[100] bg-black/20 sm:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           <div
             ref={menuRef}
-            className="fixed right-0 top-0 z-[60] h-full w-64 overflow-y-auto border-l border-black/10 bg-[var(--color-surface)] shadow-xl sm:hidden"
+            className="fixed right-0 top-0 z-[100] h-full w-64 overflow-y-auto border-l border-black/10 bg-[var(--color-surface)] shadow-xl sm:hidden"
           >
             <div className="flex h-full flex-col p-4">
               <div className="mb-4 flex items-center justify-between">

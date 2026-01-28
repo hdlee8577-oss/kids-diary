@@ -7,7 +7,8 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "migrate": "tsx scripts/run-migration.ts"
+    "migrate": "tsx scripts/run-migration.ts",
+    "commit": "bash scripts/auto-commit.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.1",
