@@ -423,15 +423,21 @@ export function HomeHero() {
   }
 
   return (
-    <section className="relative overflow-visible rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-4 shadow-sm backdrop-blur sm:overflow-hidden sm:p-12">
-      <div className="pointer-events-none absolute inset-0">
+    <section className="group relative overflow-visible rounded-3xl border border-primary/10 
+                        bg-gradient-to-br from-primary/5 to-secondary/5 p-4 
+                        shadow-2xl shadow-primary/10 backdrop-blur 
+                        hover:shadow-3xl hover:shadow-primary/20 
+                        transition-all duration-300
+                        sm:overflow-hidden sm:p-12">
+      {/* 배경 그라데이션 효과 */}
+      <div className="pointer-events-none absolute inset-0 opacity-40">
         <div 
-          className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl" 
-          style={{ backgroundColor: `${mood.accentColor1}66` }}
+          className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl 
+                     bg-gradient-to-br from-primary/30 to-secondary/30" 
         />
         <div 
-          className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl" 
-          style={{ backgroundColor: `${mood.accentColor2}66` }}
+          className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl 
+                     bg-gradient-to-br from-accent/30 to-primary/30" 
         />
       </div>
 
@@ -439,14 +445,18 @@ export function HomeHero() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
           {/* 왼쪽: 텍스트 콘텐츠 */}
           <div className="flex-1">
-            <p className="inline-flex items-center gap-2 rounded-[999px] bg-black/5 px-3 py-1 text-sm font-medium text-black/70">
-              <span className="text-lg">{mood.character || "🌸"}</span>
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 
+                          text-sm font-medium text-primary shadow-lg shadow-primary/10 
+                          backdrop-blur-sm border border-primary/10">
+              <span className="text-lg animate-bounce">{mood.character || "🌸"}</span>
               우리 가족만의 작은 아카이브
             </p>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[var(--color-text)] sm:text-5xl">
+            <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl
+                           bg-gradient-to-r from-primary via-secondary to-accent 
+                           bg-clip-text text-transparent">
               {name}의 성장 기록
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-black/70 sm:text-lg sm:leading-8">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-gray-700 sm:text-lg sm:leading-8">
               {intro}
             </p>
           </div>
@@ -862,28 +872,56 @@ export function HomeHero() {
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <Link
             href="/photos"
-            className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+            className="group relative overflow-hidden inline-flex h-12 items-center justify-center 
+                       rounded-2xl px-6 text-sm font-semibold text-white 
+                       bg-gradient-to-r from-primary to-primary-dark
+                       shadow-lg shadow-primary/30
+                       hover:shadow-xl hover:shadow-primary/40 hover:scale-105
+                       active:scale-95
+                       transition-all duration-200"
           >
-            사진첩 보기
+            <span className="relative z-10">사진첩 보기</span>
+            <div className="absolute inset-0 bg-white/20 translate-y-full 
+                            group-hover:translate-y-0 transition-transform duration-300" />
           </Link>
           <Link
             href="/diary"
-            className="inline-flex h-11 items-center justify-center rounded-[var(--radius)] bg-[var(--color-primary)] px-5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+            className="group relative overflow-hidden inline-flex h-12 items-center justify-center 
+                       rounded-2xl px-6 text-sm font-semibold text-white 
+                       bg-gradient-to-r from-secondary to-secondary-dark
+                       shadow-lg shadow-secondary/30
+                       hover:shadow-xl hover:shadow-secondary/40 hover:scale-105
+                       active:scale-95
+                       transition-all duration-200"
           >
-            일기장 쓰기
+            <span className="relative z-10">일기장 쓰기</span>
+            <div className="absolute inset-0 bg-white/20 translate-y-full 
+                            group-hover:translate-y-0 transition-transform duration-300" />
         </Link>
       </div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/60 p-5">
-            <p className="text-sm font-semibold text-[var(--color-text)]">사진첩</p>
-            <p className="mt-1 text-sm leading-6 text-black/70">
+          <div className="group rounded-2xl border border-primary/10 bg-white/80 backdrop-blur-sm p-6
+                          shadow-lg shadow-primary/5 
+                          hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1
+                          transition-all duration-300">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">📸</span>
+              <p className="text-sm font-bold text-primary">사진첩</p>
+            </div>
+            <p className="text-sm leading-6 text-gray-600">
               계절마다, 생일마다, 작은 순간들을 모아봐요.
             </p>
           </div>
-          <div className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/60 p-5">
-            <p className="text-sm font-semibold text-[var(--color-text)]">일기장</p>
-            <p className="mt-1 text-sm leading-6 text-black/70">
+          <div className="group rounded-2xl border border-secondary/10 bg-white/80 backdrop-blur-sm p-6
+                          shadow-lg shadow-secondary/5 
+                          hover:shadow-2xl hover:shadow-secondary/10 hover:-translate-y-1
+                          transition-all duration-300">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">📝</span>
+              <p className="text-sm font-bold text-secondary">일기장</p>
+            </div>
+            <p className="text-sm leading-6 text-gray-600">
               오늘의 웃음, 말, 표정을 짧게라도 남겨요.
             </p>
           </div>
