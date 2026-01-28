@@ -83,7 +83,10 @@ export function SiteHeader() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <DynamicNav toggleSettings={toggleSettings} user={user} onLogout={handleLogout} />
+          {/* 데스크톱: 가로 메뉴만 표시 */}
+          <div className="hidden sm:block">
+            <DynamicNav toggleSettings={toggleSettings} user={user} onLogout={handleLogout} />
+          </div>
           {user ? (
             <div className="hidden items-center gap-2 text-xs sm:flex">
               <span className="max-w-[140px] truncate text-black/60">

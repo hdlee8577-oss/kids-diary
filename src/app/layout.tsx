@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
+import { MobileMenu } from "@/components/layout/MobileMenu";
 import { siteConfig, type SiteSettings } from "@/Site.config";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
@@ -78,6 +79,7 @@ export default async function RootLayout({
           <div className="min-h-dvh">
             <SiteHeader />
             <SettingsSidebar />
+            <MobileMenu />
             {children}
           </div>
         </ThemeProvider>
