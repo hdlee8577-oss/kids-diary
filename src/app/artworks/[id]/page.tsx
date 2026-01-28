@@ -144,16 +144,49 @@ export default function ArtworkDetailPage() {
 
       {/* 이미지 또는 URL 콘텐츠 표시 */}
       {artwork.image_url ? (
-        <div className="relative w-full overflow-hidden rounded-[var(--radius)] bg-black/5">
-          <Image
-            src={artwork.image_url}
-            alt={artwork.title || "artwork"}
-            width={1200}
-            height={900}
-            className="h-auto w-full object-contain"
-            sizes="100vw"
-            priority
-          />
+        <div className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-[var(--radius)] bg-black/5">
+          {artwork.url ? (
+            <a
+              href={artwork.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block"
+            >
+              <Image
+                src={artwork.image_url}
+                alt={artwork.title || "artwork"}
+                width={960}
+                height={720}
+                className="h-auto w-full object-contain transition-transform group-hover:scale-[1.01]"
+                sizes="(max-width: 768px) 100vw, 60vw"
+                priority
+              />
+              {artwork.type === "video" && (
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/70 text-white shadow-xl">
+                    <svg
+                      className="h-8 w-8"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </a>
+          ) : (
+            <Image
+              src={artwork.image_url}
+              alt={artwork.title || "artwork"}
+              width={960}
+              height={720}
+              className="h-auto w-full object-contain"
+              sizes="(max-width: 768px) 100vw, 60vw"
+              priority
+            />
+          )}
         </div>
       ) : artwork.url ? (
         <div className="rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)]/50 p-8 text-center">
