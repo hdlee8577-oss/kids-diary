@@ -2,7 +2,7 @@
 
 :root {
   /* Theme engine (runtime-updated via CSS variables) */
-  /* 생동감 있는 색상 팔레트 */
+  /* 기본 색상 (applyThemeToDom에 의해 런타임에 업데이트됨) */
   --color-primary: #6366f1;
   --color-primary-light: #818cf8;
   --color-primary-dark: #4f46e5;
@@ -19,12 +19,6 @@
   --color-surface-hover: #f5f5f4;
   --color-text: #18181b;
   --color-text-secondary: #71717a;
-  
-  /* 그라데이션 */
-  --gradient-warm: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #ec4899 100%);
-  --gradient-cool: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
-  --gradient-soft: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
 
   --radius: 24px;
   --font-family-sans: var(--font-geist-sans);
@@ -79,13 +73,13 @@ body {
 }
 
 .card:hover {
-  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--color-primary) 10%, transparent);
   transform: translateY(-4px);
 }
 
 /* 그라데이션 텍스트 */
 .gradient-text {
-  background: var(--gradient-cool);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -94,6 +88,6 @@ body {
 /* 글로우 효과 */
 .glow {
   box-shadow: 
-    0 0 20px rgba(99, 102, 241, 0.2),
-    0 0 40px rgba(99, 102, 241, 0.1);
+    0 0 20px color-mix(in srgb, var(--color-primary) 20%, transparent),
+    0 0 40px color-mix(in srgb, var(--color-primary) 10%, transparent);
 }

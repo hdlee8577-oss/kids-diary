@@ -429,22 +429,28 @@ export function HomeHero() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="group relative overflow-visible rounded-3xl border border-primary/20 
-                        bg-gradient-to-br from-white via-primary/5 to-secondary/8
-                        p-4 
-                        shadow-2xl shadow-primary/10 
-                        hover:shadow-3xl hover:shadow-primary/20 
+      className="group relative overflow-visible rounded-3xl p-4 
+                        shadow-2xl hover:shadow-3xl 
                         transition-all duration-300
-                        sm:overflow-hidden sm:p-12">
+                        sm:overflow-hidden sm:p-12"
+      style={{
+        borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+        background: 'linear-gradient(to bottom right, white, color-mix(in srgb, var(--color-primary) 5%, transparent), color-mix(in srgb, var(--color-secondary) 8%, transparent))',
+        boxShadow: '0 20px 25px -5px color-mix(in srgb, var(--color-primary) 10%, transparent)'
+      }}
       {/* 배경 그라데이션 효과 */}
       <div className="pointer-events-none absolute inset-0 opacity-30 rounded-3xl overflow-hidden">
         <div 
-          className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl 
-                     bg-gradient-to-br from-primary/20 to-secondary/20" 
+          className="absolute -top-24 -right-24 h-64 w-64 rounded-full blur-3xl"
+          style={{
+            background: `linear-gradient(to bottom right, color-mix(in srgb, var(--color-primary) 20%, transparent), color-mix(in srgb, var(--color-secondary) 20%, transparent))`
+          }}
         />
         <div 
-          className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl 
-                     bg-gradient-to-br from-accent/20 to-primary/20" 
+          className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full blur-3xl"
+          style={{
+            background: `linear-gradient(to bottom right, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-primary) 20%, transparent))`
+          }}
         />
       </div>
 
@@ -457,18 +463,27 @@ export function HomeHero() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
               className="inline-flex items-center gap-2 rounded-full bg-white/95 px-5 py-2.5 
-                          text-sm font-semibold text-primary shadow-lg shadow-primary/20 
-                          backdrop-blur-sm border border-primary/20">
-              <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                          text-sm font-semibold backdrop-blur-sm"
+              style={{
+                color: 'var(--color-primary)',
+                borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--color-primary) 20%, transparent)'
+              }}>
+              <Sparkles className="w-4 h-4 animate-pulse" style={{ color: 'var(--color-primary)' }} />
               우리 가족만의 작은 아카이브
             </motion.p>
             <motion.h1 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl
-                           bg-gradient-to-r from-primary via-secondary to-accent 
-                           bg-clip-text text-transparent">
+              className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl bg-clip-text text-transparent"
+              style={{
+                background: `linear-gradient(to right, var(--color-primary), var(--color-secondary), var(--color-accent))`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
               {name}의 성장 기록
             </motion.h1>
             <motion.p 
@@ -638,8 +653,12 @@ export function HomeHero() {
                           }
                         }}
                         disabled={isUploading}
-                        className="block w-full rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
-                        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}
+                        className="block w-full rounded-xl px-4 py-3.5 text-center text-sm font-bold text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-white/20"
+                        style={{ 
+                          textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                          background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-dark))',
+                          boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--color-primary) 30%, transparent)'
+                        }}
                       >
                         {profilePhotoUrl ? "사진 변경" : "사진 업로드"}
                       </button>
@@ -900,12 +919,13 @@ export function HomeHero() {
             whileTap={{ scale: 0.95 }}
             className="group relative overflow-hidden flex h-14 w-full items-center justify-center gap-2
                        rounded-2xl px-8 text-base font-bold text-white 
-                       bg-gradient-to-r from-[#6366f1] via-[#4f46e5] to-[#4338ca]
-                       shadow-[0_4px_14px_0_rgba(99,102,241,0.4)]
-                       hover:shadow-[0_6px_20px_rgba(99,102,241,0.5)]
                        transition-all duration-300
                        border border-white/20"
-            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}
+            style={{ 
+              textShadow: '0 2px 4px rgba(0,0,0,0.25)',
+              background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-dark))',
+              boxShadow: '0 4px 14px 0 color-mix(in srgb, var(--color-primary) 40%, transparent)'
+            }}
           >
             <Camera className="w-5 h-5 relative z-10 drop-shadow-lg" />
             <span className="relative z-10 drop-shadow-lg">사진첩 보기</span>
@@ -920,12 +940,13 @@ export function HomeHero() {
             whileTap={{ scale: 0.95 }}
             className="group relative overflow-hidden flex h-14 w-full items-center justify-center gap-2
                        rounded-2xl px-8 text-base font-bold text-white 
-                       bg-gradient-to-r from-[#ec4899] via-[#db2777] to-[#be185d]
-                       shadow-[0_4px_14px_0_rgba(236,72,153,0.4)]
-                       hover:shadow-[0_6px_20px_rgba(236,72,153,0.5)]
                        transition-all duration-300
                        border border-white/20"
-            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.25)' }}
+            style={{ 
+              textShadow: '0 2px 4px rgba(0,0,0,0.25)',
+              background: 'linear-gradient(to right, var(--color-secondary), var(--color-secondary-dark))',
+              boxShadow: '0 4px 14px 0 color-mix(in srgb, var(--color-secondary) 40%, transparent)'
+            }}
           >
             <BookOpen className="w-5 h-5 relative z-10 drop-shadow-lg" />
             <span className="relative z-10 drop-shadow-lg">일기장 쓰기</span>
@@ -942,15 +963,18 @@ export function HomeHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.5 }}
             whileHover={{ y: -6, scale: 1.02 }}
-            className="group rounded-2xl border-2 border-primary/20 bg-white/95 backdrop-blur-sm p-6
-                          shadow-xl shadow-primary/10 
-                          hover:shadow-2xl hover:shadow-primary/20 hover:border-primary/40
-                          transition-all duration-300">
+            className="group rounded-2xl bg-white/95 backdrop-blur-sm p-6 transition-all duration-300"
+            style={{
+              borderWidth: '2px',
+              borderStyle: 'solid',
+              borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+              boxShadow: '0 20px 25px -5px color-mix(in srgb, var(--color-primary) 10%, transparent)'
+            }}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Camera className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)' }}>
+                <Camera className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
               </div>
-              <p className="text-base font-bold text-primary">사진첩</p>
+              <p className="text-base font-bold" style={{ color: 'var(--color-primary)' }}>사진첩</p>
             </div>
             <p className="text-sm leading-6 text-gray-700 font-medium">
               계절마다, 생일마다, 작은 순간들을 모아봐요.
@@ -961,15 +985,18 @@ export function HomeHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
             whileHover={{ y: -6, scale: 1.02 }}
-            className="group rounded-2xl border-2 border-secondary/20 bg-white/95 backdrop-blur-sm p-6
-                          shadow-xl shadow-secondary/10 
-                          hover:shadow-2xl hover:shadow-secondary/20 hover:border-secondary/40
-                          transition-all duration-300">
+            className="group rounded-2xl bg-white/95 backdrop-blur-sm p-6 transition-all duration-300"
+            style={{
+              borderWidth: '2px',
+              borderStyle: 'solid',
+              borderColor: 'color-mix(in srgb, var(--color-secondary) 20%, transparent)',
+              boxShadow: '0 20px 25px -5px color-mix(in srgb, var(--color-secondary) 10%, transparent)'
+            }}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-secondary/10">
-                <BookOpen className="w-5 h-5 text-secondary" />
+              <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)' }}>
+                <BookOpen className="w-5 h-5" style={{ color: 'var(--color-secondary)' }} />
               </div>
-              <p className="text-base font-bold text-secondary">일기장</p>
+              <p className="text-base font-bold" style={{ color: 'var(--color-secondary)' }}>일기장</p>
             </div>
             <p className="text-sm leading-6 text-gray-700 font-medium">
               오늘의 웃음, 말, 표정을 짧게라도 남겨요.
@@ -980,15 +1007,18 @@ export function HomeHero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
             whileHover={{ y: -6, scale: 1.02 }}
-            className="group rounded-2xl border-2 border-accent/20 bg-white/95 backdrop-blur-sm p-6
-                          shadow-xl shadow-accent/10 
-                          hover:shadow-2xl hover:shadow-accent/20 hover:border-accent/40
-                          transition-all duration-300">
+            className="group rounded-2xl bg-white/95 backdrop-blur-sm p-6 transition-all duration-300"
+            style={{
+              borderWidth: '2px',
+              borderStyle: 'solid',
+              borderColor: 'color-mix(in srgb, var(--color-accent) 20%, transparent)',
+              boxShadow: '0 20px 25px -5px color-mix(in srgb, var(--color-accent) 10%, transparent)'
+            }}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-lg bg-accent/10">
-                <Calendar className="w-5 h-5 text-accent" />
+              <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)' }}>
+                <Calendar className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
               </div>
-              <p className="text-base font-bold text-accent">타임라인</p>
+              <p className="text-base font-bold" style={{ color: 'var(--color-accent)' }}>타임라인</p>
             </div>
             <p className="text-sm leading-6 text-gray-700 font-medium">
               시간순으로 우리 아이의 성장 스토리를 봐요.
