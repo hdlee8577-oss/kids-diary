@@ -315,7 +315,6 @@ export function SiteHeader() {
           </div>
         </>
       )}
-      </div>
     </header>
   );
 }
