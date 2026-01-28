@@ -89,12 +89,19 @@ export function DynamicNav({ toggleSettings, user, onLogout }: DynamicNavProps =
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-                        isActive
-                          ? "bg-primary/10 text-primary shadow-lg shadow-primary/20"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                      className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all"
                       title={module.description}
+                      style={
+                        isActive
+                          ? {
+                              background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                              color: 'var(--color-primary)',
+                              boxShadow: '0 10px 15px -3px color-mix(in srgb, var(--color-primary) 20%, transparent)'
+                            }
+                          : {
+                              color: '#6b7280',
+                            }
+                      }
                     >
                       {Icon && <Icon className="w-4 h-4" />}
                       {module.label}
