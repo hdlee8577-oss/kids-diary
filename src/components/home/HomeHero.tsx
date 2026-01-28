@@ -397,9 +397,103 @@ export function HomeHero() {
               </div>
             )}
 
-            {/* 메뉴 - 아래쪽으로 열리도록 수정 */}
+            {/* 메뉴 - 모바일에서는 중앙 모달, 데스크톱에서는 드롭다운 */}
             {isMenuOpen && (
-              <div className="absolute left-0 top-full z-[100] mt-2 min-w-[200px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl">
+              <>
+                {/* 모바일: 전체 화면 오버레이 + 중앙 모달 */}
+                <div 
+                  className="fixed inset-0 z-[90] bg-black/20 sm:hidden"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                <div className="fixed inset-x-4 bottom-4 z-[100] mx-auto max-w-sm rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl sm:hidden">
+                  <div className="p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-[var(--color-text)]">프로필 사진 편집</h3>
+                      <button
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full hover:bg-black/5"
+                        aria-label="닫기"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log("[Profile] 🎯 사진 업로드 버튼 클릭");
+                          if (fileInputRef.current) {
+                            setIsMenuOpen(false);
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            fileInputRef.current.click();
+                          }
+                        }}
+                        disabled={isUploading}
+                        className="block w-full rounded-[var(--radius)] bg-[var(--color-primary)] px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-95 disabled:opacity-50"
+                      >
+                        {profilePhotoUrl ? "사진 변경" : "사진 업로드"}
+                      </button>
+                      {profilePhotoUrl && (
+                        <button
+                          onClick={() => {
+                            handleDeletePhoto();
+                            setIsMenuOpen(false);
+                          }}
+                          className="block w-full rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-600 hover:bg-red-100"
+                        >
+                          사진 삭제
+                        </button>
+                      )}
+                      <div className="border-t border-black/10 pt-3">
+                        <p className="mb-3 text-xs font-medium text-black/60">모양 선택</p>
+                        <div className="flex justify-center gap-3">
+                          <button
+                            onClick={() => {
+                              handleShapeChange("circle");
+                              setIsMenuOpen(false);
+                            }}
+                            className={`h-10 w-10 rounded-full border-2 ${
+                              profilePhotoShape === "circle"
+                                ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                                : "border-black/20"
+                            }`}
+                            aria-label="동그라미"
+                          />
+                          <button
+                            onClick={() => {
+                              handleShapeChange("rounded");
+                              setIsMenuOpen(false);
+                            }}
+                            className={`h-10 w-10 rounded-[var(--radius)] border-2 ${
+                              profilePhotoShape === "rounded"
+                                ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                                : "border-black/20"
+                            }`}
+                            aria-label="둥근 모서리"
+                          />
+                          <button
+                            onClick={() => {
+                              handleShapeChange("square");
+                              setIsMenuOpen(false);
+                            }}
+                            className={`h-10 w-10 border-2 ${
+                              profilePhotoShape === "square"
+                                ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                                : "border-black/20"
+                            }`}
+                            aria-label="사각형"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 데스크톱: 드롭다운 메뉴 */}
+                <div className="absolute left-0 top-full z-[100] mt-2 hidden min-w-[200px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-xl sm:block">
                 <button
                   onClick={async (e) => {
                     e.preventDefault();
