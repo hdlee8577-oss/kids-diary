@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { IconButton } from "@/components/shared/IconButton";
 import { useThemeUI } from "@/theme/ThemeProvider";
 import { DynamicNav } from "./DynamicNav";
@@ -51,7 +52,13 @@ export function SiteHeader() {
   const theme = useSiteSettingsStore((s) => s.theme);
   const { enabledModules, menuOrder, loading, error } = useUserMenuSettings();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // 클라이언트 사이드에서만 Portal 렌더링
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 모바일 메뉴 열릴 때 body 스크롤 방지
   useEffect(() => {
@@ -220,8 +227,8 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* 모바일: 오른쪽에서 슬라이드되는 사이드 메뉴 */}
-      {isMobileMenuOpen && (
+      {/* 모바일: 오른쪽에서 슬라이드되는 사이드 메뉴 - Portal로 body에 직접 렌더링 */}
+      {mounted && isMobileMenuOpen && createPortal(
         <>
           <div
             className="fixed inset-0 z-[100] bg-black/20 sm:hidden"
@@ -331,7 +338,8 @@ export function SiteHeader() {
               </div>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </header>
   );
