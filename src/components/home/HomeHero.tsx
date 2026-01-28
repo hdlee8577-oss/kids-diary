@@ -36,6 +36,18 @@ export function HomeHero() {
   const photoOffsetX = profile.profilePhotoOffsetX ?? 0;
   const photoOffsetY = profile.profilePhotoOffsetY ?? 0;
 
+  // 프로필 사진 드래그/줌 편집용 ref
+  const photoContainerRef = useRef<HTMLDivElement | null>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef<{
+    x: number;
+    y: number;
+    startOffsetX: number;
+    startOffsetY: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
   // 디버깅: 프로필 사진 URL 확인
   useEffect(() => {
     console.log("[Profile] 현재 profilePhotoUrl:", profilePhotoUrl);
@@ -355,6 +367,61 @@ export function HomeHero() {
     });
   }
 
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+  // 마우스/터치 드래그로 사진 위치 이동
+  function handlePhotoPointerDown(
+    clientX: number,
+    clientY: number
+  ) {
+    const rect = photoContainerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    isDraggingRef.current = true;
+    dragStartRef.current = {
+      x: clientX,
+      y: clientY,
+      startOffsetX: photoOffsetX,
+      startOffsetY: photoOffsetY,
+      width: rect.width || 1,
+      height: rect.height || 1,
+    };
+  }
+
+  function handlePhotoPointerMove(
+    clientX: number,
+    clientY: number
+  ) {
+    if (!isDraggingRef.current || !dragStartRef.current) return;
+    const start = dragStartRef.current;
+    const dx = clientX - start.x;
+    const dy = clientY - start.y;
+
+    const deltaXPercent = (dx / start.width) * 100;
+    const deltaYPercent = (dy / start.height) * 100;
+
+    updatePhotoTransform({
+      offsetX: clamp(start.startOffsetX + deltaXPercent, -50, 50),
+      offsetY: clamp(start.startOffsetY + deltaYPercent, -50, 50),
+    });
+  }
+
+  function stopDragging() {
+    isDraggingRef.current = false;
+    dragStartRef.current = null;
+  }
+
+  // 트랙패드/마우스 휠로 확대/축소 (맥북 핀치 줌은 wheel + ctrlKey로 들어오는 경우가 많음)
+  function handlePhotoWheel(e: React.WheelEvent<HTMLDivElement>) {
+    // 일반 스크롤은 무시하고, ctrlKey가 눌린 경우(핀치 줌 등)만 처리
+    if (!e.ctrlKey) return;
+    e.preventDefault();
+    const delta = e.deltaY;
+    const zoomChange = -delta * 0.002; // 감도 조절
+    const nextZoom = clamp(photoZoom + zoomChange, 1, 2.5);
+    updatePhotoTransform({ zoom: nextZoom });
+  }
+
   return (
     <section className="relative overflow-visible rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-4 shadow-sm backdrop-blur sm:overflow-hidden sm:p-12">
       <div className="pointer-events-none absolute inset-0">
@@ -409,18 +476,48 @@ export function HomeHero() {
             <div className="relative">
               {profilePhotoUrl ? (
                 <div
+                  ref={photoContainerRef}
                   className={`relative h-32 w-32 overflow-hidden border-4 border-white shadow-lg sm:h-40 sm:w-40 ${shapeClasses[profilePhotoShape]}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handlePhotoPointerDown(e.clientX, e.clientY);
+                  }}
+                  onMouseMove={(e) => {
+                    if (!isDraggingRef.current) return;
+                    e.preventDefault();
+                    handlePhotoPointerMove(e.clientX, e.clientY);
+                  }}
+                  onMouseUp={() => {
+                    stopDragging();
+                  }}
+                  onMouseLeave={() => {
+                    stopDragging();
+                  }}
+                  onTouchStart={(e) => {
+                    const touch = e.touches[0];
+                    if (!touch) return;
+                    handlePhotoPointerDown(touch.clientX, touch.clientY);
+                  }}
+                  onTouchMove={(e) => {
+                    const touch = e.touches[0];
+                    if (!touch) return;
+                    handlePhotoPointerMove(touch.clientX, touch.clientY);
+                  }}
+                  onTouchEnd={stopDragging}
+                  onTouchCancel={stopDragging}
+                  onWheel={handlePhotoWheel}
                 >
                   {/* 일반 img 태그 사용 (Next.js Image 캐싱 문제 우회) */}
                   <img
                     key={profilePhotoUrl} // URL만 key로 사용 (타임스탬프 제거)
                     src={`${profilePhotoUrl}?t=${Date.now()}`}
                     alt={name}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover select-none"
                     style={{
                       transform: `translate(${photoOffsetX}%, ${photoOffsetY}%) scale(${photoZoom})`,
                       transformOrigin: "center",
                     }}
+                    draggable={false}
                     onError={(e) => {
                       console.error("[Profile] 이미지 로드 실패:", profilePhotoUrl);
                       // 이미지 로드 실패 시 기본 아이콘으로 대체
