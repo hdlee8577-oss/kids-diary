@@ -168,7 +168,7 @@ export default function PhotosPage() {
         현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
       </p>
 
-      <div className="mt-8 flex items-center justify-between">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-base font-semibold text-[var(--color-text)]">
           사진 목록
         </h2>
@@ -333,7 +333,7 @@ export default function PhotosPage() {
               layoutMode === "timeline"
                 ? "mt-4 grid gap-4"
                 : thumbnailSize === "small"
-                  ? "mt-4 grid grid-cols-3 gap-4 sm:grid-cols-4"
+                  ? "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
                   : thumbnailSize === "large"
                     ? "mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2"
                     : "mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3"

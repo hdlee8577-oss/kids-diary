@@ -235,7 +235,7 @@ export default function ArtworksPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-[var(--color-text)]">작품 모음</h1>
           <p className="mt-1 text-sm text-black/60">
@@ -443,7 +443,7 @@ export default function ArtworksPage() {
               layoutMode === "timeline"
                 ? "mt-4 grid gap-4"
                 : thumbnailSize === "small"
-                  ? "mt-4 grid grid-cols-3 gap-4 sm:grid-cols-4"
+                  ? "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
                   : thumbnailSize === "large"
                     ? "mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2"
                     : "mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3"

@@ -308,18 +308,19 @@ export default function TimelinePage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
-          타임라인
-        </h1>
-        <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
-          사진과 일기를 시간순으로 모아봐요
-        </p>
-      </div>
-
-      {/* 필터 버튼 */}
-      <div className="mb-8">
-        <FilterButtons filter={filter} onFilterChange={setFilter} />
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
+            타임라인
+          </h1>
+          <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
+            사진과 일기를 시간순으로 모아봐요
+          </p>
+        </div>
+        {/* 필터 버튼 */}
+        <div className="sm:text-right">
+          <FilterButtons filter={filter} onFilterChange={setFilter} />
+        </div>
       </div>
 
       {/* 타임라인 그룹 */}
