@@ -54,26 +54,38 @@ export function HomeHero() {
     };
   }, [isMenuOpen]);
 
-  // 생일로부터 나이 계산
+  // 생일로부터 나이 계산 (타임존 문제 방지를 위해 문자열 직접 파싱)
   const getAge = (birthDate: string | undefined): number | null => {
     if (!birthDate) return null;
-    const birth = new Date(birthDate);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
+    try {
+      // YYYY-MM-DD 형식에서 직접 파싱
+      const [year, month, day] = birthDate.split("-").map(Number);
+      if (!year || !month || !day) return null;
+      
+      const birth = new Date(year, month - 1, day); // month는 0부터 시작
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return age;
+    } catch {
+      return null;
     }
-    return age;
   };
 
-  // 생일 포맷팅 (YYYY-MM-DD 형식을 한국어 형식으로)
+  // 생일 포맷팅 (YYYY-MM-DD 형식을 한국어 형식으로, 타임존 문제 방지)
   const formatBirthDate = (birthDate: string | undefined): string | null => {
     if (!birthDate) return null;
     try {
-      const date = new Date(birthDate);
-      // 날짜가 유효한지 확인
-      if (isNaN(date.getTime())) return null;
+      // YYYY-MM-DD 형식에서 직접 파싱하여 타임존 문제 방지
+      const [year, month, day] = birthDate.split("-").map(Number);
+      if (!year || !month || !day) return null;
+      
+      // 로컬 날짜로 직접 생성 (타임존 변환 없이)
+      const date = new Date(year, month - 1, day); // month는 0부터 시작
+      
       return date.toLocaleDateString("ko-KR", {
         year: "numeric",
         month: "long",
