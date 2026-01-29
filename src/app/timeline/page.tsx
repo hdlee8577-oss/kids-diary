@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Calendar, Camera, BookOpen, Filter } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { Button } from "@/components/shared/Button";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
@@ -171,7 +173,16 @@ function filterItems(items: TimelineItem[], filter: FilterType): TimelineItem[] 
 function PhotoCard({ item }: { item: TimelineItem }) {
   return (
     <Link href={item.link} className="block">
-      <article className="group relative overflow-hidden rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)] shadow-sm transition hover:shadow-md">
+      <motion.article 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        className="group relative overflow-hidden rounded-[var(--radius)] border shadow-sm transition"
+        style={{
+          borderColor: 'rgba(0,0,0,0.05)',
+          background: 'var(--color-surface)'
+        }}
+      >
         <div className="relative aspect-[4/3] w-full overflow-hidden">
           <Image
             src={item.imageUrl!}
@@ -185,12 +196,13 @@ function PhotoCard({ item }: { item: TimelineItem }) {
             }}
           />
         </div>
-        <div className="p-3">
+        <div className="p-3 flex items-center gap-2">
+          <Camera className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-primary)' }} />
           <h3 className="truncate text-sm font-medium text-[var(--color-text)]">
             {item.title}
           </h3>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }
@@ -198,10 +210,19 @@ function PhotoCard({ item }: { item: TimelineItem }) {
 function DiaryCard({ item }: { item: TimelineItem }) {
   return (
     <Link href={item.link} className="block">
-      <article className="group rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)] p-4 shadow-sm transition hover:shadow-md">
+      <motion.article 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+        className="group rounded-[var(--radius)] border p-4 shadow-sm transition"
+        style={{
+          borderColor: 'rgba(0,0,0,0.05)',
+          background: 'var(--color-surface)'
+        }}
+      >
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/10 text-xl">
-            📝
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)' }}>
+            <BookOpen className="w-5 h-5" style={{ color: 'var(--color-secondary)' }} />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="truncate text-sm font-medium text-[var(--color-text)]">
@@ -214,7 +235,7 @@ function DiaryCard({ item }: { item: TimelineItem }) {
             )}
           </div>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }
@@ -229,27 +250,36 @@ function FilterButtons({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <Button
-        type="button"
-        variant={filter === "all" ? "primary" : "secondary"}
-        onClick={() => onFilterChange("all")}
-      >
-        전체
-      </Button>
-      <Button
-        type="button"
-        variant={filter === "photo" ? "primary" : "secondary"}
-        onClick={() => onFilterChange("photo")}
-      >
-        📸 사진
-      </Button>
-      <Button
-        type="button"
-        variant={filter === "diary" ? "primary" : "secondary"}
-        onClick={() => onFilterChange("diary")}
-      >
-        📝 일기
-      </Button>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          type="button"
+          variant={filter === "all" ? "primary" : "secondary"}
+          onClick={() => onFilterChange("all")}
+        >
+          <Filter className="w-4 h-4 mr-2" />
+          전체
+        </Button>
+      </motion.div>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          type="button"
+          variant={filter === "photo" ? "primary" : "secondary"}
+          onClick={() => onFilterChange("photo")}
+        >
+          <Camera className="w-4 h-4 mr-2" />
+          사진
+        </Button>
+      </motion.div>
+      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          type="button"
+          variant={filter === "diary" ? "primary" : "secondary"}
+          onClick={() => onFilterChange("diary")}
+        >
+          <BookOpen className="w-4 h-4 mr-2" />
+          일기
+        </Button>
+      </motion.div>
     </div>
   );
 }
@@ -308,20 +338,32 @@ export default function TimelinePage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
-            타임라인
-          </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
-            사진과 일기를 시간순으로 모아봐요
-          </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-6"
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl" style={{ background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)' }}>
+              <Calendar className="w-6 h-6" style={{ color: 'var(--color-accent)' }} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
+                타임라인
+              </h1>
+              <p className="mt-1 text-sm text-black/60">
+                사진과 일기를 시간순으로 모아봐요
+              </p>
+            </div>
+          </div>
+          {/* 필터 버튼 */}
+          <div className="sm:text-right">
+            <FilterButtons filter={filter} onFilterChange={setFilter} />
+          </div>
         </div>
-        {/* 필터 버튼 */}
-        <div className="sm:text-right">
-          <FilterButtons filter={filter} onFilterChange={setFilter} />
-        </div>
-      </div>
+      </motion.div>
 
       {/* 타임라인 그룹 */}
       {isLoading ? (
