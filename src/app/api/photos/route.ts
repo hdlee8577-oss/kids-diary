@@ -117,7 +117,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, id: data.id });
+  return NextResponse.json({ ok: true, id: data.id, imageUrl: publicUrl });
 }
 
 export async function DELETE(req: Request) {
