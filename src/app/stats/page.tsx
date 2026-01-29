@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { BarChart3, Camera, BookOpen, TrendingUp, Calendar } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 
@@ -146,14 +148,26 @@ export default function StatsPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <header className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
-          통계
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-black/70">
-          지금까지 기록한 사진과 일기를 한눈에 볼 수 있는 간단한 통계예요.
-        </p>
-      </header>
+      <motion.header
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)' }}>
+            <BarChart3 className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
+              통계
+            </h1>
+            <p className="mt-1 text-sm text-black/60">
+              지금까지 기록한 사진과 일기를 한눈에 볼 수 있는 간단한 통계예요.
+            </p>
+          </div>
+        </div>
+      </motion.header>
 
       {error && (
         <div className="mb-6 rounded-[var(--radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -166,78 +180,146 @@ export default function StatsPage() {
       ) : (
         <>
           {/* 요약 카드 */}
-          <section className="mb-10 grid gap-4 rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/80 p-4 sm:grid-cols-2">
-            <div className="rounded-[var(--radius)] bg-white/70 p-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wide text-black/50">
-                전체 사진
+          <section className="mb-10 grid gap-4 sm:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              className="rounded-2xl p-6 shadow-xl"
+              style={{
+                background: 'linear-gradient(135deg, white, color-mix(in srgb, var(--color-primary) 5%, transparent))',
+                borderWidth: '2px',
+                borderStyle: 'solid',
+                borderColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)'
+              }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)' }}>
+                  <Camera className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-wide text-black/60">
+                  전체 사진
+                </p>
+              </div>
+              <p className="text-3xl font-bold text-[var(--color-text)]">
+                {summary.totalPhotos.toLocaleString()}<span className="text-xl text-black/50">장</span>
               </p>
-              <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-                {summary.totalPhotos.toLocaleString()}장
-              </p>
-              <p className="mt-1 text-xs text-black/50">
+              <div className="mt-3 flex items-center gap-2 text-xs text-black/60">
+                <TrendingUp className="w-3 h-3" />
                 최근 30일:{" "}
-                <span className="font-semibold text-[var(--color-text)]">
+                <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
                   {summary.photosLast30Days.toLocaleString()}장
                 </span>
-              </p>
-            </div>
+              </div>
+            </motion.div>
 
-            <div className="rounded-[var(--radius)] bg-white/70 p-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wide text-black/50">
-                전체 일기
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              className="rounded-2xl p-6 shadow-xl"
+              style={{
+                background: 'linear-gradient(135deg, white, color-mix(in srgb, var(--color-secondary) 5%, transparent))',
+                borderWidth: '2px',
+                borderStyle: 'solid',
+                borderColor: 'color-mix(in srgb, var(--color-secondary) 20%, transparent)'
+              }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)' }}>
+                  <BookOpen className="w-5 h-5" style={{ color: 'var(--color-secondary)' }} />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-wide text-black/60">
+                  전체 일기
+                </p>
+              </div>
+              <p className="text-3xl font-bold text-[var(--color-text)]">
+                {summary.totalDiary.toLocaleString()}<span className="text-xl text-black/50">편</span>
               </p>
-              <p className="mt-2 text-2xl font-bold text-[var(--color-text)]">
-                {summary.totalDiary.toLocaleString()}편
-              </p>
-              <p className="mt-1 text-xs text-black/50">
+              <div className="mt-3 flex items-center gap-2 text-xs text-black/60">
+                <TrendingUp className="w-3 h-3" />
                 최근 30일:{" "}
-                <span className="font-semibold text-[var(--color-text)]">
+                <span className="font-bold" style={{ color: 'var(--color-secondary)' }}>
                   {summary.diaryLast30Days.toLocaleString()}편
                 </span>
-              </p>
-            </div>
+              </div>
+            </motion.div>
           </section>
 
-          {/* 월별 추이 (간단한 텍스트 차트) */}
-          <section className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/80 p-4">
-            <h2 className="text-sm font-semibold text-[var(--color-text)]">
-              월별 기록 추이
-            </h2>
+          {/* 월별 추이 */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="rounded-2xl p-6 shadow-xl"
+            style={{
+              background: 'var(--color-surface)',
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: 'rgba(0,0,0,0.05)'
+            }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
+              <h2 className="text-base font-bold text-[var(--color-text)]">
+                월별 기록 추이
+              </h2>
+            </div>
             {monthly.length === 0 ? (
               <p className="mt-3 text-sm text-black/60">아직 통계를 만들 수 있는 기록이 없어요.</p>
             ) : (
-              <div className="mt-4 space-y-3 text-xs text-black/70">
-                {monthly.map((m) => {
+              <div className="mt-4 space-y-4">
+                {monthly.map((m, index) => {
                   const total = m.photos + m.diary;
                   const photoRatio = total === 0 ? 0 : (m.photos / total) * 100;
                   const diaryRatio = total === 0 ? 0 : (m.diary / total) * 100;
                   return (
-                    <div key={m.month}>
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="font-medium">
+                    <motion.div
+                      key={m.month}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.4 + index * 0.05, duration: 0.3 }}
+                    >
+                      <div className="mb-2 flex items-center justify-between text-sm">
+                        <span className="font-bold text-[var(--color-text)]">
                           {m.month.slice(0, 4)}년 {Number(m.month.slice(5))}월
                         </span>
-                        <span className="text-black/50">
-                          총 {total.toLocaleString()}개 (사진 {m.photos.toLocaleString()} / 일기{" "}
-                          {m.diary.toLocaleString()})
+                        <span className="text-xs text-black/60">
+                          총 <span className="font-bold text-[var(--color-text)]">{total.toLocaleString()}</span>개 
+                          <span className="mx-1">·</span>
+                          사진 <span className="font-bold" style={{ color: 'var(--color-primary)' }}>{m.photos.toLocaleString()}</span> 
+                          <span className="mx-1">·</span>
+                          일기 <span className="font-bold" style={{ color: 'var(--color-secondary)' }}>{m.diary.toLocaleString()}</span>
                         </span>
                       </div>
-                      <div className="flex h-2 overflow-hidden rounded-full bg-black/5">
-                        <div
-                          className="bg-[var(--color-primary)]/40"
-                          style={{ width: `${photoRatio}%` }}
+                      <div className="flex h-3 overflow-hidden rounded-full bg-black/5 shadow-inner">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${photoRatio}%` }}
+                          transition={{ delay: 0.5 + index * 0.05, duration: 0.8, ease: "easeOut" }}
+                          className="transition-all duration-300"
+                          style={{ 
+                            background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))'
+                          }}
                         />
-                        <div
-                          className="bg-[var(--color-primary)]"
-                          style={{ width: `${diaryRatio}%` }}
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${diaryRatio}%` }}
+                          transition={{ delay: 0.5 + index * 0.05, duration: 0.8, ease: "easeOut" }}
+                          className="transition-all duration-300"
+                          style={{ 
+                            background: 'linear-gradient(to right, var(--color-secondary), var(--color-secondary-light))'
+                          }}
                         />
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
             )}
-          </section>
+          </motion.section>
         </>
       )}
     </main>
