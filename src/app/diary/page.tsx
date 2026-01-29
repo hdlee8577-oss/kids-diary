@@ -88,6 +88,8 @@ export default function DiaryPage() {
 
       for (let i = 0; i < Math.min(files.length, remaining); i++) {
         const file = files[i];
+        console.log("📤 Uploading file:", file.name);
+        
         const formData = new FormData();
         formData.append("file", file);
         formData.append("siteId", siteId);
@@ -100,14 +102,22 @@ export default function DiaryPage() {
           body: formData,
         });
 
+        console.log("📥 Upload response status:", res.status);
+        
         if (res.ok) {
           const data = await res.json() as { imageUrl: string };
+          console.log("✅ Uploaded URL:", data.imageUrl);
           uploadedUrls.push(data.imageUrl);
+        } else {
+          const error = await res.text();
+          console.error("❌ Upload failed:", error);
         }
       }
 
+      console.log("📸 All uploaded URLs:", uploadedUrls);
       setPhotos([...photos, ...uploadedUrls]);
     } catch (err) {
+      console.error("❌ Upload error:", err);
       alert("사진 업로드에 실패했어요.");
     } finally {
       setUploadingPhotos(false);
@@ -127,6 +137,8 @@ export default function DiaryPage() {
     setError(null);
     setIsSubmitting(true);
 
+    console.log("💾 Submitting diary with photos:", photos);
+
     try {
       const adminToken = getAdminToken();
       const res = await fetch("/api/diary", {
@@ -143,6 +155,9 @@ export default function DiaryPage() {
           photos,
         }),
       });
+      
+      console.log("📥 Diary save response:", res.status);
+      
       if (!res.ok) {
         const j = (await res.json().catch(() => null)) as { error?: string } | null;
         throw new Error(j?.error || "저장에 실패했어.");
@@ -154,8 +169,10 @@ export default function DiaryPage() {
       setPhotos([]);
       setIsAddFormOpen(false);
       const list = await fetchDiary(siteId);
+      console.log("📋 Fetched diary list:", list);
       setItems(list);
     } catch (err) {
+      console.error("❌ Submit error:", err);
       setError(err instanceof Error ? err.message : "저장에 실패했어.");
     } finally {
       setIsSubmitting(false);
