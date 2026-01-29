@@ -157,32 +157,34 @@ export default function DiaryDetailPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className={`mb-6 grid gap-2 ${
+            className="mb-6 flex justify-center"
+          >
+            <div className={`w-full max-w-md grid gap-2 ${
               diary.photos.length === 1 ? 'grid-cols-1' :
               diary.photos.length === 2 ? 'grid-cols-2' :
               diary.photos.length === 3 ? 'grid-cols-2' :
               'grid-cols-2'
-            }`}
-          >
-            {diary.photos.map((url, index) => (
-              <div
-                key={index}
-                className={`relative rounded-xl overflow-hidden shadow-lg ${
-                  diary.photos.length === 3 && index === 2 ? 'col-span-2' : ''
-                }`}
-                style={{ 
-                  aspectRatio: diary.photos.length === 1 ? '16/9' : '1/1'
-                }}
-              >
-                <Image
-                  src={url}
-                  alt={`사진 ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
-            ))}
+            }`}>
+              {diary.photos.map((url, index) => (
+                <div
+                  key={index}
+                  className={`relative rounded-xl overflow-hidden shadow-lg ${
+                    diary.photos.length === 3 && index === 2 ? 'col-span-2' : ''
+                  }`}
+                  style={{ 
+                    aspectRatio: diary.photos.length === 1 ? '16/9' : '1/1'
+                  }}
+                >
+                  <Image
+                    src={url}
+                    alt={`사진 ${index + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                  />
+                </div>
+              ))}
+            </div>
           </motion.div>
         )}
 
