@@ -75,7 +75,9 @@ export async function POST(req: Request) {
   const siteId = (body.siteId || siteConfig.siteId).trim();
   const title = (body.title || "").trim();
   const content = (body.content || "").trim();
-  const entryDate = (body.entryDate || "").trim() || null;
+  // If no date provided, use today's date in YYYY-MM-DD format
+  const entryDate = (body.entryDate || "").trim() || 
+    new Date().toLocaleDateString('en-CA'); // en-CA gives YYYY-MM-DD format
   const photos = (body.photos || []).slice(0, 4); // max 4 photos
 
   if (!content) {

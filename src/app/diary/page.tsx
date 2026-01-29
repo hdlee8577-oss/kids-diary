@@ -42,7 +42,10 @@ export default function DiaryPage() {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   const [title, setTitle] = useState("");
-  const [entryDate, setEntryDate] = useState<string>("");
+  // Default to today's date
+  const [entryDate, setEntryDate] = useState<string>(
+    new Date().toLocaleDateString('en-CA') // YYYY-MM-DD format
+  );
   const [content, setContent] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
@@ -146,7 +149,7 @@ export default function DiaryPage() {
       }
 
       setTitle("");
-      setEntryDate("");
+      setEntryDate(new Date().toLocaleDateString('en-CA')); // Reset to today
       setContent("");
       setPhotos([]);
       setIsAddFormOpen(false);
@@ -277,11 +280,12 @@ export default function DiaryPage() {
                 placeholder="예: 오늘의 한 마디"
               />
             </Field>
-            <Field label="날짜 (선택)">
+            <Field label="날짜">
               <Input
                 type="date"
                 value={entryDate}
                 onChange={(e) => setEntryDate(e.currentTarget.value)}
+                required
               />
             </Field>
             <Field label="내용">
