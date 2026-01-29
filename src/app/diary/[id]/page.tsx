@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -16,6 +17,7 @@ type DiaryItem = {
   title: string;
   content: string;
   entry_date: string;
+  photos: string[];
   created_at: string;
 };
 
@@ -149,11 +151,46 @@ export default function DiaryDetailPage() {
           </h1>
         </motion.div>
 
+        {/* 사진 콜라주 */}
+        {diary.photos && diary.photos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className={`mb-6 grid gap-2 ${
+              diary.photos.length === 1 ? 'grid-cols-1' :
+              diary.photos.length === 2 ? 'grid-cols-2' :
+              diary.photos.length === 3 ? 'grid-cols-2' :
+              'grid-cols-2'
+            }`}
+          >
+            {diary.photos.map((url, index) => (
+              <div
+                key={index}
+                className={`relative rounded-xl overflow-hidden shadow-lg ${
+                  diary.photos.length === 3 && index === 2 ? 'col-span-2' : ''
+                }`}
+                style={{ 
+                  aspectRatio: diary.photos.length === 1 ? '16/9' : '1/1'
+                }}
+              >
+                <Image
+                  src={url}
+                  alt={`사진 ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+            ))}
+          </motion.div>
+        )}
+
         {/* 일기 본문 */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
           className="rounded-2xl p-8 shadow-xl"
           style={{
             background: 'var(--color-surface)',

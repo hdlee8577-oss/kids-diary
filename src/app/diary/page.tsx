@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Plus, Trash2, Edit3, MoreVertical } from "lucide-react";
+import { BookOpen, Plus, Trash2, Edit3, MoreVertical, ImagePlus, X } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -18,6 +19,7 @@ type DiaryItem = {
   title: string;
   content: string;
   entry_date: string;
+  photos: string[];
   created_at: string;
 };
 
@@ -42,6 +44,8 @@ export default function DiaryPage() {
   const [title, setTitle] = useState("");
   const [entryDate, setEntryDate] = useState<string>("");
   const [content, setContent] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
@@ -63,6 +67,53 @@ export default function DiaryPage() {
       alive = false;
     };
   }, [siteId]);
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const remaining = 4 - photos.length;
+    if (remaining <= 0) {
+      alert("사진은 최대 4개까지만 첨부할 수 있어요.");
+      return;
+    }
+
+    setUploadingPhotos(true);
+    try {
+      const adminToken = getAdminToken();
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < Math.min(files.length, remaining); i++) {
+        const file = files[i];
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("siteId", siteId);
+
+        const res = await fetch("/api/photos", {
+          method: "POST",
+          headers: {
+            ...(adminToken ? { "x-admin-token": adminToken } : {}),
+          },
+          body: formData,
+        });
+
+        if (res.ok) {
+          const data = await res.json() as { imageUrl: string };
+          uploadedUrls.push(data.imageUrl);
+        }
+      }
+
+      setPhotos([...photos, ...uploadedUrls]);
+    } catch (err) {
+      alert("사진 업로드에 실패했어요.");
+    } finally {
+      setUploadingPhotos(false);
+    }
+  }
+
+  function removePhoto(index: number) {
+    setPhotos(photos.filter((_, i) => i !== index));
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,6 +137,7 @@ export default function DiaryPage() {
           title,
           content,
           entryDate: entryDate || undefined,
+          photos,
         }),
       });
       if (!res.ok) {
@@ -96,6 +148,7 @@ export default function DiaryPage() {
       setTitle("");
       setEntryDate("");
       setContent("");
+      setPhotos([]);
       setIsAddFormOpen(false);
       const list = await fetchDiary(siteId);
       setItems(list);
@@ -238,6 +291,71 @@ export default function DiaryPage() {
                 placeholder="오늘 있었던 일을 짧게라도 남겨봐요."
               />
             </Field>
+
+            {/* 사진 업로드 */}
+            <Field label="사진 (최대 4개)">
+              <div className="space-y-3">
+                {/* 사진 미리보기 그리드 */}
+                {photos.length > 0 && (
+                  <div className={`grid gap-2 ${
+                    photos.length === 1 ? 'grid-cols-1' :
+                    photos.length === 2 ? 'grid-cols-2' :
+                    photos.length === 3 ? 'grid-cols-2' :
+                    'grid-cols-2'
+                  }`}>
+                    {photos.map((url, index) => (
+                      <div
+                        key={index}
+                        className={`relative group rounded-lg overflow-hidden ${
+                          photos.length === 3 && index === 2 ? 'col-span-2' : ''
+                        }`}
+                        style={{ aspectRatio: photos.length === 1 ? '16/9' : '1/1' }}
+                      >
+                        <Image
+                          src={url}
+                          alt={`사진 ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* 사진 추가 버튼 */}
+                {photos.length < 4 && (
+                  <label className="flex items-center justify-center gap-2 h-32 rounded-lg border-2 border-dashed cursor-pointer transition-colors hover:border-[var(--color-secondary)] hover:bg-black/5"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handlePhotoUpload}
+                      disabled={uploadingPhotos}
+                      className="hidden"
+                    />
+                    {uploadingPhotos ? (
+                      <span className="text-sm text-black/60">업로드 중...</span>
+                    ) : (
+                      <>
+                        <ImagePlus className="w-5 h-5 text-black/40" />
+                        <span className="text-sm text-black/60">
+                          사진 추가 ({photos.length}/4)
+                        </span>
+                      </>
+                    )}
+                  </label>
+                )}
+              </div>
+            </Field>
+
             {error ? (
               <p className="text-sm font-medium text-red-600">{error}</p>
             ) : null}
@@ -388,6 +506,34 @@ function DiaryCard({
         <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
           {item.title || "제목 없음"}
         </p>
+        
+        {/* 사진 미리보기 */}
+        {item.photos && item.photos.length > 0 && (
+          <div className={`mt-3 grid gap-1.5 ${
+            item.photos.length === 1 ? 'grid-cols-1' :
+            item.photos.length === 2 ? 'grid-cols-2' :
+            item.photos.length === 3 ? 'grid-cols-3' :
+            'grid-cols-2'
+          }`}>
+            {item.photos.slice(0, 4).map((url, index) => (
+              <div
+                key={index}
+                className={`relative rounded-lg overflow-hidden ${
+                  item.photos.length === 3 && index === 2 ? 'col-span-3' : ''
+                }`}
+                style={{ aspectRatio: '1/1' }}
+              >
+                <Image
+                  src={url}
+                  alt={`사진 ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="150px"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </Link>
       <div className="absolute top-4 right-4" ref={menuRef}>
         <motion.button

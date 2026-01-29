@@ -9,6 +9,7 @@ type DiaryRow = {
   title: string;
   content: string;
   entry_date: string;
+  photos: string[];
   created_at: string;
 };
 
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await supabase
     .from(siteConfig.data.diary.table)
-    .select("id, site_id, title, content, entry_date, created_at")
+    .select("id, site_id, title, content, entry_date, photos, created_at")
     .eq("site_id", siteId)
     .order("entry_date", { ascending: false })
     .order("created_at", { ascending: false })
@@ -42,6 +43,7 @@ export async function GET(req: Request) {
       title: r.title ?? "",
       content: r.content ?? "",
       entry_date: r.entry_date,
+      photos: r.photos ?? [],
       created_at: r.created_at,
     })) ?? [];
 
@@ -67,12 +69,14 @@ export async function POST(req: Request) {
     title?: string;
     content: string;
     entryDate?: string; // yyyy-mm-dd
+    photos?: string[]; // photo URLs
   };
 
   const siteId = (body.siteId || siteConfig.siteId).trim();
   const title = (body.title || "").trim();
   const content = (body.content || "").trim();
   const entryDate = (body.entryDate || "").trim() || null;
+  const photos = (body.photos || []).slice(0, 4); // max 4 photos
 
   if (!content) {
     return NextResponse.json({ error: "Missing content" }, { status: 400 });
@@ -85,6 +89,7 @@ export async function POST(req: Request) {
       title,
       content,
       entry_date: entryDate,
+      photos,
     })
     .select("id")
     .single();
