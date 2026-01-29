@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { ArrowLeft, Trash2, Calendar, BookOpen } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 import { getAdminToken } from "@/lib/admin/clientToken";
@@ -96,37 +98,81 @@ export default function DiaryDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6">
-        <Link
-          href="/diary"
-          className="text-sm text-[var(--color-text)]/70 hover:text-[var(--color-text)]"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* 헤더: 뒤로가기 + 액션 버튼 */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Link href="/diary">
+            <motion.div
+              whileHover={{ x: -4 }}
+              className="inline-flex items-center gap-2 text-sm font-medium"
+              style={{ color: 'var(--color-secondary)' }}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              일기장으로
+            </motion.div>
+          </Link>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {isDeleting ? "삭제 중..." : "삭제"}
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* 제목 및 메타 정보 */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="mb-6 rounded-2xl p-6"
+          style={{
+            background: 'color-mix(in srgb, var(--color-secondary) 5%, transparent)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)'
+          }}
         >
-          ← 일기장으로
-        </Link>
-      </div>
+          <div className="flex items-center gap-2 text-sm text-black/70 mb-2">
+            <Calendar className="w-4 h-4" />
+            <span>{diary.entry_date}</span>
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+            {diary.title || "제목 없음"}
+          </h1>
+        </motion.div>
 
-      <div className="mb-6">
-        <p className="text-sm text-black/50">{diary.entry_date}</p>
-        <h1 className="mt-2 text-2xl font-semibold text-[var(--color-text)]">
-          {diary.title || "제목 없음"}
-        </h1>
-      </div>
-
-      <div className="rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-6 shadow-sm">
-        <p className="whitespace-pre-wrap text-base leading-7 text-[var(--color-text)]">
-          {diary.content}
-        </p>
-      </div>
-
-      <div className="mt-6 flex items-center justify-end">
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={isDeleting}
+        {/* 일기 본문 */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="rounded-2xl p-8 shadow-xl"
+          style={{
+            background: 'var(--color-surface)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'rgba(0,0,0,0.05)'
+          }}
         >
-          {isDeleting ? "삭제 중..." : "삭제"}
-        </Button>
-      </div>
+          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-black/5">
+            <div className="p-2 rounded-lg" style={{ background: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)' }}>
+              <BookOpen className="w-5 h-5" style={{ color: 'var(--color-secondary)' }} />
+            </div>
+            <span className="text-sm font-semibold text-black/60">일기 내용</span>
+          </div>
+          <p className="whitespace-pre-wrap text-base leading-8 text-[var(--color-text)]">
+            {diary.content}
+          </p>
+        </motion.div>
+      </motion.div>
     </main>
   );
 }
