@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { BookOpen, Plus, Trash2, Edit3, MoreVertical } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -106,12 +108,25 @@ export default function DiaryPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
-        일기장
-      </h1>
-      <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
-        현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
-      </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl" style={{ background: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)' }}>
+            <BookOpen className="w-6 h-6" style={{ color: 'var(--color-secondary)' }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
+              일기장
+            </h1>
+            <p className="mt-1 text-sm text-black/60">
+              현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-base font-semibold text-[var(--color-text)]">
@@ -120,63 +135,77 @@ export default function DiaryPage() {
         <div className="flex items-center gap-2">
           {isSelectionMode ? (
             <>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedIds(new Set());
-                  setIsSelectionMode(false);
-                }}
-              >
-                취소
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={async () => {
-                  if (selectedIds.size === 0) return;
-                  if (!confirm(`${selectedIds.size}개의 일기를 삭제하시겠어요?`)) {
-                    return;
-                  }
-                  const adminToken = getAdminToken();
-                  try {
-                    for (const id of selectedIds) {
-                      const res = await fetch(`/api/diary/${id}`, {
-                        method: "DELETE",
-                        headers: adminToken
-                          ? { "x-admin-token": adminToken }
-                          : {},
-                      });
-                      if (!res.ok) {
-                        throw new Error("삭제 실패");
-                      }
-                    }
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
                     setSelectedIds(new Set());
                     setIsSelectionMode(false);
-                    const list = await fetchDiary(siteId);
-                    setItems(list);
-                  } catch (err) {
-                    console.error("삭제 실패:", err);
-                    alert("일부 일기 삭제에 실패했어요.");
-                  }
-                }}
-                disabled={selectedIds.size === 0}
-              >
-                선택 삭제 ({selectedIds.size})
-              </Button>
+                  }}
+                >
+                  취소
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    if (selectedIds.size === 0) return;
+                    if (!confirm(`${selectedIds.size}개의 일기를 삭제하시겠어요?`)) {
+                      return;
+                    }
+                    const adminToken = getAdminToken();
+                    try {
+                      for (const id of selectedIds) {
+                        const res = await fetch(`/api/diary/${id}`, {
+                          method: "DELETE",
+                          headers: adminToken
+                            ? { "x-admin-token": adminToken }
+                            : {},
+                        });
+                        if (!res.ok) {
+                          throw new Error("삭제 실패");
+                        }
+                      }
+                      setSelectedIds(new Set());
+                      setIsSelectionMode(false);
+                      const list = await fetchDiary(siteId);
+                      setItems(list);
+                    } catch (err) {
+                      console.error("삭제 실패:", err);
+                      alert("일부 일기 삭제에 실패했어요.");
+                    }
+                  }}
+                  disabled={selectedIds.size === 0}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  선택 삭제 ({selectedIds.size})
+                </Button>
+              </motion.div>
             </>
           ) : (
             <>
               {items.length > 0 && (
-                <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
-                  선택
-                </Button>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
+                    선택
+                  </Button>
+                </motion.div>
               )}
-              <Button
-                type="button"
-                onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-                variant={isAddFormOpen ? "secondary" : "primary"}
-              >
-                {isAddFormOpen ? "닫기" : "일기 추가"}
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  type="button"
+                  onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+                  variant={isAddFormOpen ? "secondary" : "primary"}
+                >
+                  {isAddFormOpen ? "닫기" : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      일기 추가
+                    </>
+                  )}
+                </Button>
+              </motion.div>
             </>
           )}
         </div>
@@ -313,13 +342,15 @@ function DiaryCard({
 
   if (isSelectionMode) {
     return (
-      <article
+      <motion.article
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
         onClick={onToggleSelect}
-        className={`cursor-pointer rounded-[var(--radius)] border-2 p-5 shadow-sm transition ${
-          isSelected
-            ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
-            : "border-black/5 bg-[var(--color-surface)]/70 hover:border-[var(--color-primary)]/30"
-        }`}
+        className="cursor-pointer rounded-[var(--radius)] border-2 p-5 shadow-sm transition"
+        style={{
+          borderColor: isSelected ? 'var(--color-secondary)' : 'rgba(0,0,0,0.05)',
+          background: isSelected ? 'color-mix(in srgb, var(--color-secondary) 10%, transparent)' : 'color-mix(in srgb, var(--color-surface) 70%, transparent)',
+        }}
       >
         <div className="flex items-start gap-3">
           <input
@@ -327,7 +358,8 @@ function DiaryCard({
             checked={isSelected}
             onChange={onToggleSelect}
             onClick={(e) => e.stopPropagation()}
-            className="mt-0.5 h-4 w-4 rounded border-black/20 text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
+            className="mt-0.5 h-4 w-4 rounded border-black/20 focus:ring-[var(--color-secondary)]/20"
+            style={{ accentColor: 'var(--color-secondary)' }}
           />
           <div className="flex-1">
             <p className="text-xs text-black/50">{item.entry_date}</p>
@@ -336,12 +368,21 @@ function DiaryCard({
             </p>
           </div>
         </div>
-      </article>
+      </motion.article>
     );
   }
 
   return (
-    <article className="relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 p-5 shadow-sm transition hover:shadow-md">
+    <motion.article 
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="relative rounded-[var(--radius)] border p-5 shadow-sm transition"
+      style={{
+        borderColor: 'rgba(0,0,0,0.05)',
+        background: 'color-mix(in srgb, var(--color-surface) 70%, transparent)'
+      }}
+    >
       <Link href={`/diary/${item.id}`}>
         <p className="text-xs text-black/50">{item.entry_date}</p>
         <p className="mt-1 text-sm font-semibold text-[var(--color-text)]">
@@ -349,31 +390,25 @@ function DiaryCard({
         </p>
       </Link>
       <div className="absolute top-4 right-4" ref={menuRef}>
-        <button
+        <motion.button
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setIsMenuOpen(!isMenuOpen);
           }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-black/5"
           aria-label="메뉴"
         >
-          <svg
-            className="h-5 w-5 text-[var(--color-text)]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-            />
-          </svg>
-        </button>
+          <MoreVertical className="h-5 w-5 text-[var(--color-text)]" />
+        </motion.button>
         {isMenuOpen && (
-          <div className="absolute right-0 top-full mt-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute right-0 top-full mt-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg"
+          >
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -381,14 +416,15 @@ function DiaryCard({
                 setIsMenuOpen(false);
                 onDelete();
               }}
-              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-[var(--radius)]"
+              className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-[var(--radius)]"
             >
+              <Trash2 className="w-4 h-4" />
               삭제
             </button>
-          </div>
+          </motion.div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }
 
