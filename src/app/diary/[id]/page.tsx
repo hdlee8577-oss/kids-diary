@@ -168,19 +168,17 @@ export default function DiaryDetailPage() {
               {diary.photos.map((url, index) => (
                 <div
                   key={index}
-                  className={`relative rounded-xl overflow-hidden shadow-lg ${
+                  className={`relative rounded-xl overflow-hidden shadow-lg bg-gray-100 ${
                     diary.photos.length === 3 && index === 2 ? 'col-span-2' : ''
                   }`}
-                  style={{ 
-                    aspectRatio: diary.photos.length === 1 ? '16/9' : '1/1'
-                  }}
                 >
-                  <Image
+                  <img
                     src={url}
                     alt={`사진 ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="w-full h-full object-cover"
+                    style={{ 
+                      aspectRatio: diary.photos.length === 1 ? '16/9' : '1/1'
+                    }}
                   />
                 </div>
               ))}

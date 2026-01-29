@@ -310,16 +310,15 @@ export default function DiaryPage() {
                     {photos.map((url, index) => (
                       <div
                         key={index}
-                        className={`relative group rounded-lg overflow-hidden ${
+                        className={`relative group rounded-lg overflow-hidden bg-gray-100 ${
                           photos.length === 3 && index === 2 ? 'col-span-2' : ''
                         }`}
-                        style={{ aspectRatio: photos.length === 1 ? '16/9' : '1/1' }}
                       >
-                        <Image
+                        <img
                           src={url}
                           alt={`사진 ${index + 1}`}
-                          fill
-                          className="object-cover"
+                          className="w-full h-full object-cover"
+                          style={{ aspectRatio: photos.length === 1 ? '16/9' : '1/1' }}
                         />
                         <button
                           type="button"
@@ -522,17 +521,15 @@ function DiaryCard({
             {item.photos.slice(0, 4).map((url, index) => (
               <div
                 key={index}
-                className={`relative rounded-lg overflow-hidden ${
+                className={`relative rounded-lg overflow-hidden bg-gray-100 ${
                   item.photos.length === 3 && index === 2 ? 'col-span-3' : ''
                 }`}
-                style={{ aspectRatio: '1/1' }}
               >
-                <Image
+                <img
                   src={url}
                   alt={`사진 ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="150px"
+                  className="w-full h-full object-cover"
+                  style={{ aspectRatio: '1/1' }}
                 />
               </div>
             ))}
