@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { Palette, Plus, Trash2, Edit3, MoreVertical, ExternalLink, Play } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -235,45 +237,71 @@ export default function ArtworksPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-[var(--color-text)]">작품 모음</h1>
-          <p className="mt-1 text-sm text-black/60">
-            아이가 만든 그림, 만들기를 모아요
-          </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-6"
+      >
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl" style={{ background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)' }}>
+              <Palette className="w-6 h-6" style={{ color: 'var(--color-accent)' }} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold text-[var(--color-text)]">작품 모음</h1>
+              <p className="mt-1 text-sm text-black/60">
+                아이가 만든 그림, 만들기를 모아요
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isSelectionMode ? (
+              <>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedIds(new Set());
+                      setIsSelectionMode(false);
+                    }}
+                  >
+                    취소
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteSelected}
+                    disabled={selectedIds.size === 0}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    선택 삭제 ({selectedIds.size})
+                  </Button>
+                </motion.div>
+              </>
+            ) : (
+              <>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
+                    선택
+                  </Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button onClick={() => setIsAddFormOpen(!isAddFormOpen)}>
+                    {isAddFormOpen ? "닫기" : (
+                      <>
+                        <Plus className="w-4 h-4 mr-2" />
+                        작품 추가
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              </>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {isSelectionMode ? (
-            <>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedIds(new Set());
-                  setIsSelectionMode(false);
-                }}
-              >
-                취소
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteSelected}
-                disabled={selectedIds.size === 0}
-              >
-                선택 삭제 ({selectedIds.size})
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
-                선택
-              </Button>
-              <Button onClick={() => setIsAddFormOpen(!isAddFormOpen)}>
-                {isAddFormOpen ? "닫기" : "작품 추가"}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+      </motion.div>
 
       {isAddFormOpen && (
         <section className="mb-10 rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] p-6">
