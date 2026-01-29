@@ -1,6 +1,67 @@
 # 최근 업데이트 내역
 
-## 2026년 1월 27일 업데이트
+## 2026년 1월 27일 업데이트 (Phase 2)
+
+### 🎨 디자인 시스템 완전 개편
+
+#### 1. Theme 시스템 통일
+- **CSS 변수 기반** 완전 전환
+- `applyThemeToDom`에서 자동으로 색상 변형 생성:
+  - `--color-primary-light`, `--color-primary-dark`
+  - `--color-secondary`, `--color-secondary-light`, `--color-secondary-dark`
+  - `--color-accent`, `--color-accent-light`
+- **실시간 테마 변경** 100% 지원 (모든 UI 요소가 즉시 반응)
+
+#### 2. 아이콘 시스템 도입
+- **lucide-react** 설치 및 적용
+- 모든 이모지(📸📝🎨📅) → 벡터 아이콘으로 교체:
+  - Camera, BookOpen, Palette, Calendar, BarChart3
+  - Plus, Trash2, Edit3, MoreVertical, ArrowLeft
+  - Sparkles, ArrowRight, Filter, ExternalLink, Play
+  - TrendingUp, Tag, MessageSquare
+
+#### 3. 애니메이션 시스템 구축
+- **framer-motion** 설치 및 적용
+- 페이지별 애니메이션:
+  - **페이지 로드**: 페이드인 + 슬라이드업 (opacity: 0→1, y: 20→0)
+  - **버튼 호버**: 확대 효과 (scale: 1.05)
+  - **버튼 클릭**: 축소 효과 (scale: 0.95)
+  - **카드 호버**: 들어올리기 (y: -4)
+  - **차트 바**: 너비 애니메이션 (width: 0→100%)
+  - **메뉴**: 순차 애니메이션 (delay: index * 0.05)
+
+#### 4. 전체 페이지 개선 목록
+**홈 페이지**:
+- 히어로 섹션 전체 애니메이션화
+- 버튼에 아이콘 + 화살표 + 빛나는 효과
+- 카드 아이콘 배지 스타일
+
+**목록 페이지** (Photos, Diary, Artworks, Timeline):
+- 페이지 헤더에 아이콘 배지 추가
+- 모든 버튼에 아이콘 + 애니메이션
+- 카드 로드/호버 애니메이션
+- Theme 변수로 색상 통일
+
+**상세 페이지** (Photo, Diary, Artwork):
+- 뒤로가기 버튼에 애니메이션 (x: -4)
+- 제목 영역 배경 + 아이콘 배지
+- 콘텐츠 영역 애니메이션
+- 삭제 버튼 스타일 개선
+
+**Stats 페이지**:
+- 통계 카드에 그라데이션 배경
+- 진행 바 애니메이션 (좌→우)
+- 아이콘 추가 (BarChart3, Camera, BookOpen, TrendingUp)
+
+#### 5. UI 가독성 개선
+- 버튼 텍스트에 `text-shadow` 추가
+- 배경 불투명도 증가 (80% → 95%)
+- 테두리 강화 (border-2)
+- 그림자 강화 (shadow-xl, shadow-2xl)
+
+---
+
+## 2026년 1월 27일 업데이트 (Phase 1)
 
 ### 📱 모바일 UX 대폭 개선
 
