@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { ArrowLeft, Trash2, Calendar, ExternalLink, Play, Tag, MessageSquare, Palette } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSupabaseUser } from "@/hooks/useSupabaseUser";
 import { getAdminToken } from "@/lib/admin/clientToken";
@@ -107,44 +109,95 @@ export default function ArtworkDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mb-6">
-        <Link
-          href="/artworks"
-          className="text-sm text-[var(--color-text)]/70 hover:text-[var(--color-text)]"
-        >
-          ← 작품 모음으로
-        </Link>
-      </div>
-
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-[var(--color-text)]">
-          {artwork.title || "제목 없음"}
-        </h1>
-        {artwork.artwork_date && (
-          <p className="mt-2 text-sm text-black/60">
-            작품 날짜: {new Date(artwork.artwork_date).toLocaleDateString("ko-KR")}
-          </p>
-        )}
-        <div className="mt-2 flex flex-wrap gap-2">
-          {artwork.category && (
-            <span className="inline-flex items-center rounded-full bg-black/5 px-3 py-1 text-sm text-black/70">
-              {artwork.category}
-            </span>
-          )}
-          {artwork.grade && (
-            <span className="inline-flex items-center rounded-full bg-black/5 px-3 py-1 text-sm text-black/70">
-              {artwork.grade}
-            </span>
-          )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {/* 헤더: 뒤로가기 + 액션 버튼 */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Link href="/artworks">
+            <motion.div
+              whileHover={{ x: -4 }}
+              className="inline-flex items-center gap-2 text-sm font-medium"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              작품 모음으로
+            </motion.div>
+          </Link>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {isDeleting ? "삭제 중..." : "삭제"}
+            </Button>
+          </motion.div>
         </div>
-        {artwork.description && (
-          <p className="mt-4 text-sm text-black/70 leading-relaxed">{artwork.description}</p>
-        )}
-      </div>
+
+        {/* 제목 및 메타 정보 */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="mb-6 rounded-2xl p-6"
+          style={{
+            background: 'color-mix(in srgb, var(--color-accent) 5%, transparent)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'color-mix(in srgb, var(--color-accent) 10%, transparent)'
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Palette className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
+            <h1 className="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
+              {artwork.title || "제목 없음"}
+            </h1>
+          </div>
+          {artwork.artwork_date && (
+            <div className="flex items-center gap-2 text-sm text-black/70 mt-2">
+              <Calendar className="w-4 h-4" />
+              <span>작품 날짜: {new Date(artwork.artwork_date).toLocaleDateString("ko-KR")}</span>
+            </div>
+          )}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {artwork.category && (
+              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium"
+                style={{
+                  background: 'color-mix(in srgb, var(--color-accent) 15%, transparent)',
+                  color: 'var(--color-accent)'
+                }}>
+                <Tag className="w-3 h-3" />
+                {artwork.category}
+              </span>
+            )}
+            {artwork.grade && (
+              <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium"
+                style={{
+                  background: 'color-mix(in srgb, var(--color-primary) 15%, transparent)',
+                  color: 'var(--color-primary)'
+                }}>
+                {artwork.grade}
+              </span>
+            )}
+          </div>
+          {artwork.description && (
+            <p className="mt-4 text-sm text-black/70 leading-relaxed">{artwork.description}</p>
+          )}
+        </motion.div>
 
       {/* 이미지 또는 URL 콘텐츠 표시 */}
       {artwork.image_url ? (
-        <div className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-[var(--radius)] bg-black/5">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl"
+          style={{ background: 'rgba(0,0,0,0.02)' }}
+        >
           {artwork.url ? (
             <a
               href={artwork.url}
@@ -163,16 +216,14 @@ export default function ArtworkDetailPage() {
               />
               {artwork.type === "video" && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/70 text-white shadow-xl">
-                    <svg
-                      className="h-8 w-8"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex h-20 w-20 items-center justify-center rounded-full bg-black/70 text-white shadow-2xl"
+                  >
+                    <Play className="h-10 w-10 fill-current" />
+                  </motion.div>
                 </div>
               )}
             </a>
@@ -187,13 +238,22 @@ export default function ArtworkDetailPage() {
               priority
             />
           )}
-        </div>
+        </motion.div>
       ) : artwork.url ? (
-        <div className="rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)]/50 p-8 text-center">
-          <div className="mb-4 text-6xl">
-            {artwork.type === "video" ? "🎥" : artwork.type === "writing" ? "✍️" : "🔗"}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="rounded-2xl border p-8 text-center"
+          style={{
+            borderColor: 'color-mix(in srgb, var(--color-accent) 20%, transparent)',
+            background: 'var(--color-surface)'
+          }}
+        >
+          <div className="mb-4">
+            <Palette className="w-16 h-16 mx-auto" style={{ color: 'var(--color-accent)' }} />
           </div>
-          <p className="mb-4 text-sm text-black/70">
+          <p className="mb-4 text-sm text-black/70 font-medium">
             {artwork.type === "video"
               ? "비디오 링크"
               : artwork.type === "writing"
@@ -204,47 +264,45 @@ export default function ArtworkDetailPage() {
             href={artwork.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-[var(--radius)] bg-[var(--color-primary)] px-6 py-3 text-sm font-semibold text-white hover:opacity-95"
           >
-            링크 열기
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-bold text-white"
+              style={{
+                background: 'linear-gradient(to right, var(--color-accent), var(--color-accent-light))',
+                boxShadow: '0 4px 14px 0 color-mix(in srgb, var(--color-accent) 40%, transparent)'
+              }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
+              링크 열기
+              <ExternalLink className="h-4 w-4" />
+            </motion.button>
           </a>
-        </div>
+        </motion.div>
       ) : null}
 
       {/* 엄마의 한마디 */}
       {artwork.mom_note && (
-        <div className="mt-6 rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)]/50 p-4">
-          <h2 className="mb-2 text-sm font-semibold text-[var(--color-text)]">엄마의 한마디</h2>
-          <p className="text-sm text-black/70 leading-relaxed">{artwork.mom_note}</p>
-        </div>
-      )}
-
-      {/* 메타 정보 */}
-      <div className="mt-6 flex items-center justify-between">
-        <div className="text-xs text-black/50">
-          <p>작성일: {new Date(artwork.created_at).toLocaleDateString("ko-KR")}</p>
-        </div>
-        <Button
-          variant="destructive"
-          onClick={handleDelete}
-          disabled={isDeleting}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="mt-6 rounded-2xl p-6"
+          style={{
+            background: 'color-mix(in srgb, var(--color-secondary) 5%, transparent)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'color-mix(in srgb, var(--color-secondary) 10%, transparent)'
+          }}
         >
-          {isDeleting ? "삭제 중..." : "삭제"}
-        </Button>
-      </div>
+          <div className="flex items-center gap-2 mb-3">
+            <MessageSquare className="w-5 h-5" style={{ color: 'var(--color-secondary)' }} />
+            <h2 className="text-sm font-bold text-[var(--color-text)]">엄마의 한마디</h2>
+          </div>
+          <p className="text-sm text-black/70 leading-relaxed">{artwork.mom_note}</p>
+        </motion.div>
+      )}
+      </motion.div>
     </main>
   );
 }
