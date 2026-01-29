@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { Camera, Plus, Trash2, Edit3, MoreVertical, ImagePlus } from "lucide-react";
 import { siteConfig } from "@/Site.config";
 import { useSiteSettingsStore } from "@/stores/siteSettingsStore";
 import { Button } from "@/components/shared/Button";
@@ -161,12 +163,25 @@ export default function PhotosPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
-      <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
-        사진첩
-      </h1>
-      <p className="mt-3 max-w-2xl text-base leading-7 text-black/70">
-        현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
-      </p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl" style={{ background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)' }}>
+            <Camera className="w-6 h-6" style={{ color: 'var(--color-primary)' }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)] sm:text-3xl">
+              사진첩
+            </h1>
+            <p className="mt-1 text-sm text-black/60">
+              현재 레이아웃: <span className="font-semibold">{modeLabel}</span>
+            </p>
+          </div>
+        </div>
+      </motion.div>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-base font-semibold text-[var(--color-text)]">
@@ -175,18 +190,21 @@ export default function PhotosPage() {
         <div className="flex items-center gap-2">
           {isSelectionMode ? (
             <>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedIds(new Set());
-                  setIsSelectionMode(false);
-                }}
-              >
-                취소
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={async () => {
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                    setIsSelectionMode(false);
+                  }}
+                >
+                  취소
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
                   if (selectedIds.size === 0) return;
                   if (!confirm(`선택한 ${selectedIds.size}개의 사진을 삭제하시겠어요?`)) {
                     return;
@@ -211,23 +229,34 @@ export default function PhotosPage() {
                     alert("삭제 중 오류가 발생했습니다.");
                   }
                 }}
-                disabled={selectedIds.size === 0}
-              >
-                선택 삭제 ({selectedIds.size})
-              </Button>
+                  disabled={selectedIds.size === 0}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  선택 삭제 ({selectedIds.size})
+                </Button>
+              </motion.div>
             </>
           ) : (
             <>
-              <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
-                선택
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setIsAddFormOpen(!isAddFormOpen)}
-                variant={isAddFormOpen ? "secondary" : "primary"}
-              >
-                {isAddFormOpen ? "닫기" : "사진 추가"}
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button variant="outline" onClick={() => setIsSelectionMode(true)}>
+                  선택
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  type="button"
+                  onClick={() => setIsAddFormOpen(!isAddFormOpen)}
+                  variant={isAddFormOpen ? "secondary" : "primary"}
+                >
+                  {isAddFormOpen ? "닫기" : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      사진 추가
+                    </>
+                  )}
+                </Button>
+              </motion.div>
             </>
           )}
         </div>
@@ -422,10 +451,21 @@ function PhotoCard({
   }, [isMenuOpen]);
 
   return (
-    <article
-      className={`relative rounded-[var(--radius)] border border-black/5 bg-[var(--color-surface)]/70 shadow-sm transition hover:shadow-md overflow-visible ${
+    <motion.article
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className={`relative rounded-[var(--radius)] border shadow-sm transition-all overflow-visible ${
         isSelectionMode ? "cursor-pointer" : ""
-      } ${isSelected ? "ring-2 ring-[var(--color-primary)]" : ""}`}
+      }`}
+      style={{
+        borderColor: isSelected ? 'var(--color-primary)' : 'rgba(0,0,0,0.05)',
+        borderWidth: isSelected ? '2px' : '1px',
+        background: 'color-mix(in srgb, var(--color-surface) 70%, transparent)',
+        boxShadow: isSelected 
+          ? '0 10px 15px -3px color-mix(in srgb, var(--color-primary) 20%, transparent)'
+          : '0 1px 2px 0 rgba(0,0,0,0.05)'
+      }}
       onClick={isSelectionMode ? onToggleSelect : undefined}
     >
       <Link href={`/photos/${item.id}`} onClick={(e) => isSelectionMode && e.preventDefault()}>
@@ -475,36 +515,32 @@ function PhotoCard({
             </p>
           </div>
           <div className="relative ml-2 flex-shrink-0" ref={menuRef}>
-            <button
+            <motion.button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setIsMenuOpen(!isMenuOpen);
               }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-black/5"
               aria-label="메뉴"
             >
-              <svg
-                className="h-5 w-5 text-[var(--color-text)]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                />
-              </svg>
-            </button>
+              <MoreVertical className="h-5 w-5 text-[var(--color-text)]" />
+            </motion.button>
             {isMenuOpen && (
-              <div className="absolute right-0 bottom-full mb-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute right-0 bottom-full mb-2 z-50 min-w-[160px] rounded-[var(--radius)] border border-black/10 bg-[var(--color-surface)] shadow-lg"
+              >
                 <Link
                   href={`/photos/${item.id}/edit`}
                   onClick={() => setIsMenuOpen(false)}
-                  className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)]"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-[var(--color-text)] hover:bg-black/5 first:rounded-t-[var(--radius)]"
                 >
+                  <Edit3 className="w-4 h-4" />
                   섬네일 수정
                 </Link>
                 <button
@@ -514,16 +550,17 @@ function PhotoCard({
                     setIsMenuOpen(false);
                     onDelete();
                   }}
-                  className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 last:rounded-b-[var(--radius)]"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 last:rounded-b-[var(--radius)]"
                 >
+                  <Trash2 className="w-4 h-4" />
                   삭제
                 </button>
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
