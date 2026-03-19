@@ -1,53 +1,87 @@
 # kids-diary
 
-누구나 자신의 아이에 맞춰 커스터마이징할 수 있는 **성장 기록 프레임워크**.
+An extensible child growth tracking framework that can be customized per family.
 
-## Getting Started
+## Getting started
 
-First, run the development server:
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `src/app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
+- `/` Home
+- `/photos` Photo Album
+- `/diary` Diary
+- `/artworks` Artworks
+- `/timeline` Timeline
+- `/stats` Stats
+- `/settings/menu` Menu settings
 
-Pages:
-- `/` 홈
-- `/photos` 사진첩
-- `/diary` 일기장
+## Settings (Theme/Profile) + Supabase persistence
 
-## Settings (Theme/Profile) + Supabase Persistence
+This project supports real-time preview for profile and theme settings from the Settings Sidebar and persists them to Supabase (`site_settings`).
 
-이 프로젝트는 `Settings Sidebar`에서 바꾼 값(아이 이름/소개/생년월일/테마)을 **실시간 프리뷰**하고,
-Supabase `site_settings` 테이블에 저장하도록 설계되어 있어요.
-
-- **환경변수**: `.env.example` 참고
+- **Environment variables**: create `.env.local` (see `.env.local.example` if present)
   - `SUPABASE_URL`
-  - `SUPABASE_SERVICE_ROLE_KEY` (서버에서만 사용)
-  - `ADMIN_TOKEN` (선택: POST 보호용, 설정/사진/일기 추가 시 필요)
-- **테이블 생성 SQL**: `docs/supabase-site-settings.sql`
-- **컨텐츠(사진/일기) SQL**: `docs/supabase-content.sql`
+  - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+  - `ADMIN_TOKEN` (optional: protects write endpoints)
+- **SQL (site settings)**: `docs/supabase-site-settings.sql`
+- **SQL (content)**: `docs/supabase-content.sql`
 
-## DB 스키마(현재 코드 기준)
+## Current DB schema (code-aligned)
 
-Supabase `public` 스키마에 아래가 있어야 합니다:
+Required tables in Supabase `public`:
 - `site_settings(site_id, settings, updated_at)`
-- `photos(id, site_id, title, image_path, image_url, taken_at, created_at)`
-- `diary_entries(id, site_id, title, content, entry_date, created_at)`
-- Storage bucket: `photos`
+- `photos(id, site_id, title, image_path, image_url, taken_at, thumb_pos_x, thumb_pos_y, created_at)`
+- `diary_entries(id, site_id, title, content, entry_date, photos, created_at)`
+- `artworks(id, site_id, title, description, image_url, image_path, url, type, category, grade, tags, mom_note, artwork_date, created_at)`
+- `user_menu_settings(user_id, enabled_modules, menu_order, updated_at)`
+- Storage buckets: `photos`, `artworks`, `profile-photos`
 
-API:
-- `GET /api/site-settings?siteId=default`
-- `POST /api/site-settings` `{ siteId, settings }`
+## Migrations
+
+See `MIGRATION.md` (Korean) or `MIGRATION.en.md` (English) for step-by-step migration instructions.
+
+## Docs index (Korean ↔ English)
+
+Glossary:
+- `DOCS_GLOSSARY.en.md`
+
+Core:
+- `README.md` / `README.ko.md`
+- `README.en.md`
+- `PROJECT_STRUCTURE.md` / `PROJECT_STRUCTURE.en.md`
+- `MIGRATION.md` / `MIGRATION.en.md`
+- `HOW_TO_WORK.md` / `HOW_TO_WORK.en.md`
+- `HOW_TO_TEST.md` / `HOW_TO_TEST.en.md`
+
+Product / business:
+- `PRODUCT_VISION_REPOSITIONING.md` / `PRODUCT_VISION_REPOSITIONING.en.md`
+- `BUSINESS_MODEL_SUMMARY.md` / `BUSINESS_MODEL_SUMMARY.en.md`
+- `MONETIZATION_GUIDE.md` / `MONETIZATION_GUIDE.en.md`
+- `PROJECT_STATUS_ANALYSIS.md` / `PROJECT_STATUS_ANALYSIS.en.md`
+
+Dev / UI:
+- `CUSTOMIZATION_SYSTEM.md` / `CUSTOMIZATION_SYSTEM.en.md`
+- `UI_FRAME_STRUCTURE.md` / `UI_FRAME_STRUCTURE.en.md`
+- `ANIMATION_GUIDE.md` / `ANIMATION_GUIDE.en.md`
+- `DESIGN_IMPROVEMENT_GUIDE.md` / `DESIGN_IMPROVEMENT_GUIDE.en.md`
+- `DIARY_PHOTOS_FEATURE.md` / `DIARY_PHOTOS_FEATURE.en.md`
+- `MOBILE_MENU_OPTIONS.md` / `MOBILE_MENU_OPTIONS.en.md`
+
+Ops / roadmap:
+- `ROADMAP.md` / `ROADMAP.en.md`
+- `WORK_STATUS.md` / `WORK_STATUS.en.md`
+- `IMPLEMENTATION_GUIDE.md` / `IMPLEMENTATION_GUIDE.en.md`
+- `IMPLEMENTATION_PRIORITY.md` / `IMPLEMENTATION_PRIORITY.en.md`
+- `TIMELINE_ESTIMATE.md` / `TIMELINE_ESTIMATE.en.md`
+- `TIMELINE_IMPLEMENTATION.md` / `TIMELINE_IMPLEMENTATION.en.md`
+- `WEB_VS_APP_ANALYSIS.md` / `WEB_VS_APP_ANALYSIS.en.md`
+- `RECENT_UPDATES.md` / `RECENT_UPDATES.en.md`
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
